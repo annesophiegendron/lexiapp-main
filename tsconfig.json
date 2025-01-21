@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "strict": true,
+    "jsx": "react-native",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "noEmit": true,
+    "baseUrl": ".", // Optional: Set base URL for absolute imports
+    "paths": { // Optional: Define paths for absolute imports
+      "*": ["node_modules/*", "src/types/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "pages/MainScreen.js",
+    "App.js",
+    "MyWordsScreen.jsjs"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
