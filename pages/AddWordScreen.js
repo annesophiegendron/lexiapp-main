@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Modal, Text, Image, StyleSheet } from 'react-native';
+import { View, TextInput, TouchableOpacity, Modal, Text, Image, StyleSheet,KeyboardAvoidingView,Platform } from 'react-native';
 import PenImage from '../assets/images/pen.png';
 import { useLexicon } from '../context/LexiconContext';
 import { categoryColors, categories } from '../constants.js';
@@ -50,6 +50,10 @@ const AddWordScreen = ({ isVisible, onClose }) => {
       onRequestClose={onClose}
     >
       <TouchableOpacity style={styles.modalContainer} activeOpacity={1} onPress={onClose}>
+      <KeyboardAvoidingView
+          style={styles.modalContent}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
         <View style={styles.modalContent} onTouchEnd={(e) => e.stopPropagation()}>
           <View style={styles.imagePlaceholder}>
             <Image source={PenImage} style={styles.image} resizeMode="contain" />
@@ -112,6 +116,7 @@ const AddWordScreen = ({ isVisible, onClose }) => {
             <Text style={styles.saveButtonText}>Save to my lexicon</Text>
           </TouchableOpacity>
         </View>
+        </KeyboardAvoidingView>
       </TouchableOpacity>
     </Modal>
   );

@@ -6,7 +6,7 @@ import {
   Modal,
   Text,
   Image,
-  StyleSheet,
+  StyleSheet,KeyboardAvoidingView,Platform
 } from 'react-native';
 
 import PenImage from '../assets/images/pen.png';
@@ -84,6 +84,10 @@ const EditWordScreen = ({ isVisible, onClose, word, onUpdateWord }) => {
         style={styles.modalContainer}
         activeOpacity={1}
         onPress={onClose}>
+           <KeyboardAvoidingView
+                    style={styles.modalContent}
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                  >
         <View style={styles.modalContent} onTouchEnd={e => e.stopPropagation()}>
           <View style={styles.imagePlaceholder}>
             <Image source={PenImage} style={styles.image} resizeMode="contain" />
@@ -164,6 +168,7 @@ const EditWordScreen = ({ isVisible, onClose, word, onUpdateWord }) => {
             <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
         </View>
+        </KeyboardAvoidingView>
       </TouchableOpacity>
     </Modal>
   );
