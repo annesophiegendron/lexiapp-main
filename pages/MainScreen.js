@@ -156,23 +156,25 @@ const styles = StyleSheet.create({
 
   // Text styles
   title: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
     marginVertical: 16,
   },
   buttonText: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: 'bold',
     marginTop: 8,
     textAlign: 'center',
+
   },
   buttonTextAction: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
+    marginBottom: '6'
   },
   descriptionText: {
-    fontSize: 10,
+    fontSize: 13,
     textAlign: 'center',
   },
 
