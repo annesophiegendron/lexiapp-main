@@ -47,8 +47,8 @@ const handleClose = () => {
       </Text>
       <TouchableOpacity
   style={[
-    styles.card, 
-    styles.actionButton, 
+    styles.card,
+    styles.actionButton,
     { backgroundColor: categoryColors[category] || '#6b4f7d', alignSelf: 'center' }
   ]}
   onPress={() => setModalVisible(true)}
@@ -96,7 +96,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '500',
-    marginBottom: 15,
     textAlign: 'center',
     letterSpacing: 0.5,
   },
@@ -124,10 +123,11 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   emptyContainer: {
+    flex: 1, 
     justifyContent: 'center',
     alignItems: 'center',
-    flex: 1,
     paddingHorizontal: 15,
+    marginTop: '-50%'
   },
   iconContainer: {
     marginBottom: 20,
