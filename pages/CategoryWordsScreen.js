@@ -1,12 +1,16 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Animated } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Animated, TouchableOpacity } from 'react-native';
 import { useLexicon } from '../context/LexiconContext';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { categoryColors } from '../constants.js';
 
+// Components
+import AddWordScreen from './AddWordScreen';
+
 const CategoryWordsScreen = ({ route }) => {
   const { category } = route.params;
   const { lexicon } = useLexicon();
+  const [modalVisible, setModalVisible] = useState(false);
 
   const filteredWords = lexicon.filter(word => word.categories.includes(category));
 
@@ -29,11 +33,31 @@ const CategoryWordsScreen = ({ route }) => {
     ).start();
   }, []);
 
+
+// Handlers
+const handleClose = () => {
+  setModalVisible(false);
+};
+
+
   return (
     <View style={styles.container}>
       <Text style={[styles.title, { color: categoryColors[category] || '#6b4f7d' }]}>
         {category}
       </Text>
+      <TouchableOpacity
+  style={[
+    styles.card, 
+    styles.actionButton, 
+    { backgroundColor: categoryColors[category] || '#6b4f7d', alignSelf: 'center' }
+  ]}
+  onPress={() => setModalVisible(true)}
+>
+  <View style={styles.textContainer}>
+    <Ionicons name="add" size={23} color="#E9F1F2" style={styles.icon} />
+  </View>
+</TouchableOpacity>
+
       {filteredWords.length > 0 ? (
         <FlatList
           data={filteredWords}
@@ -55,7 +79,10 @@ const CategoryWordsScreen = ({ route }) => {
           <Text style={styles.emptyText}>No words to display here.</Text>
         </View>
       )}
+          <AddWordScreen isVisible={modalVisible} onClose={handleClose} />
+
     </View>
+
   );
 };
 
@@ -110,6 +137,40 @@ const styles = StyleSheet.create({
     color: '#888',
     textAlign: 'center',
   },
+  card: {
+    padding: 15,
+    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    marginVertical: 10,
+  },
+  actionButton: {
+    width: 60, 
+    height: 60, 
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    shadowColor: '#000',
+    borderColor: '#E9F1F2',
+  },
+  textContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonTextAction: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  icon: {
+    marginRight: 8,
+  },
+  
 });
 
 export default CategoryWordsScreen;

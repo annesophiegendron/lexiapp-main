@@ -212,8 +212,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   categoryButtonText: {
-    fontSize: 12,
-    color: '#000',
+    fontSize: 13,
+    color: '#262626',
+    fontWeight: 'bold',
   },
   saveButtonText: {
     color: '#fff',
@@ -227,10 +228,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   categoryButton: {
-    paddingVertical: 3,
-    paddingHorizontal: 9,
-    borderRadius: 12,
-    marginBottom: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    marginBottom: 7,
     minWidth: '30%',
     alignItems: 'center',
   },
