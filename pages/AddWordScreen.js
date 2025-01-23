@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Modal, Text, Image, StyleSheet,KeyboardAvoidingView,Platform } from 'react-native';
+import { View, TextInput, TouchableOpacity, Modal, Text, Image, StyleSheet,KeyboardAvoidingView,Platform, Alert } from 'react-native';
 import PenImage from '../assets/images/pen.png';
 import { useLexicon } from '../context/LexiconContext';
 import { categoryColors, categories } from '../constants.js';
@@ -12,27 +12,36 @@ const AddWordScreen = ({ isVisible, onClose }) => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const { addWord } = useLexicon();
+  const { addWord ,lexicon} = useLexicon();
 
   const saveWord = () => {
-    if (original && translation && selectedCategories.length > 0) {
-      console.log('Saving word:', { original, translation, selectedCategories });
-      addWord(original, translation, selectedCategories);
-      setOriginal('');
-      setTranslation('');
-      setSelectedCategories([]);
-      setError(false);
-      setErrorMessage('');
-      onClose();
-    } else {
+    if (!original || !translation || selectedCategories.length === 0) {
       setError(true);
-      if (selectedCategories.length === 0) {
-        setErrorMessage('Please add at least one tag.');
-      } else {
-        setErrorMessage('All fields are required.');
-      }
+      setErrorMessage(selectedCategories.length === 0 ? 'Please add at least one tag.' : 'All fields are required.');
+      return;
     }
+  
+    // Check for existing translation
+    const exists = lexicon.some((word) => word.translation.toLowerCase() === translation.toLowerCase());
+    if (exists) {
+      Alert.alert(
+        'Duplicate Translation',
+        'The translation you entered already exists in your lexicon.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+  
+    // Add new word if it doesn't exist
+    addWord(original, translation, selectedCategories);
+    setOriginal('');
+    setTranslation('');
+    setSelectedCategories([]);
+    setError(false);
+    setErrorMessage('');
+    onClose();
   };
+  
 
   const toggleCategory = (category) => {
     setSelectedCategories((prevCategories) =>
