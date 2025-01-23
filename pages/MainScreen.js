@@ -51,27 +51,7 @@ const navigateToQuizScreen = () => {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: isDarkMode ? backgroundDark : backgroundLight }]}>
-      <View style={styles.buttonsContainer}>
-        <TouchableOpacity
-          style={[styles.card, styles.actionButton, { backgroundColor: isDarkMode ? cardBackgroundDark : cardBackgroundLight }]}
-          onPress={() => setModalVisible(true)}
-        >
-          <View style={styles.textContainer}>
-            <Text style={[styles.buttonTextAction, { color: isDarkMode ? textLight : textDark }]}>Add New Word</Text>
-            <Text style={[styles.descriptionText, { color: isDarkMode ? '#CCC' : '#666' }]}>Click here every time you learn a new word.</Text>
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.card, styles.actionButton, { backgroundColor: isDarkMode ? cardBackgroundDark : cardBackgroundLight }]}
-          onPress={navigateToQuizScreen}
-        >
-          <View style={styles.textContainer}>
-            <Text style={[styles.buttonTextAction, { color: isDarkMode ? textLight : textDark }]}>Start Quiz</Text>
-            <Text style={[styles.descriptionText, { color: isDarkMode ? '#CCC' : '#666' }]}>Test the words you've added.</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
+          <Text style={[styles.topTitle, { color: isDarkMode ? textLight : textDark }]}>Your language journey begins here. What’s your next word?</Text>
 
       <Text style={[styles.title, { color: isDarkMode ? textLight : textDark }]}>Categories</Text>
       <View style={styles.categoriesContainer}>
@@ -95,6 +75,18 @@ const navigateToQuizScreen = () => {
         ))}
       </View>
 
+      <Text style={[styles.title, { color: isDarkMode ? textLight : textDark }]}>Challenge yourself</Text>
+
+        <TouchableOpacity
+          style={[styles.card, styles.actionButton, { backgroundColor: isDarkMode ? cardBackgroundDark : cardBackgroundLight }]}
+          onPress={navigateToQuizScreen}
+        >
+          <View style={styles.textContainer}>
+            <Text style={[styles.buttonTextAction, { color: isDarkMode ? textLight : textDark }]}>Start Quiz</Text>
+            <Text style={[styles.descriptionText, { color: isDarkMode ? '#CCC' : '#666' }]}>Test the words you've added.</Text>
+          </View>
+        </TouchableOpacity>
+
       <AddWordScreen isVisible={modalVisible} onClose={handleClose} />
     </ScrollView>
   );
@@ -106,11 +98,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  buttonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
   categoriesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -120,8 +107,7 @@ const styles = StyleSheet.create({
   // Card styles
   card: {
     borderRadius: 12,
-    width: '48%',
-    padding: 10,
+    padding: 8,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
@@ -152,13 +138,20 @@ const styles = StyleSheet.create({
     transform: [{ scale: 1 }],
     transition: 'transform 0.3s',
     padding: 24,
+    marginVertical:16
   },
 
   // Text styles
+  topTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginVertical: 14,
+    color:'#262626'
+  },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginVertical: 16,
+    marginVertical: 7,
   },
   buttonText: {
     fontSize: 14,
@@ -185,7 +178,5 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
 });
-
-
 
 export default MainScreen;
