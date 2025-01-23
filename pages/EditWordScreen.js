@@ -122,6 +122,7 @@ const EditWordScreen = ({ isVisible, onClose, word, onUpdateWord }) => {
               error.includes('Original') ? styles.errorInput : null,
             ]}
             placeholder="Original Word"
+            placeholderTextColor="#404040" 
             value={original}
             onChangeText={text =>
               text.length <= MAX_CHARACTERS.original && setOriginal(text)
@@ -144,6 +145,7 @@ const EditWordScreen = ({ isVisible, onClose, word, onUpdateWord }) => {
               error.includes('Translation') ? styles.errorInput : null,
             ]}
             placeholder="Translation"
+            placeholderTextColor="#404040" 
             value={translation}
             onChangeText={text =>
               text.length <= MAX_CHARACTERS.translation && setTranslation(text)

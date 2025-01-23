@@ -85,6 +85,7 @@ const AddWordScreen = ({ isVisible, onClose }) => {
             <TextInput
               style={[styles.input, error && !original ? styles.errorInput : null]}
               placeholder="New word"
+              placeholderTextColor="#404040" 
               value={original}
               onChangeText={(text) => setOriginal(text.slice(0, MAX_CHARACTERS))}
               maxLength={MAX_CHARACTERS}
@@ -98,6 +99,7 @@ const AddWordScreen = ({ isVisible, onClose }) => {
             <TextInput
               style={[styles.input, error && !translation ? styles.errorInput : null]}
               placeholder="Translation"
+              placeholderTextColor="#404040" 
               value={translation}
               onChangeText={(text) => setTranslation(text.slice(0, MAX_CHARACTERS))}
               maxLength={MAX_CHARACTERS}
