@@ -6,10 +6,11 @@ import {
   Modal,
   Text,
   Image,
-  StyleSheet,KeyboardAvoidingView,Platform
+  StyleSheet,KeyboardAvoidingView,Platform, Alert
 } from 'react-native';
 
 import PenImage from '../assets/images/pen.png';
+import { useLexicon } from '../context/LexiconContext';
 
 import { categoryColors, categories } from '../constants.js';
 
@@ -21,6 +22,7 @@ const EditWordScreen = ({ isVisible, onClose, word, onUpdateWord }) => {
   );
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const { updateWord,lexicon} = useLexicon();
 
   const MAX_CHARACTERS = {
     original: 200,
@@ -50,6 +52,16 @@ const EditWordScreen = ({ isVisible, onClose, word, onUpdateWord }) => {
       setError('At least one category must be selected.');
       return;
     }
+        // Check for existing translation
+        const exists = lexicon.some((word) => word.translation.toLowerCase() === translation.toLowerCase());
+        if (exists) {
+          Alert.alert(
+            'Duplicate Translation',
+            'The translation you entered already exists in your lexicon.',
+            [{ text: 'OK' }]
+          );
+          return;
+        }
 
     const updatedWord = {
       ...word,
