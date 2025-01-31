@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, useColorScheme } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, useColorScheme } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useLexicon } from '../context/LexiconContext';
 import AddWordScreen from './AddWordScreen';
@@ -13,68 +13,64 @@ const LexiconList = () => {
   const [isEditModalVisible, setEditModalVisible] = useState(false);
   const [currentWord, setCurrentWord] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [wordToDelete, setWordToDelete] = useState(null); 
+  const [wordToDelete, setWordToDelete] = useState(null);
+  const [searchText, setSearchText] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const colorScheme = useColorScheme();
   const { isDarkMode } = useTheme();
 
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  };
+  const toggleModal = () => setModalVisible(!isModalVisible);
+  const toggleEditModal = () => setEditModalVisible(!isEditModalVisible);
+  const handleDelete = (word) => { setWordToDelete(word); setShowDeleteModal(true); };
+  const confirmDelete = () => { removeWord(lexicon.findIndex(w => w === wordToDelete)); setShowDeleteModal(false); };
+  const cancelDelete = () => setShowDeleteModal(false);
+  const handleEdit = (word) => { setCurrentWord(word); toggleEditModal(); };
+  
+  const filteredLexicon = lexicon.filter(item =>
+    (item.original.toLowerCase().includes(searchText.toLowerCase()) ||
+     item.translation.toLowerCase().includes(searchText.toLowerCase())) &&
+    (selectedCategory ? item.categories?.includes(selectedCategory) : true)
+  );
 
-  const toggleEditModal = () => {
-    setEditModalVisible(!isEditModalVisible);
-  };
-
-  const handleDelete = (word, index) => {
-    setWordToDelete(word);
-    setShowDeleteModal(true); 
-  };
-
-  const confirmDelete = () => {
-    removeWord(lexicon.findIndex((w) => w === wordToDelete));
-    setShowDeleteModal(false); 
-  };
-
-  const cancelDelete = () => {
-    setShowDeleteModal(false); 
-  };
-
-  const handleEdit = (word) => {
-    setCurrentWord(word);
-    toggleEditModal();
-  };
-
-  const styles = colorScheme === 'dark' ? darkStyles : lightStyles;
+  const styles = isDarkMode ? darkStyles : lightStyles;
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? '#121212' : '#ffffff' }]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? '#121212' : '#ffffff' }]}>      
+      <TextInput
+  style={[
+    styles.searchBar,
+    searchText ? styles.searchBarFocused : {},
+  ]}
+  placeholder="Search words..."
+  placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
+  value={searchText}
+  onChangeText={setSearchText}
+/>
       {lexicon.length === 0 ? (
         <Text style={styles.emptyMessage}>No words in the lexicon</Text>
       ) : (
         <FlatList
-          data={lexicon}
+          data={filteredLexicon}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => (
-            <View style={[styles.wordContainer, { backgroundColor: isDarkMode ? '#333' : '#F2F2F2' }]}>
+          renderItem={({ item }) => (
+            <View style={[styles.wordContainer, { backgroundColor: isDarkMode ? '#333' : '#F2F2F2' }]}>              
               <View style={styles.leftContainer}>
                 <View style={styles.categoriesContainer}>
-                  {item.categories && item.categories.map((cat, catIndex) => (
-                    <View key={catIndex} style={[styles.categoryTag, { backgroundColor: categoryColors[cat] || '#ccc' }]}>
+                  {item.categories?.map((cat, catIndex) => (
+                    <View key={catIndex} style={[styles.categoryTag, { backgroundColor: categoryColors[cat] || '#ccc' }]}>                      
                       <Ionicons name={categoryIcons[cat] || 'help-circle'} size={12} color={isDarkMode ? '#fff' : '#000'} />
                     </View>
                   ))}
                 </View>
-
                 <Text style={[styles.wordText, { color: isDarkMode ? '#D9D9D9' : '#000' }]}>
-                  <Text style={[styles.originalText, { color: isDarkMode ? '#D9D9D9' : '#000' }]}>{item.original}</Text>
-                  <Text> - {item.translation}</Text>
+                  <Text style={styles.originalText}>{item.original}</Text> - {item.translation}
                 </Text>
               </View>
               <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.editButton} onPress={() => handleEdit(item)}>
                   <Ionicons name="pencil" size={15} color={isDarkMode ? '#aaa' : '#888'} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item, index)}>
+                <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item)}>
                   <Ionicons name="trash" size={15} color={isDarkMode ? '#aaa' : '#888'} />
                 </TouchableOpacity>
               </View>
@@ -92,19 +88,10 @@ const LexiconList = () => {
           toggleEditModal();
         }} 
       />
-      
-      {/* Delete Confirmation Modal */}
-      <Modal
-        visible={showDeleteModal}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={cancelDelete}
-      >
+      <Modal visible={showDeleteModal} animationType="fade" transparent={true} onRequestClose={cancelDelete}>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContainer, { backgroundColor: isDarkMode ? '#333' : '#fff' }]}>
-            <Text style={[styles.modalText, { color: isDarkMode ? '#D9D9D9' : '#000' }]}>
-              Are you sure you want to delete this word?
-            </Text>
+          <View style={[styles.modalContainer, { backgroundColor: isDarkMode ? '#333' : '#fff' }]}>            
+            <Text style={[styles.modalText, { color: isDarkMode ? '#D9D9D9' : '#000' }]}>Are you sure you want to delete this word?</Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity style={styles.modalButton} onPress={confirmDelete}>
                 <Text style={styles.modalButtonText}>Yes</Text>
@@ -226,6 +213,30 @@ const lightStyles = StyleSheet.create({
     justifyContent: 'space-around',
     width: '100%',
   },
+
+    // Search Bar styles
+    searchBar: {
+      width: '100%',
+      height: 45,
+      borderRadius: 25,
+      paddingHorizontal: 20,
+      fontSize: 16,
+      backgroundColor: '#fff',
+      marginBottom: 20,
+      shadowColor: '#000',
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 5, // For Android shadow
+    },
+  
+    // Focused search bar styles
+    searchBarFocused: {
+      shadowColor: '#007BFF',
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
+      elevation: 8, // For Android shadow
+    },
+
 });
 
 const darkStyles = StyleSheet.create({
@@ -250,7 +261,29 @@ const darkStyles = StyleSheet.create({
     alignItems: 'flex-start',
     flex: 1,
     marginRight: 10,
-  },
+  },  
+    // Search Bar styles (dark mode)
+    searchBar: {
+      width: '100%',
+      height: 45,
+      borderRadius: 25,
+      paddingHorizontal: 20,
+      fontSize: 16,
+      backgroundColor: '#333',
+      marginBottom: 20,
+      shadowColor: '#000',
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 5, // For Android shadow
+    },
+  
+    // Focused search bar styles (dark mode)
+    searchBarFocused: {
+      shadowColor: '#007BFF',
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
+      elevation: 8, // For Android shadow
+    },
 
 });
 
