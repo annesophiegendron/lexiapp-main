@@ -53,7 +53,10 @@ const LexiconList = () => {
           data={filteredLexicon}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
-            <View style={[styles.wordContainer, { backgroundColor: isDarkMode ? '#333' : '#F2F2F2' }]}>              
+            <TouchableOpacity 
+              onPress={() => handleEdit(item)} 
+              style={[styles.wordContainer, { backgroundColor: isDarkMode ? '#333' : '#F2F2F2' }]}
+            >              
               <View style={styles.leftContainer}>
                 <View style={styles.categoriesContainer}>
                   {item.categories?.map((cat, catIndex) => (
@@ -66,15 +69,10 @@ const LexiconList = () => {
                   <Text style={styles.originalText}>{item.original}</Text> - {item.translation}
                 </Text>
               </View>
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.editButton} onPress={() => handleEdit(item)}>
-                  <Ionicons name="pencil" size={15} color={isDarkMode ? '#aaa' : '#888'} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item)}>
-                  <Ionicons name="trash" size={15} color={isDarkMode ? '#aaa' : '#888'} />
-                </TouchableOpacity>
-              </View>
-            </View>
+              <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item)}>
+                <Ionicons name="trash" size={15} color={isDarkMode ? '#aaa' : '#888'} />
+              </TouchableOpacity>
+            </TouchableOpacity>
           )}
         />
       )}
