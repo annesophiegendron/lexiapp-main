@@ -7,7 +7,7 @@ import { categoryColors } from '../constants.js';
 // Components
 import AddWordScreen from './AddWordScreen';
 
-const CategoryWordsScreen = ({ route }) => {
+const CategoryWordsScreen = ({ route, navigation }) => {
   const { category } = route.params;
   const { lexicon } = useLexicon();
   const [modalVisible, setModalVisible] = useState(false);
@@ -33,38 +33,46 @@ const CategoryWordsScreen = ({ route }) => {
     ).start();
   }, []);
 
+  // Handlers
+  const handleClose = () => {
+    setModalVisible(false);
+  };
 
-// Handlers
-const handleClose = () => {
-  setModalVisible(false);
-};
-
+  const handleBack = () => {
+    navigation.goBack();
+  };
 
   return (
     <View style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+        <Ionicons name="arrow-back" size={24} color="#fff" />
+      </TouchableOpacity>
+
       <Text style={[styles.title, { color: categoryColors[category] || '#6b4f7d' }]}>
         {category}
       </Text>
       <TouchableOpacity
-  style={[
-    styles.card,
-    styles.actionButton,
-    { backgroundColor: categoryColors[category] || '#6b4f7d' }
-  ]}
-  onPress={() => setModalVisible(true)}
->
-  <View style={styles.textContainer}>
-    <Ionicons name="add" size={23} color="#E9F1F2" style={styles.icon} />
-  </View>
-</TouchableOpacity>
-
+        style={[
+          styles.card,
+          styles.actionButton,
+          { backgroundColor: categoryColors[category] || '#6b4f7d' },
+        ]}
+        onPress={() => setModalVisible(true)}
+      >
+        <View style={styles.textContainer}>
+          <Ionicons name="add" size={23} color="#E9F1F2" style={styles.icon} />
+        </View>
+      </TouchableOpacity>
 
       {filteredWords.length > 0 ? (
         <FlatList
           data={filteredWords}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
-            <View style={[styles.wordContainer, { borderColor: categoryColors[category] || '#6b4f7d' }]}>
+            <View
+              style={[styles.wordContainer, { borderColor: categoryColors[category] || '#6b4f7d' }]}
+            >
               <Text style={styles.wordText}>{item.original}</Text>
               <Text style={styles.translationText}>{item.translation}</Text>
             </View>
@@ -80,10 +88,8 @@ const handleClose = () => {
           <Text style={styles.emptyText}>No words to display here.</Text>
         </View>
       )}
-          <AddWordScreen isVisible={modalVisible} onClose={handleClose} />
-
+      <AddWordScreen isVisible={modalVisible} onClose={handleClose} />
     </View>
-
   );
 };
 
@@ -91,8 +97,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 15,
-    paddingTop: 60,
+    paddingTop: 65,
     backgroundColor: '#f4f2ec',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 55,
+    left: 15,
+    zIndex: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    padding: 10,
+    borderRadius: 50,
   },
   title: {
     fontSize: 20,
@@ -112,23 +127,24 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 3,
+    top: 25,
   },
   wordText: {
-    fontSize: 15, 
-    fontWeight: '600', 
+    fontSize: 15,
+    fontWeight: '600',
     color: '#333',
     marginBottom: 4,
   },
   translationText: {
-    fontSize: 13, 
+    fontSize: 13,
     color: '#555',
   },
   emptyContainer: {
-    flex: 1, 
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 15,
-    marginTop: '-50%'
+    marginTop: '-50%',
   },
   iconContainer: {
     marginBottom: 20,
@@ -150,8 +166,8 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   actionButton: {
-    width: 60, 
-    height: 60, 
+    width: 60,
+    height: 60,
     borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
