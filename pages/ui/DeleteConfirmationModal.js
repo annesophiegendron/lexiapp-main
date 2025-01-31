@@ -1,7 +1,7 @@
 import React from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import {Modal, View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 
-const DeleteConfirmationModal = ({ isVisible, onClose, onDelete }) => {
+const DeleteConfirmationModal = ({isVisible, onClose, onDelete}) => {
   if (!isVisible) return null;
 
   return (
@@ -9,11 +9,12 @@ const DeleteConfirmationModal = ({ isVisible, onClose, onDelete }) => {
       transparent={true}
       animationType="fade"
       visible={isVisible}
-      onRequestClose={onClose}
-    >
+      onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
-          <Text style={styles.modalText}>Are you sure you want to delete this word?</Text>
+          <Text style={styles.modalText}>
+            Are you sure you want to delete this word?
+          </Text>
           <View style={styles.buttonContainer}>
             {/* Delete Button */}
             <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
@@ -21,7 +22,9 @@ const DeleteConfirmationModal = ({ isVisible, onClose, onDelete }) => {
             </TouchableOpacity>
             {/* Cancel Button */}
             <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
+              <Text style={[styles.buttonText, styles.cancelButtonText]}>
+                Cancel
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -54,7 +57,7 @@ const styles = StyleSheet.create({
   },
   // Styled Delete Button with Centered Text
   deleteButton: {
-    backgroundColor: '#e63946',  // Red for delete action
+    backgroundColor: '#e63946', // Red for delete action
     paddingVertical: 10,
     paddingHorizontal: 20,
     margin: 5,

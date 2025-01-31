@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   TextInput,
@@ -6,15 +6,18 @@ import {
   Modal,
   Text,
   Image,
-  StyleSheet,KeyboardAvoidingView,Platform, Alert
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
 } from 'react-native';
 
 import PenImage from '../assets/images/pen.png';
-import { useLexicon } from '../context/LexiconContext';
+import {useLexicon} from '../context/LexiconContext';
 
-import { categoryColors, categories } from '../constants.js';
+import {categoryColors, categories} from '../constants.js';
 
-const EditWordScreen = ({ isVisible, onClose, word, onUpdateWord }) => {
+const EditWordScreen = ({isVisible, onClose, word, onUpdateWord}) => {
   const [original, setOriginal] = useState(word?.original || '');
   const [translation, setTranslation] = useState(word?.translation || '');
   const [selectedCategories, setSelectedCategories] = useState(
@@ -22,7 +25,7 @@ const EditWordScreen = ({ isVisible, onClose, word, onUpdateWord }) => {
   );
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const { updateWord,lexicon} = useLexicon();
+  const {updateWord, lexicon} = useLexicon();
 
   const MAX_CHARACTERS = {
     original: 200,
@@ -52,16 +55,18 @@ const EditWordScreen = ({ isVisible, onClose, word, onUpdateWord }) => {
       setError('At least one category must be selected.');
       return;
     }
-        // Check for existing translation
-        const exists = lexicon.some((word) => word.translation.toLowerCase() === translation.toLowerCase());
-        if (exists) {
-          Alert.alert(
-            'Duplicate Translation',
-            'The translation you entered already exists in your lexicon.',
-            [{ text: 'OK' }]
-          );
-          return;
-        }
+    // Check for existing translation
+    const exists = lexicon.some(
+      word => word.translation.toLowerCase() === translation.toLowerCase(),
+    );
+    if (exists) {
+      Alert.alert(
+        'Duplicate Translation',
+        'The translation you entered already exists in your lexicon.',
+        [{text: 'OK'}],
+      );
+      return;
+    }
 
     const updatedWord = {
       ...word,
@@ -96,92 +101,98 @@ const EditWordScreen = ({ isVisible, onClose, word, onUpdateWord }) => {
         style={styles.modalContainer}
         activeOpacity={1}
         onPress={onClose}>
-           <KeyboardAvoidingView
-                    style={styles.modalContent}
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                  >
-        <View style={styles.modalContent} onTouchEnd={e => e.stopPropagation()}>
-          <View style={styles.imagePlaceholder}>
-            <Image source={PenImage} style={styles.image} resizeMode="contain" />
+        <KeyboardAvoidingView
+          style={styles.modalContent}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View
+            style={styles.modalContent}
+            onTouchEnd={e => e.stopPropagation()}>
+            <View style={styles.imagePlaceholder}>
+              <Image
+                source={PenImage}
+                style={styles.image}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.title}>Edit Word</Text>
+            <Text style={styles.description}>
+              Update the details of your word
+            </Text>
+
+            <View style={styles.buttonGrid}>
+              {categories.map(cat => (
+                <TouchableOpacity
+                  key={cat}
+                  style={[
+                    styles.categoryButton,
+                    {
+                      backgroundColor: selectedCategories.includes(cat)
+                        ? categoryColors[cat]
+                        : '#ddd',
+                    },
+                  ]}
+                  onPress={() => toggleCategory(cat)}>
+                  <Text style={styles.categoryButtonText}>{cat}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Original Word Input */}
+            <TextInput
+              style={[
+                styles.input,
+                error.includes('Original') ? styles.errorInput : null,
+              ]}
+              placeholder="Original Word"
+              placeholderTextColor="#404040"
+              value={original}
+              onChangeText={text =>
+                text.length <= MAX_CHARACTERS.original && setOriginal(text)
+              }
+            />
+            <Text
+              style={[
+                styles.charCount,
+                original.length >= MAX_CHARACTERS.original
+                  ? styles.charCountError
+                  : null,
+              ]}>
+              {original.length}/{MAX_CHARACTERS.original}
+            </Text>
+
+            {/* Translation Input */}
+            <TextInput
+              style={[
+                styles.input,
+                error.includes('Translation') ? styles.errorInput : null,
+              ]}
+              placeholder="Translation"
+              placeholderTextColor="#404040"
+              value={translation}
+              onChangeText={text =>
+                text.length <= MAX_CHARACTERS.translation &&
+                setTranslation(text)
+              }
+            />
+            <Text
+              style={[
+                styles.charCount,
+                translation.length >= MAX_CHARACTERS.translation
+                  ? styles.charCountError
+                  : null,
+              ]}>
+              {translation.length}/{MAX_CHARACTERS.translation}
+            </Text>
+
+            {error && <Text style={styles.errorText}>{error}</Text>}
+            {success && (
+              <Text style={styles.successText}>Word updated successfully!</Text>
+            )}
+
+            <TouchableOpacity style={styles.saveButton} onPress={saveWord}>
+              <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
           </View>
-          <Text style={styles.title}>Edit Word</Text>
-          <Text style={styles.description}>
-            Update the details of your word
-          </Text>
-
-          <View style={styles.buttonGrid}>
-            {categories.map(cat => (
-              <TouchableOpacity
-                key={cat}
-                style={[
-                  styles.categoryButton,
-                  {
-                    backgroundColor: selectedCategories.includes(cat)
-                      ? categoryColors[cat]
-                      : '#ddd',
-                  },
-                ]}
-                onPress={() => toggleCategory(cat)}>
-                <Text style={styles.categoryButtonText}>{cat}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Original Word Input */}
-          <TextInput
-            style={[
-              styles.input,
-              error.includes('Original') ? styles.errorInput : null,
-            ]}
-            placeholder="Original Word"
-            placeholderTextColor="#404040" 
-            value={original}
-            onChangeText={text =>
-              text.length <= MAX_CHARACTERS.original && setOriginal(text)
-            }
-          />
-          <Text
-            style={[
-              styles.charCount,
-              original.length >= MAX_CHARACTERS.original
-                ? styles.charCountError
-                : null,
-            ]}>
-            {original.length}/{MAX_CHARACTERS.original}
-          </Text>
-
-          {/* Translation Input */}
-          <TextInput
-            style={[
-              styles.input,
-              error.includes('Translation') ? styles.errorInput : null,
-            ]}
-            placeholder="Translation"
-            placeholderTextColor="#404040" 
-            value={translation}
-            onChangeText={text =>
-              text.length <= MAX_CHARACTERS.translation && setTranslation(text)
-            }
-          />
-          <Text
-            style={[
-              styles.charCount,
-              translation.length >= MAX_CHARACTERS.translation
-                ? styles.charCountError
-                : null,
-            ]}>
-            {translation.length}/{MAX_CHARACTERS.translation}
-          </Text>
-
-          {error && <Text style={styles.errorText}>{error}</Text>}
-          {success && (
-            <Text style={styles.successText}>Word updated successfully!</Text>
-          )}
-
-          <TouchableOpacity style={styles.saveButton} onPress={saveWord}>
-            <Text style={styles.saveButtonText}>Save</Text>
-          </TouchableOpacity>
-        </View>
         </KeyboardAvoidingView>
       </TouchableOpacity>
     </Modal>

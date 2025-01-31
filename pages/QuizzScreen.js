@@ -1,18 +1,32 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Animated } from 'react-native';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Animated,
+} from 'react-native';
 import HapticFeedback from 'react-native-haptic-feedback';
-import { useLexicon } from '../context/LexiconContext';
-import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '../context/ThemeContext';
-import { useQuiz } from '../context/QuizzContext';
+import {useLexicon} from '../context/LexiconContext';
+import {useNavigation} from '@react-navigation/native';
+import {useTheme} from '../context/ThemeContext';
+import {useQuiz} from '../context/QuizzContext';
 import AddWordScreen from './AddWordScreen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const QuizzScreen = () => {
-  const { lexicon } = useLexicon();
+  const {lexicon} = useLexicon();
   const navigation = useNavigation();
-  const { isDarkMode } = useTheme();
-  const { currentQuestionIndex, setCurrentQuestionIndex, score, setScore, pastResults, setPastResults } = useQuiz();
+  const {isDarkMode} = useTheme();
+  const {
+    currentQuestionIndex,
+    setCurrentQuestionIndex,
+    score,
+    setScore,
+    pastResults,
+    setPastResults,
+  } = useQuiz();
 
   const shuffledLexicon = useMemo(() => {
     return lexicon.length >= 4
@@ -33,7 +47,7 @@ const QuizzScreen = () => {
 
   useEffect(() => {
     if (currentQuestion) {
-      const generateAnswerOptions = (correctTranslation) => {
+      const generateAnswerOptions = correctTranslation => {
         const optionsSet = new Set();
         optionsSet.add(correctTranslation);
 
@@ -65,7 +79,7 @@ const QuizzScreen = () => {
     if (shuffledLexicon.length > 0) {
       const progress = (currentQuestionIndex + 1) / shuffledLexicon.length;
       console.log('Progress:', progress);
-      
+
       // Animate the progress bar width
       Animated.timing(progressAnim, {
         toValue: progress,
@@ -75,19 +89,21 @@ const QuizzScreen = () => {
     }
   }, [currentQuestionIndex, shuffledLexicon.length]);
 
-  const handleAnswer = (selectedTranslation) => {
+  const handleAnswer = selectedTranslation => {
     const isCorrect = selectedTranslation === currentQuestion.translation;
-  
+
     // Trigger haptic feedback based on correctness
-    HapticFeedback.trigger(isCorrect ? 'notificationSuccess' : 'notificationError');
-  
+    HapticFeedback.trigger(
+      isCorrect ? 'notificationSuccess' : 'notificationError',
+    );
+
     // Set selected answer
     setSelectedAnswer(selectedTranslation);
     setIsAnswerChecked(true); // Mark answer as checked
 
     // Reset feedback immediately, then update after animation
     setFeedback(null);
-  
+
     // Animate the scaling effect for the button
     Animated.sequence([
       Animated.timing(scaleAnim, {
@@ -129,8 +145,8 @@ const QuizzScreen = () => {
               totalQuestions: shuffledLexicon.length,
               date: new Date().toLocaleString(),
             };
-            setPastResults((prevResults) => [...prevResults, result]);
-            navigation.navigate('ResultsScreen', { result });
+            setPastResults(prevResults => [...prevResults, result]);
+            navigation.navigate('ResultsScreen', {result});
             // Reset quiz after completing all questions
             setCurrentQuestionIndex(0);
             setScore(0);
@@ -141,12 +157,15 @@ const QuizzScreen = () => {
   };
   if (lexicon.length < 4) {
     return (
-      <View style={[styles.container(isDarkMode), { justifyContent: 'center' }]}>
-        <TouchableOpacity onPress={() => setModalVisible(true)} activeOpacity={0.7}>
+      <View style={[styles.container(isDarkMode), {justifyContent: 'center'}]}>
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          activeOpacity={0.7}>
           <View style={styles.card(isDarkMode)}>
             <Text style={styles.cardTitle(isDarkMode)}>Not Enough Words</Text>
             <Text style={styles.cardMessage(isDarkMode)}>
-              You need at least 4 words in your lexicon to start the quiz. Add more words to continue learning!
+              You need at least 4 words in your lexicon to start the quiz. Add
+              more words to continue learning!
             </Text>
             <Ionicons
               name="add-circle-outline"
@@ -156,107 +175,105 @@ const QuizzScreen = () => {
             />
           </View>
         </TouchableOpacity>
-  
+
         <AddWordScreen isVisible={modalVisible} onClose={handleCloseModal} />
       </View>
     );
   }
-  
 
   return (
     <View style={styles.container(isDarkMode)}>
       <View style={styles.progressBarContainer}>
-      <Animated.View
-  style={[
-    styles.progressBar(isDarkMode), // Use the dynamic progressBar style
-    {
-      width: progressAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: ['0%', '100%'], // Animate progress from 0% to 100%
-      }),
-    },
-  ]}
-/>
+        <Animated.View
+          style={[
+            styles.progressBar(isDarkMode), // Use the dynamic progressBar style
+            {
+              width: progressAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0%', '100%'], // Animate progress from 0% to 100%
+              }),
+            },
+          ]}
+        />
       </View>
-      <Text style={styles.quizzTitle(isDarkMode)}>Can you find the translation for this word?</Text>
+      <Text style={styles.quizzTitle(isDarkMode)}>
+        Can you find the translation for this word?
+      </Text>
       <View style={styles.questionCard(isDarkMode)}>
-        <Text style={styles.questionText(isDarkMode)}>{currentQuestion.original}</Text>
+        <Text style={styles.questionText(isDarkMode)}>
+          {currentQuestion.original}
+        </Text>
       </View>
       <View style={styles.answersContainer}>
-  {answerOptions.map((translation, index) => (
-    <TouchableOpacity
-      key={index}
-      onPress={() => handleAnswer(translation)}
-      style={[
-        styles.answerButton(isDarkMode),
-        {
-          backgroundColor: isAnswerChecked
-            ? selectedAnswer === translation
-              ? buttonColor
-              : isDarkMode
-              ? '#37474f'
-              : '#f6f6f6'
-            : isDarkMode
-            ? '#37474f'
-            : '#f6f6f6',
-        },
-      ]}
-    >
-      <Text style={styles.answerText(isDarkMode)}>{translation}</Text>
-    </TouchableOpacity>
-  ))}
-</View>
-<View style={styles.questionCard(isDarkMode)}>
-  {isAnswerChecked && feedback && (
-    <Text
-      style={[
-        styles.feedbackMessage,
-        { color: feedback.type === 'correct' ? '#479c93' : '#ff4d4d' },
-      ]}
-    >
-      {feedback.type === 'correct'
-        ? ''
-        : `The correct answer is: ${currentQuestion.translation}`}
-    </Text>
-  )}
-</View>
-
+        {answerOptions.map((translation, index) => (
+          <TouchableOpacity
+            key={index}
+            onPress={() => handleAnswer(translation)}
+            style={[
+              styles.answerButton(isDarkMode),
+              {
+                backgroundColor: isAnswerChecked
+                  ? selectedAnswer === translation
+                    ? buttonColor
+                    : isDarkMode
+                    ? '#37474f'
+                    : '#f6f6f6'
+                  : isDarkMode
+                  ? '#37474f'
+                  : '#f6f6f6',
+              },
+            ]}>
+            <Text style={styles.answerText(isDarkMode)}>{translation}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <View style={styles.questionCard(isDarkMode)}>
+        {isAnswerChecked && feedback && (
+          <Text
+            style={[
+              styles.feedbackMessage,
+              {color: feedback.type === 'correct' ? '#479c93' : '#ff4d4d'},
+            ]}>
+            {feedback.type === 'correct'
+              ? ''
+              : `The correct answer is: ${currentQuestion.translation}`}
+          </Text>
+        )}
+      </View>
     </View>
   );
 };
 
-
-
 const styles = StyleSheet.create({
-  card: (isDarkMode) => ({
+  card: isDarkMode => ({
     backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff',
     borderRadius: 15,
     padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
     width: '70%',
     maxWidth: 350,
-    marginVertical: 20, 
+    marginVertical: 20,
   }),
-  cardTitle: (isDarkMode) => ({
-    fontSize: 22, 
+  cardTitle: isDarkMode => ({
+    fontSize: 22,
     fontWeight: 'bold',
     color: isDarkMode ? '#ffffff' : '#333333',
     marginBottom: 15,
-    textAlign: 'center', 
+    textAlign: 'center',
   }),
-  cardMessage: (isDarkMode) => ({
+  cardMessage: isDarkMode => ({
     fontSize: 16,
     color: isDarkMode ? '#cccccc' : '#555555',
-    textAlign: 'center', 
-    lineHeight: 22, 
+    textAlign: 'center',
+    lineHeight: 22,
   }),
-  container: (isDarkMode) => ({
+  container: isDarkMode => ({
     flex: 1,
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -275,24 +292,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0e0e0',
     borderRadius: 10,
   },
-  progressBar: (isDarkMode) => ({
+  progressBar: isDarkMode => ({
     height: '100%',
-    backgroundColor: isDarkMode ? '#4caf50' : '#C1A3D9', 
+    backgroundColor: isDarkMode ? '#4caf50' : '#C1A3D9',
     borderRadius: 10,
   }),
-  quizzTitle: (isDarkMode) => ({
+  quizzTitle: isDarkMode => ({
     color: isDarkMode ? '#ffffff' : '#333333',
     fontSize: 15,
     fontWeight: 'bold',
   }),
-  questionCard: (isDarkMode) => ({
+  questionCard: isDarkMode => ({
     marginVertical: 10,
     padding: 5,
-    height: 200, 
+    height: 200,
     alignItems: 'center',
     justifyContent: 'center',
   }),
-  questionText: (isDarkMode) => ({
+  questionText: isDarkMode => ({
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
@@ -308,9 +325,9 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 15,
     marginVertical: 10,
-    minHeight: 150, 
+    minHeight: 150,
   },
-  answerButton: (isDarkMode) => ({
+  answerButton: isDarkMode => ({
     backgroundColor: isDarkMode ? '#37474f' : '#f6f6f6',
     width: '48%',
     height: 60,
@@ -319,7 +336,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   }),
-  answerText: (isDarkMode) => ({
+  answerText: isDarkMode => ({
     color: isDarkMode ? '#ffffff' : '#333333',
     fontSize: 18,
     textAlign: 'center',
@@ -330,6 +347,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
 
 export default QuizzScreen;

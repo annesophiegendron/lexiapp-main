@@ -1,47 +1,65 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, Modal, Text, Image, StyleSheet,KeyboardAvoidingView,Platform, Alert } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Modal,
+  Text,
+  Image,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+} from 'react-native';
 import PenImage from '../assets/images/pen.png';
-import { useLexicon } from '../context/LexiconContext';
-import { categoryColors, categories } from '../constants.js';
+import {useLexicon} from '../context/LexiconContext';
+import {categoryColors, categories} from '../constants.js';
 
 const MAX_CHARACTERS = 200;
 
-const AddWordScreen = ({ isVisible, onClose,selectedCategory }) => {
+const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
   const [original, setOriginal] = useState('');
-  const [category, setCategory] = useState(selectedCategory); 
+  const [category, setCategory] = useState(selectedCategory);
 
   const [translation, setTranslation] = useState('');
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const { addWord ,lexicon} = useLexicon();
+  const {addWord, lexicon} = useLexicon();
 
   const [selectedCategories, setSelectedCategories] = useState(
-    Array.isArray(selectedCategory) ? selectedCategory : [selectedCategory]
+    Array.isArray(selectedCategory) ? selectedCategory : [selectedCategory],
   );
-  
+
   useEffect(() => {
-    setSelectedCategories(Array.isArray(selectedCategory) ? selectedCategory : [selectedCategory]);
+    setSelectedCategories(
+      Array.isArray(selectedCategory) ? selectedCategory : [selectedCategory],
+    );
   }, [selectedCategory]);
-  
+
   useEffect(() => {
-    console.log("Selected category updated:", selectedCategory);
-    setCategory(selectedCategory); 
+    console.log('Selected category updated:', selectedCategory);
+    setCategory(selectedCategory);
   }, [selectedCategory]);
-  
 
   const saveWord = () => {
     if (!original || !translation || selectedCategories.length === 0) {
       setError(true);
-      setErrorMessage(selectedCategories.length === 0 ? 'Please add at least one tag.' : 'All fields are required.');
+      setErrorMessage(
+        selectedCategories.length === 0
+          ? 'Please add at least one tag.'
+          : 'All fields are required.',
+      );
       return;
     }
     // Check for existing translation
-    const exists = lexicon.some((word) => word.translation.toLowerCase() === translation.toLowerCase());
+    const exists = lexicon.some(
+      word => word.translation.toLowerCase() === translation.toLowerCase(),
+    );
     if (exists) {
       Alert.alert(
         'Duplicate Translation',
         'The translation you entered already exists in your lexicon.',
-        [{ text: 'OK' }]
+        [{text: 'OK'}],
       );
       return;
     }
@@ -55,11 +73,12 @@ const AddWordScreen = ({ isVisible, onClose,selectedCategory }) => {
     onClose();
   };
 
-  const toggleCategory = (category) => {
-    setSelectedCategories((prevCategories) =>
-      prevCategories.includes(category)
-        ? prevCategories.filter((cat) => cat !== category)  // Remove category if already selected
-        : [...prevCategories, category]  // Add category if not already selected
+  const toggleCategory = category => {
+    setSelectedCategories(
+      prevCategories =>
+        prevCategories.includes(category)
+          ? prevCategories.filter(cat => cat !== category) // Remove category if already selected
+          : [...prevCategories, category], // Add category if not already selected
     );
   };
 
@@ -68,23 +87,34 @@ const AddWordScreen = ({ isVisible, onClose,selectedCategory }) => {
       animationType="slide"
       transparent={true}
       visible={isVisible}
-      onRequestClose={onClose}
-    >
-      <TouchableOpacity style={styles.modalContainer} activeOpacity={1} onPress={onClose}>
+      onRequestClose={onClose}>
+      <TouchableOpacity
+        style={styles.modalContainer}
+        activeOpacity={1}
+        onPress={onClose}>
         <KeyboardAvoidingView
           style={styles.modalContent}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-          <View style={styles.modalContent} onTouchEnd={(e) => e.stopPropagation()}>
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View
+            style={styles.modalContent}
+            onTouchEnd={e => e.stopPropagation()}>
             <View style={styles.imagePlaceholder}>
-              <Image source={PenImage} style={styles.image} resizeMode="contain" />
+              <Image
+                source={PenImage}
+                style={styles.image}
+                resizeMode="contain"
+              />
             </View>
             <Text style={styles.title}>Add a New Word</Text>
-            <Text style={styles.description}>Add a new translation to your lexicon</Text>
-            <Text style={styles.subtitle}>Add tag(s) to categorize this word</Text>
+            <Text style={styles.description}>
+              Add a new translation to your lexicon
+            </Text>
+            <Text style={styles.subtitle}>
+              Add tag(s) to categorize this word
+            </Text>
 
             <View style={styles.buttonGrid}>
-              {categories.map((cat) => (
+              {categories.map(cat => (
                 <TouchableOpacity
                   key={cat}
                   style={[
@@ -95,26 +125,33 @@ const AddWordScreen = ({ isVisible, onClose,selectedCategory }) => {
                         : '#ddd', // Highlight selected categories
                     },
                   ]}
-                  onPress={() => toggleCategory(cat)}
-                >
+                  onPress={() => toggleCategory(cat)}>
                   <Text style={styles.categoryButtonText}>{cat}</Text>
                 </TouchableOpacity>
               ))}
             </View>
 
             <TextInput
-              style={[styles.input, error && !original ? styles.errorInput : null]}
+              style={[
+                styles.input,
+                error && !original ? styles.errorInput : null,
+              ]}
               placeholder="New word"
               value={original}
-              onChangeText={(text) => setOriginal(text.slice(0, MAX_CHARACTERS))}
+              onChangeText={text => setOriginal(text.slice(0, MAX_CHARACTERS))}
               maxLength={MAX_CHARACTERS}
             />
 
             <TextInput
-              style={[styles.input, error && !translation ? styles.errorInput : null]}
+              style={[
+                styles.input,
+                error && !translation ? styles.errorInput : null,
+              ]}
               placeholder="Translation"
               value={translation}
-              onChangeText={(text) => setTranslation(text.slice(0, MAX_CHARACTERS))}
+              onChangeText={text =>
+                setTranslation(text.slice(0, MAX_CHARACTERS))
+              }
               maxLength={MAX_CHARACTERS}
             />
 

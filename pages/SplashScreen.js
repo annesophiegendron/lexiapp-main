@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
-import { View, Image, StyleSheet } from 'react-native';
+import React, {useEffect} from 'react';
+import {View, Image, StyleSheet} from 'react-native';
 
-const SplashScreen = ({ navigation }) => {
+const SplashScreen = ({navigation}) => {
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.replace('HomeTabs'); 
+      navigation.replace('HomeTabs');
     }, 3000);
 
     return () => clearTimeout(timer);

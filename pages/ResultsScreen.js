@@ -1,13 +1,19 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { useQuiz } from '../context/QuizzContext';
-import { useTheme } from '../context/ThemeContext';
-import { format, parseISO, isValid } from 'date-fns';
+import React, {useEffect} from 'react';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
+import {useQuiz} from '../context/QuizzContext';
+import {useTheme} from '../context/ThemeContext';
+import {format, parseISO, isValid} from 'date-fns';
 
-const ResultsScreen = ({ route, navigation }) => {
-  const { result } = route.params || {};
-  const { pastResults, setCurrentQuestionIndex, setScore, score, totalQuestions } = useQuiz();
-  const { isDarkMode } = useTheme(); 
+const ResultsScreen = ({route, navigation}) => {
+  const {result} = route.params || {};
+  const {
+    pastResults,
+    setCurrentQuestionIndex,
+    setScore,
+    score,
+    totalQuestions,
+  } = useQuiz();
+  const {isDarkMode} = useTheme();
 
   useEffect(() => {
     if (result && result.score === totalQuestions) {
@@ -21,11 +27,11 @@ const ResultsScreen = ({ route, navigation }) => {
     navigation.navigate('QuizzScreen');
   };
 
-  const formatDate = (dateStr) => {
+  const formatDate = dateStr => {
     if (!dateStr) return 'No date available';
     const cleanedDateStr = dateStr.replace(', ', 'T');
     const parsedDate = parseISO(cleanedDateStr);
-    
+
     return isValid(parsedDate) ? format(parsedDate, 'PPP') : 'Invalid Date';
   };
 
@@ -38,24 +44,31 @@ const ResultsScreen = ({ route, navigation }) => {
 
   const getScoreEmoji = (score, totalQuestions) => {
     const percentage = (score / totalQuestions) * 100;
-    if (percentage < 50) return '😞'; 
-    if (percentage >= 50 && percentage < 75) return '😐'; 
-    return '😊'; 
+    if (percentage < 50) return '😞';
+    if (percentage >= 50 && percentage < 75) return '😐';
+    return '😊';
   };
 
   const renderQuizResults = () => {
     if (result) {
       const formattedDate = formatDate(result.date);
-      const backgroundColor = calculateResultBackgroundColor(result.score, result.totalQuestions);
+      const backgroundColor = calculateResultBackgroundColor(
+        result.score,
+        result.totalQuestions,
+      );
       const emoji = getScoreEmoji(result.score, result.totalQuestions);
 
       return (
         <>
-          <Text style={[styles.title, { color: isDarkMode ? '#fff' : '#333' }]}>
+          <Text style={[styles.title, {color: isDarkMode ? '#fff' : '#333'}]}>
             Quiz Results
           </Text>
-          <View style={[styles.resultContainer, { backgroundColor }]}>
-            <Text style={[styles.resultText, { color: isDarkMode ? '#bb86fc' : '#6200EE' }]}>
+          <View style={[styles.resultContainer, {backgroundColor}]}>
+            <Text
+              style={[
+                styles.resultText,
+                {color: isDarkMode ? '#bb86fc' : '#6200EE'},
+              ]}>
               You scored {result.score} out of {result.totalQuestions}! {emoji}
             </Text>
           </View>
@@ -65,13 +78,16 @@ const ResultsScreen = ({ route, navigation }) => {
 
     return (
       <View style={styles.noResultsContainer}>
-        <Text style={[styles.noResultsText, { color: isDarkMode ? '#ccc' : '#555' }]}>
+        <Text
+          style={[styles.noResultsText, {color: isDarkMode ? '#ccc' : '#555'}]}>
           You haven't completed any quizzes yet. Start your first quiz now!
         </Text>
         <TouchableOpacity
-          style={[styles.startQuizButton, { backgroundColor: isDarkMode ? '#3700B3' : '#6200EE' }]}
-          onPress={handleStartNewQuiz}
-        >
+          style={[
+            styles.startQuizButton,
+            {backgroundColor: isDarkMode ? '#3700B3' : '#6200EE'},
+          ]}
+          onPress={handleStartNewQuiz}>
           <Text style={styles.startQuizButtonText}>Start Your First Quiz</Text>
         </TouchableOpacity>
       </View>
@@ -79,26 +95,41 @@ const ResultsScreen = ({ route, navigation }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? '#121212' : '#f8f8f8' }]}>
+    <View
+      style={[
+        styles.container,
+        {backgroundColor: isDarkMode ? '#121212' : '#f8f8f8'},
+      ]}>
       {renderQuizResults()}
 
       {pastResults.length > 0 && (
         <>
-          <Text style={[styles.historyTitle, { color: isDarkMode ? '#fff' : '#333' }]}>Past Results</Text>
-          <View style={[styles.pastResultsContainer, { backgroundColor: isDarkMode ? '#333' : '#f2f2f2' }]}>
+          <Text
+            style={[
+              styles.historyTitle,
+              {color: isDarkMode ? '#fff' : '#333'},
+            ]}>
+            Past Results
+          </Text>
+          <View
+            style={[
+              styles.pastResultsContainer,
+              {backgroundColor: isDarkMode ? '#333' : '#f2f2f2'},
+            ]}>
             <FlatList
               data={pastResults}
               keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => {
+              renderItem={({item}) => {
                 const formattedDate = formatDate(item.date);
-                const backgroundColor = calculateResultBackgroundColor(item.score, item.totalQuestions);
+                const backgroundColor = calculateResultBackgroundColor(
+                  item.score,
+                  item.totalQuestions,
+                );
                 return (
-                  <View style={[styles.historyItem, { backgroundColor }]}>
-<Text style={[styles.historyText, { color: '#333' }]}>
-  {formattedDate}: {item.score}/{item.totalQuestions}
-</Text>
-
-
+                  <View style={[styles.historyItem, {backgroundColor}]}>
+                    <Text style={[styles.historyText, {color: '#333'}]}>
+                      {formattedDate}: {item.score}/{item.totalQuestions}
+                    </Text>
                   </View>
                 );
               }}
@@ -132,7 +163,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     width: '100%',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
@@ -171,7 +202,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#333',
     marginVertical: 15,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
@@ -181,7 +212,7 @@ const styles = StyleSheet.create({
     marginVertical: 6,
     borderRadius: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
