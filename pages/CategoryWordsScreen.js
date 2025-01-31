@@ -121,11 +121,10 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 15,
     paddingTop: 65,
-    backgroundColor: '#f4f2ec',
   },
   backButton: {
     position: 'absolute',
-    top: 55,
+    top: 60,
     left: 15,
     zIndex: 10,
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
