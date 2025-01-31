@@ -16,6 +16,20 @@ const CategoryWordsScreen = ({ route, navigation }) => {
 
   const opacityValue = new Animated.Value(1);
 
+  const hexToRgba = (hex, alpha = 0.2) => {
+    // Remove '#' if it's there
+    let cleanedHex = hex.replace('#', '');
+  
+    // Extract RGB components
+    let r = parseInt(cleanedHex.substring(0, 2), 16);
+    let g = parseInt(cleanedHex.substring(2, 4), 16);
+    let b = parseInt(cleanedHex.substring(4, 6), 16);
+  
+    // Return the RGBA color string
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+  
+
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
@@ -71,7 +85,13 @@ const CategoryWordsScreen = ({ route, navigation }) => {
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
             <View
-              style={[styles.wordContainer, { borderColor: categoryColors[category] || '#6b4f7d' }]}
+              style={[
+                styles.wordContainer,
+                {
+                  borderColor: categoryColors[category] || '#6b4f7d',
+                  backgroundColor: hexToRgba(categoryColors[category] || '#6b4f7d', 0.1), // Reduced opacity background color
+                },
+              ]}
             >
               <Text style={styles.wordText}>{item.original}</Text>
               <Text style={styles.translationText}>{item.translation}</Text>
@@ -92,6 +112,7 @@ const CategoryWordsScreen = ({ route, navigation }) => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
