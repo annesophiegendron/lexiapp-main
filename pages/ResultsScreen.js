@@ -1,19 +1,13 @@
-import React, {useEffect} from 'react';
-import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
-import {useQuiz} from '../context/QuizzContext';
-import {useTheme} from '../context/ThemeContext';
-import {format, parseISO, isValid} from 'date-fns';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { useQuiz } from '../context/QuizzContext';
+import { useTheme } from '../context/ThemeContext';
+import { format, parseISO, isValid } from 'date-fns';
 
-const ResultsScreen = ({route, navigation}) => {
-  const {result} = route.params || {};
-  const {
-    pastResults,
-    setCurrentQuestionIndex,
-    setScore,
-    score,
-    totalQuestions,
-  } = useQuiz();
-  const {isDarkMode} = useTheme();
+const ResultsScreen = ({ route, navigation }) => {
+  const { result } = route.params || {};
+  const { pastResults, setCurrentQuestionIndex, setScore, score, totalQuestions } = useQuiz();
+  const { isDarkMode } = useTheme();
 
   useEffect(() => {
     if (result && result.score === totalQuestions) {
@@ -27,48 +21,41 @@ const ResultsScreen = ({route, navigation}) => {
     navigation.navigate('QuizzScreen');
   };
 
-  const formatDate = dateStr => {
+  const formatDate = (dateStr) => {
     if (!dateStr) return 'No date available';
     const cleanedDateStr = dateStr.replace(', ', 'T');
     const parsedDate = parseISO(cleanedDateStr);
-
+    
     return isValid(parsedDate) ? format(parsedDate, 'PPP') : 'Invalid Date';
   };
 
   const calculateResultBackgroundColor = (score, totalQuestions) => {
     const percentage = (score / totalQuestions) * 100;
-    if (percentage < 50) return '#FFCDD2'; // Light red
-    if (percentage >= 50 && percentage < 75) return '#FFEB3B'; // Orange
-    return '#81C784'; // Green
+    if (percentage < 50) return '#FF4F58'; // Trendy red
+    if (percentage >= 50 && percentage < 75) return '#FFCA2D'; // Trendy yellow
+    return '#27AE60'; // Trendy green
   };
 
   const getScoreEmoji = (score, totalQuestions) => {
     const percentage = (score / totalQuestions) * 100;
-    if (percentage < 50) return '😞';
-    if (percentage >= 50 && percentage < 75) return '😐';
-    return '😊';
+    if (percentage < 50) return '😞'; 
+    if (percentage >= 50 && percentage < 75) return '😐'; 
+    return '😊'; 
   };
 
   const renderQuizResults = () => {
     if (result) {
       const formattedDate = formatDate(result.date);
-      const backgroundColor = calculateResultBackgroundColor(
-        result.score,
-        result.totalQuestions,
-      );
+      const backgroundColor = calculateResultBackgroundColor(result.score, result.totalQuestions);
       const emoji = getScoreEmoji(result.score, result.totalQuestions);
 
       return (
         <>
-          <Text style={[styles.title, {color: isDarkMode ? '#fff' : '#333'}]}>
+          <Text style={[styles.title, { color: isDarkMode ? '#fff' : '#212529' }]}>
             Quiz Results
           </Text>
-          <View style={[styles.resultContainer, {backgroundColor}]}>
-            <Text
-              style={[
-                styles.resultText,
-                {color: isDarkMode ? '#bb86fc' : '#6200EE'},
-              ]}>
+          <View style={[styles.resultContainer, { backgroundColor }]}>
+            <Text style={[styles.resultText, { color: isDarkMode ? '#bb86fc' : '#212121' }]}>
               You scored {result.score} out of {result.totalQuestions}! {emoji}
             </Text>
           </View>
@@ -78,16 +65,13 @@ const ResultsScreen = ({route, navigation}) => {
 
     return (
       <View style={styles.noResultsContainer}>
-        <Text
-          style={[styles.noResultsText, {color: isDarkMode ? '#ccc' : '#555'}]}>
+        <Text style={[styles.noResultsText, { color: isDarkMode ? '#ccc' : '#555' }]}>
           You haven't completed any quizzes yet. Start your first quiz now!
         </Text>
         <TouchableOpacity
-          style={[
-            styles.startQuizButton,
-            {backgroundColor: isDarkMode ? '#3700B3' : '#6200EE'},
-          ]}
-          onPress={handleStartNewQuiz}>
+          style={[styles.startQuizButton, { backgroundColor: isDarkMode ? '#3700B3' : '#6200EE' }]}
+          onPress={handleStartNewQuiz}
+        >
           <Text style={styles.startQuizButtonText}>Start Your First Quiz</Text>
         </TouchableOpacity>
       </View>
@@ -95,39 +79,22 @@ const ResultsScreen = ({route, navigation}) => {
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        {backgroundColor: isDarkMode ? '#121212' : '#f8f8f8'},
-      ]}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? '#121212' : '#FAFAFA' }]}>
       {renderQuizResults()}
 
       {pastResults.length > 0 && (
         <>
-          <Text
-            style={[
-              styles.historyTitle,
-              {color: isDarkMode ? '#fff' : '#333'},
-            ]}>
-            Past Results
-          </Text>
-          <View
-            style={[
-              styles.pastResultsContainer,
-              {backgroundColor: isDarkMode ? '#333' : '#f2f2f2'},
-            ]}>
+          <Text style={[styles.historyTitle, { color: isDarkMode ? '#fff' : '#212529' }]}>Past Results</Text>
+          <View style={[styles.pastResultsContainer, { backgroundColor: isDarkMode ? '#333' : '#F5F5F5' }]}>
             <FlatList
               data={pastResults}
               keyExtractor={(item, index) => index.toString()}
-              renderItem={({item}) => {
+              renderItem={({ item }) => {
                 const formattedDate = formatDate(item.date);
-                const backgroundColor = calculateResultBackgroundColor(
-                  item.score,
-                  item.totalQuestions,
-                );
+                const backgroundColor = calculateResultBackgroundColor(item.score, item.totalQuestions);
                 return (
-                  <View style={[styles.historyItem, {backgroundColor}]}>
-                    <Text style={[styles.historyText, {color: '#333'}]}>
+                  <View style={[styles.historyItem, { backgroundColor }]}>
+                    <Text style={[styles.historyText, { color: isDarkMode ? '#fff' : '#212529' }]}>
                       {formattedDate}: {item.score}/{item.totalQuestions}
                     </Text>
                   </View>
@@ -144,29 +111,38 @@ const ResultsScreen = ({route, navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: 'center',
+    padding: 30,
+    justifyContent: 'flex-start',
     alignItems: 'center',
+    paddingTop: 50,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 30,
+    letterSpacing: 1.5,
+    textAlign: 'center',
+    textTransform: 'uppercase',
   },
   resultText: {
-    fontSize: 20,
-    marginVertical: 10,
+    fontSize: 22,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginVertical: 20,
+    lineHeight: 28,
   },
   resultContainer: {
-    padding: 20,
-    borderRadius: 12,
-    marginVertical: 10,
     width: '100%',
+    paddingVertical: 30,
+    paddingHorizontal: 40,
+    borderRadius: 25,
+    alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    marginBottom: 40,
   },
   noResultsContainer: {
     alignItems: 'center',
@@ -174,52 +150,58 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   noResultsText: {
-    fontSize: 18,
-    marginBottom: 20,
+    fontSize: 20,
+    marginBottom: 30,
     textAlign: 'center',
+    fontWeight: '500',
   },
   startQuizButton: {
-    paddingVertical: 12,
-    borderRadius: 5,
+    paddingVertical: 16,
+    paddingHorizontal: 45,
+    backgroundColor: '#6200EE',
+    borderRadius: 30,
+    elevation: 5,
     alignItems: 'center',
-    paddingHorizontal: 10,
+    shadowColor: '#6200EE',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
   startQuizButtonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '600',
   },
   historyTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginTop: 30,
-    marginBottom: 10,
+    fontSize: 26,
+    fontWeight: '600',
+    marginVertical: 20,
+    letterSpacing: 1,
   },
   pastResultsContainer: {
     width: '100%',
-    padding: 10,
-    borderRadius: 12,
-    backgroundColor: '#333',
-    marginVertical: 15,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    marginTop: 20,
+    backgroundColor: '#EDEDED',
   },
   historyItem: {
-    padding: 12,
-    marginVertical: 6,
-    borderRadius: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 25,
+    borderRadius: 15,
+    marginVertical: 12,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   historyText: {
-    fontSize: 14,
-    color: '#fff',
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#212529',
+    textAlign: 'center',
   },
 });
 
