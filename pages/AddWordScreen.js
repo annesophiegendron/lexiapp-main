@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, Modal, Text, Image, StyleSheet,KeyboardAvoidingView,Platform, Alert } from 'react-native';
 import PenImage from '../assets/images/pen.png';
 import { useLexicon } from '../context/LexiconContext';
@@ -6,13 +6,28 @@ import { categoryColors, categories } from '../constants.js';
 
 const MAX_CHARACTERS = 200;
 
-const AddWordScreen = ({ isVisible, onClose }) => {
+const AddWordScreen = ({ isVisible, onClose,selectedCategory }) => {
   const [original, setOriginal] = useState('');
+  const [category, setCategory] = useState(selectedCategory); 
+
   const [translation, setTranslation] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState([]);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const { addWord ,lexicon} = useLexicon();
+
+  const [selectedCategories, setSelectedCategories] = useState(
+    Array.isArray(selectedCategory) ? selectedCategory : [selectedCategory]
+  );
+  
+  useEffect(() => {
+    setSelectedCategories(Array.isArray(selectedCategory) ? selectedCategory : [selectedCategory]);
+  }, [selectedCategory]);
+  
+  useEffect(() => {
+    console.log("Selected category updated:", selectedCategory);
+    setCategory(selectedCategory); 
+  }, [selectedCategory]);
+  
 
   const saveWord = () => {
     if (!original || !translation || selectedCategories.length === 0) {
@@ -20,7 +35,6 @@ const AddWordScreen = ({ isVisible, onClose }) => {
       setErrorMessage(selectedCategories.length === 0 ? 'Please add at least one tag.' : 'All fields are required.');
       return;
     }
-  
     // Check for existing translation
     const exists = lexicon.some((word) => word.translation.toLowerCase() === translation.toLowerCase());
     if (exists) {
@@ -31,7 +45,6 @@ const AddWordScreen = ({ isVisible, onClose }) => {
       );
       return;
     }
-  
     // Add new word if it doesn't exist
     addWord(original, translation, selectedCategories);
     setOriginal('');
@@ -41,13 +54,12 @@ const AddWordScreen = ({ isVisible, onClose }) => {
     setErrorMessage('');
     onClose();
   };
-  
 
   const toggleCategory = (category) => {
     setSelectedCategories((prevCategories) =>
       prevCategories.includes(category)
-        ? prevCategories.filter((cat) => cat !== category) // Remove category if already selected
-        : [...prevCategories, category] // Add category if not already selected
+        ? prevCategories.filter((cat) => cat !== category)  // Remove category if already selected
+        : [...prevCategories, category]  // Add category if not already selected
     );
   };
 
@@ -59,74 +71,61 @@ const AddWordScreen = ({ isVisible, onClose }) => {
       onRequestClose={onClose}
     >
       <TouchableOpacity style={styles.modalContainer} activeOpacity={1} onPress={onClose}>
-      <KeyboardAvoidingView
+        <KeyboardAvoidingView
           style={styles.modalContent}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-        <View style={styles.modalContent} onTouchEnd={(e) => e.stopPropagation()}>
-          <View style={styles.imagePlaceholder}>
-            <Image source={PenImage} style={styles.image} resizeMode="contain" />
-          </View>
-          <Text style={styles.title}>Add a New Word</Text>
-          <Text style={styles.description}>Add a new translation to your lexicon</Text>
-          <Text style={styles.subtitle}>Add tag(s) to categorize this word</Text>
+          <View style={styles.modalContent} onTouchEnd={(e) => e.stopPropagation()}>
+            <View style={styles.imagePlaceholder}>
+              <Image source={PenImage} style={styles.image} resizeMode="contain" />
+            </View>
+            <Text style={styles.title}>Add a New Word</Text>
+            <Text style={styles.description}>Add a new translation to your lexicon</Text>
+            <Text style={styles.subtitle}>Add tag(s) to categorize this word</Text>
 
-          <View style={styles.buttonGrid}>
-            {categories.map((cat) => (
-              <TouchableOpacity
-                key={cat}
-                style={[
-                  styles.categoryButton,
-                  {
-                    backgroundColor: selectedCategories.includes(cat)
-                      ? categoryColors[cat]
-                      : '#ddd', // Highlight selected categories
-                  },
-                ]}
-                onPress={() => toggleCategory(cat)}
-              >
-                <Text style={styles.categoryButtonText}>{cat}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+            <View style={styles.buttonGrid}>
+              {categories.map((cat) => (
+                <TouchableOpacity
+                  key={cat}
+                  style={[
+                    styles.categoryButton,
+                    {
+                      backgroundColor: selectedCategories.includes(cat)
+                        ? categoryColors[cat]
+                        : '#ddd', // Highlight selected categories
+                    },
+                  ]}
+                  onPress={() => toggleCategory(cat)}
+                >
+                  <Text style={styles.categoryButtonText}>{cat}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
 
-          <View>
             <TextInput
               style={[styles.input, error && !original ? styles.errorInput : null]}
               placeholder="New word"
-              placeholderTextColor="#404040"
               value={original}
               onChangeText={(text) => setOriginal(text.slice(0, MAX_CHARACTERS))}
               maxLength={MAX_CHARACTERS}
             />
-            <Text style={styles.characterCount}>
-              {original.length}/{MAX_CHARACTERS}
-            </Text>
-          </View>
 
-          <View>
             <TextInput
               style={[styles.input, error && !translation ? styles.errorInput : null]}
               placeholder="Translation"
-              placeholderTextColor="#404040"
               value={translation}
               onChangeText={(text) => setTranslation(text.slice(0, MAX_CHARACTERS))}
               maxLength={MAX_CHARACTERS}
             />
-            <Text style={styles.characterCount}>
-              {translation.length}/{MAX_CHARACTERS}
-            </Text>
+
+            {error && selectedCategories.length === 0 && (
+              <Text style={styles.errorMessage}>{errorMessage}</Text>
+            )}
+
+            <TouchableOpacity style={styles.saveButton} onPress={saveWord}>
+              <Text style={styles.saveButtonText}>Save to my lexicon</Text>
+            </TouchableOpacity>
           </View>
-
-          {/* Error message for missing categories */}
-          {error && selectedCategories.length === 0 && (
-            <Text style={styles.errorMessage}>{errorMessage}</Text>
-          )}
-
-          <TouchableOpacity style={styles.saveButton} onPress={saveWord}>
-            <Text style={styles.saveButtonText}>Save to my lexicon</Text>
-          </TouchableOpacity>
-        </View>
         </KeyboardAvoidingView>
       </TouchableOpacity>
     </Modal>

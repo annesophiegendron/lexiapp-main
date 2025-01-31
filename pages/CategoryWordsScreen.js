@@ -111,7 +111,8 @@ const CategoryWordsScreen = ({ route, navigation }) => {
         )}
       </View>
 
-      <AddWordScreen isVisible={modalVisible} onClose={handleClose} />
+      <AddWordScreen isVisible={modalVisible} onClose={handleClose}   selectedCategory={category} 
+ />
     </View>
   );
 };
