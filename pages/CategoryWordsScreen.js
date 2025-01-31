@@ -121,11 +121,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 15,
-    paddingTop: 65,
+    paddingTop: 75,
   },
   backButton: {
     position: 'absolute',
-    top: 60,
+    top: 70,
     left: 15,
     zIndex: 10,
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 15,
-    marginTop: '-50%',
+    marginTop: '-30%',
   },
   iconContainer: {
     marginBottom: 20,
