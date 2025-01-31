@@ -49,7 +49,7 @@ const handleClose = () => {
   style={[
     styles.card,
     styles.actionButton,
-    { backgroundColor: categoryColors[category] || '#6b4f7d', alignSelf: 'center' }
+    { backgroundColor: categoryColors[category] || '#6b4f7d' }
   ]}
   onPress={() => setModalVisible(true)}
 >
@@ -57,6 +57,7 @@ const handleClose = () => {
     <Ionicons name="add" size={23} color="#E9F1F2" style={styles.icon} />
   </View>
 </TouchableOpacity>
+
 
       {filteredWords.length > 0 ? (
         <FlatList
@@ -157,9 +158,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     shadowColor: '#000',
     borderColor: '#E9F1F2',
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
   },
   textContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -167,10 +170,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  icon: {
-    marginRight: 8,
-  },
-  
 });
 
 export default CategoryWordsScreen;

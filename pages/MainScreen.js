@@ -51,7 +51,7 @@ const navigateToQuizScreen = () => {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: isDarkMode ? backgroundDark : backgroundLight }]}>
-          <Text style={[styles.topTitle, { color: isDarkMode ? textLight : textDark }]}>Your language journey begins here. What’s your next word?</Text>
+          <Text style={[styles.topTitle, { color: isDarkMode ? textLight : textDark }]}>Add words with translations and meanings to your lexicon</Text>
 
       <Text style={[styles.title, { color: isDarkMode ? textLight : textDark }]}>Categories</Text>
       <View style={styles.categoriesContainer}>
