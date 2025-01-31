@@ -3,14 +3,24 @@ import { View, Text, StyleSheet, FlatList, Animated, TouchableOpacity } from 're
 import { useLexicon } from '../context/LexiconContext';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { categoryColors } from '../constants.js';
+import { useTheme } from '../context/ThemeContext';
 
 // Components
 import AddWordScreen from './AddWordScreen';
+import EditWordScreen from './EditWordScreen';
+import DeleteConfirmationModal from './ui/DeleteConfirmationModal';
 
 const CategoryWordsScreen = ({ route, navigation }) => {
   const { category } = route.params;
-  const { lexicon } = useLexicon();
-  const [modalVisible, setModalVisible] = useState(false);
+  const { lexicon, removeWord, updateWord } = useLexicon();const [isModalVisible, setModalVisible] = useState(false);
+  const [wordToDelete, setWordToDelete] = useState(null);const [isEditModalVisible, setEditModalVisible] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [currentWord, setCurrentWord] = useState(null);
+  const { isDarkMode } = useTheme();
+  const toggleModal = () => setModalVisible(!isModalVisible);
+  const toggleEditModal = () => setEditModalVisible(!isEditModalVisible);
+  const handleDelete = (word) => { setWordToDelete(word); setShowDeleteModal(true); };
+  const confirmDelete = () => { removeWord(lexicon.findIndex(w => w === wordToDelete)); setShowDeleteModal(false); };
 
   const filteredWords = lexicon.filter(word => word.categories.includes(category));
 
@@ -28,6 +38,9 @@ const CategoryWordsScreen = ({ route, navigation }) => {
     // Return the RGBA color string
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
+
+  const handleEdit = (word) => { setCurrentWord(word); toggleEditModal(); };
+
 
   useEffect(() => {
     Animated.loop(
@@ -85,6 +98,9 @@ const CategoryWordsScreen = ({ route, navigation }) => {
             data={filteredWords}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
+                 <TouchableOpacity 
+                            onPress={() => handleEdit(item)} 
+                          >   
               <View
                 style={[
                   styles.wordContainer,
@@ -97,6 +113,11 @@ const CategoryWordsScreen = ({ route, navigation }) => {
                 <Text style={styles.wordText}>{item.original}</Text>
                 <Text style={styles.translationText}>{item.translation}</Text>
               </View>
+                   <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item)}>
+                              <Ionicons name="trash" size={15} color={isDarkMode ? '#aaa' : '#888'} />
+                            </TouchableOpacity>
+                                        </TouchableOpacity>
+                            
             )}
           />
         ) : (
@@ -111,8 +132,22 @@ const CategoryWordsScreen = ({ route, navigation }) => {
         )}
       </View>
 
-      <AddWordScreen isVisible={modalVisible} onClose={handleClose}   selectedCategory={category} 
+      <AddWordScreen isVisible={isModalVisible} onClose={toggleModal}   selectedCategory={category} 
  />
+       <EditWordScreen 
+        isVisible={isEditModalVisible} 
+        onClose={toggleEditModal} 
+        word={currentWord} 
+        onUpdateWord={(updatedWord) => {
+          updateWord(lexicon.findIndex(word => word === currentWord), updatedWord);
+          toggleEditModal();
+        }} 
+      />
+          <DeleteConfirmationModal
+        isVisible={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onDelete={confirmDelete}  
+      />
     </View>
   );
 };
