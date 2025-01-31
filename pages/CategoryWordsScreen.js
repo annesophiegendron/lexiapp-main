@@ -226,6 +226,12 @@ const styles = StyleSheet.create({
     top: 25,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  deleteButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 5,
   },
   wordText: {
     fontSize: 15,
@@ -245,7 +251,7 @@ const styles = StyleSheet.create({
     marginTop: '-30%',
   },
   iconContainer: {
-    marginBottom: 20,
+    marginBottom: 30,
   },
   emptyText: {
     fontSize: 16,
