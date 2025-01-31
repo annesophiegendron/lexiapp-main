@@ -91,13 +91,13 @@ const LexiconList = () => {
           <View style={[styles.modalContainer, { backgroundColor: isDarkMode ? '#333' : '#fff' }]}>            
             <Text style={[styles.modalText, { color: isDarkMode ? '#D9D9D9' : '#000' }]}>Are you sure you want to delete this word?</Text>
             <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.modalButton} onPress={confirmDelete}>
-                <Text style={styles.modalButtonText}>Yes</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalButton} onPress={cancelDelete}>
-                <Text style={styles.modalButtonText}>No</Text>
-              </TouchableOpacity>
-            </View>
+  <TouchableOpacity style={styles.modalButtonYes} onPress={confirmDelete}>
+    <Text style={styles.modalButtonTextYes}>Yes</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.modalButtonNo} onPress={cancelDelete}>
+    <Text style={styles.modalButtonTextNo}>No</Text>
+  </TouchableOpacity>
+</View>
           </View>
         </View>
       </Modal>
@@ -126,10 +126,6 @@ const lightStyles = StyleSheet.create({
     alignItems: 'flex-start',
     flex: 1,
     marginRight: 10,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center', // Ensure button alignment is consistent
   },
 
   // Ensure uniform spacing for search bar and input fields
@@ -161,6 +157,79 @@ const lightStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+    width: '100%',
+    height: '100%',
+  },
+  modalContainer: {
+    width: '80%',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalButton: {
+    backgroundColor: '#007BFF',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginHorizontal: 10,
+    marginTop: 10,
+  },
+  modalButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
+  },
+  modalButtonYes: {
+    backgroundColor: '#28a745', // Green for affirmative action
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    marginHorizontal: 10,
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalButtonNo: {
+    backgroundColor: 'transparent',
+    borderColor: '#6c757d', // Gray border for negative action
+    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    marginHorizontal: 10,
+    marginTop: 10,
+  },
+  modalButtonTextYes: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  modalButtonTextNo: {
+    color: '#6c757d',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  deleteButton: {
+    padding: 10, 
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
+  
 });
 
 const darkStyles = StyleSheet.create({
@@ -184,10 +253,6 @@ const darkStyles = StyleSheet.create({
     alignItems: 'flex-start',
     flex: 1,
     marginRight: 10,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center', // Ensure button alignment is consistent
   },
 
   // Search bar consistency
@@ -218,6 +283,58 @@ const darkStyles = StyleSheet.create({
     marginRight: 5,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+
+  modalButton: {
+    backgroundColor: '#1E90FF',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginHorizontal: 10,
+    marginTop: 10,
+  },
+  modalButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
+  },
+  modalButtonYes: {
+    backgroundColor: '#1e7e34', // Darker green for dark mode
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    marginHorizontal: 10,
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalButtonNo: {
+    backgroundColor: 'transparent',
+    borderColor: '#adb5bd', // Lighter gray for dark mode
+    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    marginHorizontal: 10,
+    marginTop: 10,
+  },
+  modalButtonTextYes: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  modalButtonTextNo: {
+    color: '#adb5bd',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 
