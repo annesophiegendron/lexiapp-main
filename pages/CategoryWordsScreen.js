@@ -63,7 +63,7 @@ const CategoryWordsScreen = ({ route, navigation }) => {
         <Ionicons name="arrow-back" size={24} color="#fff" />
       </TouchableOpacity>
 
-      <Text style={[styles.title, { color: categoryColors[category] || '#6b4f7d' }]}>
+      <Text style={[styles.title]}>
         {category}
       </Text>
       <TouchableOpacity
@@ -131,10 +131,10 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '500',
-    textAlign: 'center',
-    letterSpacing: 0.5,
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'right',
+    color:'#262626'
   },
   wordContainer: {
     paddingVertical: 10,
