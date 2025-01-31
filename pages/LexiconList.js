@@ -108,7 +108,6 @@ const LexiconList = () => {
 };
 
 const lightStyles = StyleSheet.create({
-  // Container styles
   container: {
     flex: 1,
     alignItems: 'center',
@@ -132,39 +131,25 @@ const lightStyles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
+    alignItems: 'center', // Ensure button alignment is consistent
   },
 
-  // Text styles
-  emptyMessage: {
-    fontSize: 18,
-    fontStyle: 'italic',
-    color: '#555',
-    marginVertical: 20,
-  },
-  wordText: {
-    fontSize: 14,
-    fontWeight: '400',
-    flexShrink: 1,
-  },
-  originalText: {
-    fontWeight: 'bold',
-  },
-  categoryText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  modalText: {
-    fontSize: 18,
-    marginBottom: 20,
-  },
-  modalButtonText: {
-    color: '#fff',
+  // Ensure uniform spacing for search bar and input fields
+  searchBar: {
+    width: '100%',
+    height: 45,
+    borderRadius: 25,
+    paddingHorizontal: 20,
     fontSize: 16,
-    alignSelf: 'center',
+    backgroundColor: '#fff',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
   },
 
-  // Category styles
+  // Consistent category styles
   categoriesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -178,69 +163,9 @@ const lightStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
-  // Button styles
-  editButton: {
-    padding: 5,
-    marginRight: 10,
-  },
-  deleteButton: {
-    padding: 5,
-  },
-  modalButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    backgroundColor: '#007BFF',
-    width: '48%',
-  },
-
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContainer: {
-    padding: 20,
-    borderRadius: 12,
-    width: '90%',
-    alignItems: 'center',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-  },
-
-    // Search Bar styles
-    searchBar: {
-      width: '100%',
-      height: 45,
-      borderRadius: 25,
-      paddingHorizontal: 20,
-      fontSize: 16,
-      backgroundColor: '#fff',
-      marginBottom: 20,
-      shadowColor: '#000',
-      shadowOpacity: 0.1,
-      shadowRadius: 10,
-      elevation: 5, // For Android shadow
-    },
-  
-    // Focused search bar styles
-    searchBarFocused: {
-      shadowColor: '#007BFF',
-      shadowOpacity: 0.3,
-      shadowRadius: 12,
-      elevation: 8, // For Android shadow
-    },
-
 });
 
 const darkStyles = StyleSheet.create({
-  // Container styles
   container: {
     flex: 1,
     alignItems: 'center',
@@ -261,31 +186,43 @@ const darkStyles = StyleSheet.create({
     alignItems: 'flex-start',
     flex: 1,
     marginRight: 10,
-  },  
-    // Search Bar styles (dark mode)
-    searchBar: {
-      width: '100%',
-      height: 45,
-      borderRadius: 25,
-      paddingHorizontal: 20,
-      fontSize: 16,
-      backgroundColor: '#333',
-      marginBottom: 20,
-      shadowColor: '#000',
-      shadowOpacity: 0.1,
-      shadowRadius: 10,
-      elevation: 5, // For Android shadow
-    },
-  
-    // Focused search bar styles (dark mode)
-    searchBarFocused: {
-      shadowColor: '#007BFF',
-      shadowOpacity: 0.3,
-      shadowRadius: 12,
-      elevation: 8, // For Android shadow
-    },
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center', // Ensure button alignment is consistent
+  },
 
+  // Search bar consistency
+  searchBar: {
+    width: '100%',
+    height: 45,
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    fontSize: 16,
+    backgroundColor: '#333',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+
+  // Consistent category styles
+  categoriesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 8,
+  },
+  categoryTag: {
+    borderRadius: 16,
+    paddingVertical: 5,
+    paddingHorizontal: 5,
+    marginRight: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
+
 
 
 export default LexiconList;
