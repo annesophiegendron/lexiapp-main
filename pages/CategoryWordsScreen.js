@@ -28,7 +28,6 @@ const CategoryWordsScreen = ({ route, navigation }) => {
     // Return the RGBA color string
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
-  
 
   useEffect(() => {
     Animated.loop(
@@ -66,6 +65,7 @@ const CategoryWordsScreen = ({ route, navigation }) => {
       <Text style={[styles.title]}>
         {category}
       </Text>
+
       <TouchableOpacity
         style={[
           styles.card,
@@ -79,40 +79,42 @@ const CategoryWordsScreen = ({ route, navigation }) => {
         </View>
       </TouchableOpacity>
 
-      {filteredWords.length > 0 ? (
-        <FlatList
-          data={filteredWords}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
-            <View
-              style={[
-                styles.wordContainer,
-                {
-                  borderColor: categoryColors[category] || '#6b4f7d',
-                  backgroundColor: hexToRgba(categoryColors[category] || '#6b4f7d', 0.1), // Reduced opacity background color
-                },
-              ]}
+      <View style={[styles.listContainer, { paddingBottom: filteredWords.length > 0 ? 80 : 0 }]}>
+        {filteredWords.length > 0 ? (
+          <FlatList
+            data={filteredWords}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
+              <View
+                style={[
+                  styles.wordContainer,
+                  {
+                    borderColor: categoryColors[category] || '#6b4f7d',
+                    backgroundColor: hexToRgba(categoryColors[category] || '#6b4f7d', 0.1), // Reduced opacity background color
+                  },
+                ]}
+              >
+                <Text style={styles.wordText}>{item.original}</Text>
+                <Text style={styles.translationText}>{item.translation}</Text>
+              </View>
+            )}
+          />
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Animated.View
+              style={[styles.iconContainer, { transform: [{ scale: opacityValue }] }]}
             >
-              <Text style={styles.wordText}>{item.original}</Text>
-              <Text style={styles.translationText}>{item.translation}</Text>
-            </View>
-          )}
-        />
-      ) : (
-        <View style={styles.emptyContainer}>
-          <Animated.View
-            style={[styles.iconContainer, { transform: [{ scale: opacityValue }] }]}
-          >
-            <Ionicons name="sad-outline" size={60} color="#ccc" />
-          </Animated.View>
-          <Text style={styles.emptyText}>No words to display here.</Text>
-        </View>
-      )}
+              <Ionicons name="sad-outline" size={60} color="#ccc" />
+            </Animated.View>
+            <Text style={styles.emptyText}>No words to display here.</Text>
+          </View>
+        )}
+      </View>
+
       <AddWordScreen isVisible={modalVisible} onClose={handleClose} />
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -203,9 +205,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  buttonTextAction: {
-    fontSize: 16,
-    fontWeight: '600',
+  listContainer: {
+    flex: 1,
   },
 });
 
