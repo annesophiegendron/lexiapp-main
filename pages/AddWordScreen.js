@@ -97,9 +97,9 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
           <View
             style={styles.modalContent}
             onTouchEnd={e => e.stopPropagation()}>
-        <View style={styles.imagePlaceholder}>
-  <Ionicons name="create-outline" size={80} color="#fff" />
-</View>
+            <View style={styles.imagePlaceholder}>
+              <Ionicons name="create-outline" size={80} color="#fff" />
+            </View>
 
             <Text style={styles.title}>Add a New Word</Text>
             <Text style={styles.description}>
@@ -127,29 +127,41 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
               ))}
             </View>
 
-            <TextInput
-              style={[
-                styles.input,
-                error && !original ? styles.errorInput : null,
-              ]}
-              placeholder="New word"
-              value={original}
-              onChangeText={text => setOriginal(text.slice(0, MAX_CHARACTERS))}
-              maxLength={MAX_CHARACTERS}
-            />
+            <View>
+              <TextInput
+                style={[
+                  styles.input,
+                  error && !original ? styles.errorInput : null,
+                ]}
+                placeholder="New word"
+                value={original}
+                onChangeText={text =>
+                  setOriginal(text.slice(0, MAX_CHARACTERS))
+                }
+                maxLength={MAX_CHARACTERS}
+              />
+              <Text style={styles.charCount}>
+                {original.length}/{MAX_CHARACTERS}
+              </Text>
+            </View>
 
-            <TextInput
-              style={[
-                styles.input,
-                error && !translation ? styles.errorInput : null,
-              ]}
-              placeholder="Translation"
-              value={translation}
-              onChangeText={text =>
-                setTranslation(text.slice(0, MAX_CHARACTERS))
-              }
-              maxLength={MAX_CHARACTERS}
-            />
+            <View>
+              <TextInput
+                style={[
+                  styles.input,
+                  error && !translation ? styles.errorInput : null,
+                ]}
+                placeholder="Translation"
+                value={translation}
+                onChangeText={text =>
+                  setTranslation(text.slice(0, MAX_CHARACTERS))
+                }
+                maxLength={MAX_CHARACTERS}
+              />
+              <Text style={styles.charCount}>
+                {translation.length}/{MAX_CHARACTERS}
+              </Text>
+            </View>
 
             {error && selectedCategories.length === 0 && (
               <Text style={styles.errorMessage}>{errorMessage}</Text>
@@ -248,7 +260,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     alignItems: 'center',
     shadowColor: '#6200EE',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 8,
     marginBottom: 40,
@@ -275,6 +287,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: 10,
     textAlign: 'center',
+  },
+  charCount: {
+    fontSize: 12,
+    color: '#aaa',
+    textAlign: 'right',
+    marginBottom: 10,
   },
 });
 
