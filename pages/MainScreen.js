@@ -97,7 +97,7 @@ const MainScreen = () => {
             <Text
               style={[
                 styles.categoryText,
-                {color: isDarkMode ? textLight : textDark}, // Dynamically set text color
+                {color: isDarkMode ? textLight : textDark},
               ]}>
               {category}
             </Text>
@@ -173,26 +173,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: 100,
-    position: 'relative', // Keep the card as relative to position text over icon
-    overflow: 'hidden', // Prevent the icon from overflowing the card
+    position: 'relative',
+    overflow: 'hidden',
     flexDirection: 'column',
   },
-
+  
   categoryIconBackground: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 70, // Fixed size for the icon
+    width: 70,  // Fixed size for the icon
     height: 70, // Fixed size for the icon
   },
-
+  
   categoryText: {
-    position: 'absolute', // Position text over the icon
-    top: '50%', // Center vertically in the card
-    left: '50%', // Center horizontally in the card
-    transform: [{translateX: -35}, {translateY: -35}], // Adjust to perfectly center the text over the icon
+    position: 'absolute',
+    transform: [
+      {translateX: -35},  // Move text back by half of its width (fontSize: 16)
+      {translateY: -35}   // Move text back by half of its height (fontSize: 16)
+    ],
     fontWeight: '600',
-    fontSize: '16',
+    fontSize: 16,
+    color: 'white',   // Or use dynamic color based on theme
+    textAlign: 'center',  // Center the text horizontally within the container
+    width: '100%',    // Ensure text does not overflow
   },
+  
+
   // Button styles
   actionButton: {
     backgroundColor: 'rgba(217, 217, 217, 0.3)',
@@ -201,8 +207,9 @@ const styles = StyleSheet.create({
     transition: 'transform 0.3s',
     padding: 24,
     marginVertical: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-
   // Text styles
   topTitle: {
     fontSize: 30,
