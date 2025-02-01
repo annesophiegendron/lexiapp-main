@@ -177,8 +177,6 @@ const styles = StyleSheet.create({
   },
   categoryIconBackground: {
     position: 'absolute',
-    top: '50%',
-    left: '50%',
     transform: [{translateX: -27}, {translateY: -27}],
   },
 
