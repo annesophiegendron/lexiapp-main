@@ -5,14 +5,13 @@ import {
   TouchableOpacity,
   Modal,
   Text,
-  Image,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
   Alert,
 } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import PenImage from '../assets/images/pen.png';
 import {useLexicon} from '../context/LexiconContext';
 
 import {categoryColors, categories} from '../constants.js';
@@ -108,11 +107,7 @@ const EditWordScreen = ({isVisible, onClose, word, onUpdateWord}) => {
             style={styles.modalContent}
             onTouchEnd={e => e.stopPropagation()}>
             <View style={styles.imagePlaceholder}>
-              <Image
-                source={PenImage}
-                style={styles.image}
-                resizeMode="contain"
-              />
+              <Ionicons name="create-outline" size={80} color="#fff" />
             </View>
             <Text style={styles.title}>Edit Word</Text>
             <Text style={styles.description}>
@@ -268,7 +263,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     alignItems: 'center',
     shadowColor: '#6200EE',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 8,
     marginBottom: 40,

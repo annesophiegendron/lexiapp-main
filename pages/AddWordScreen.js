@@ -5,15 +5,14 @@ import {
   TouchableOpacity,
   Modal,
   Text,
-  Image,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
   Alert,
 } from 'react-native';
-import PenImage from '../assets/images/pen.png';
 import {useLexicon} from '../context/LexiconContext';
 import {categoryColors, categories} from '../constants.js';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const MAX_CHARACTERS = 200;
 
@@ -98,13 +97,10 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
           <View
             style={styles.modalContent}
             onTouchEnd={e => e.stopPropagation()}>
-            <View style={styles.imagePlaceholder}>
-              <Image
-                source={PenImage}
-                style={styles.image}
-                resizeMode="contain"
-              />
-            </View>
+        <View style={styles.imagePlaceholder}>
+  <Ionicons name="create-outline" size={80} color="#fff" />
+</View>
+
             <Text style={styles.title}>Add a New Word</Text>
             <Text style={styles.description}>
               Add a new translation to your lexicon
