@@ -94,11 +94,10 @@ const MainScreen = () => {
               style={styles.categoryIconBackground}
             />
 
-            {/* Category Title */}
             <Text
               style={[
-                styles.buttonText,
-                {color: isDarkMode ? textLight : textDark},
+                styles.categoryText,
+                {color: isDarkMode ? textLight : textDark}, // Dynamically set text color
               ]}>
               {category}
             </Text>
@@ -174,12 +173,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: 100,
-  },
-  categoryIconBackground: {
-    position: 'absolute',
-    transform: [{translateX: -27}, {translateY: -27}],
+    position: 'relative', // Keep the card as relative to position text over icon
+    overflow: 'hidden', // Prevent the icon from overflowing the card
+    flexDirection: 'column',
   },
 
+  categoryIconBackground: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 70, // Fixed size for the icon
+    height: 70, // Fixed size for the icon
+  },
+
+  categoryText: {
+    position: 'absolute', // Position text over the icon
+    top: '50%', // Center vertically in the card
+    left: '50%', // Center horizontally in the card
+    transform: [{translateX: -35}, {translateY: -35}], // Adjust to perfectly center the text over the icon
+    fontWeight: '600',
+    fontSize: '16',
+  },
   // Button styles
   actionButton: {
     backgroundColor: 'rgba(217, 217, 217, 0.3)',
