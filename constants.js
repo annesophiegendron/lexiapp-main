@@ -1,63 +1,47 @@
 // Categories
 export const categories = [
-  'Daily Life',
-  'Social Interactions',
-  'Work and School',
-  'Nature',
-  'Emotions and Feelings',
-  'Common Phrases',
-  'Numbers',
-  'Legal Matters',
-  'Cultural Context',
-  'Technology and Media',
-  'Travel',
-  'Secret',
+  'Everyday Talk',    // Daily life, casual convos, essential phrases
+  'Social & Family',  // Chats with friends, parents, and networking
+  'Work & Study',     // Office, school, productivity vocab
+  'Getting Around',   // Travel, transport, directions
+  'Food & Shopping',  // Restaurants, groceries, retail experiences
+  'Health & Safety',  // Medical terms, emergencies, well-being
+  'Culture & Vibes',  // Customs, etiquette, slang, local phrases
+  'Numbers & Money',  // Prices, measurements, transactions
 ];
 
 // Category icons mapping
 export const categoryIcons = {
-  'Common Phrases': 'chatbubble-ellipses',
-  'Social Interactions': 'people',
-  'Emotions and Feelings': 'happy',
-  'Daily Life': 'home',
-  'Weather and Nature': 'cloudy',
-  Numbers: 'time',
-  'Technology and Media': 'laptop',
-  'Work and School': 'briefcase',
-  'Legal Matters': 'document-text',
-  'Cultural Context': 'globe',
-  Travel: 'airplane',
-  Secret: 'secret',
+  'Everyday Talk': 'chatbubble-ellipses',
+  'Social & Family': 'people',
+  'Work & Study': 'briefcase',
+  'Getting Around': 'car',
+  'Food & Shopping': 'cart',
+  'Health & Safety': 'medkit',
+  'Culture & Vibes': 'globe',
+  'Numbers & Money': 'cash',
 };
 
 // Category color mappings
 export const categoryColors = {
-  'Daily Life': '#F28F8C',
-  'Social Interactions': '#A1C1F7',
-  'Work and School': '#A9D678',
-  Nature: '#74F21B',
-  'Emotions and Feelings': '#F28F77',
-  'Common Phrases': '#D49FC0',
-  Numbers: '#C1A3D9',
-  'Legal Matters': '#80C4B4',
-  'Cultural Context': '#EAC86A',
-  'Technology and Media': '#93B8E2',
-  Travel: '#B4D589',
-  Secret: '#225C73',
+  'Everyday Talk': '#F28F8C',
+  'Social & Family': '#A1C1F7',
+  'Work & Study': '#A9D678',
+  'Getting Around': '#74F21B',
+  'Food & Shopping': '#F28F77',
+  'Health & Safety': '#D49FC0',
+  'Culture & Vibes': '#EAC86A',
+  'Numbers & Money': '#C1A3D9',
 };
 
 // Category light color mappings
 export const categoryColorsLight = {
-  'Daily Life': 'rgba(242, 143, 140, 0.4)',
-  'Social Interactions': 'rgba(161, 193, 247, 0.4)',
-  'Work and School': 'rgba(169, 214, 120, 0.4)',
-  Nature: 'rgba(201, 242, 172, 1)',
-  'Emotions and Feelings': 'rgba(242, 143, 119, 0.4)',
-  'Common Phrases': 'rgba(212, 159, 192, 0.4)',
-  Numbers: 'rgba(193, 163, 217, 0.4)',
-  'Legal Matters': 'rgba(128, 196, 180, 0.4)',
-  'Cultural Context': 'rgba(234, 200, 106, 0.4)',
-  'Technology and Media': 'rgba(147, 184, 226, 0.4)',
-  Travel: 'rgba(180, 213, 137, 0.4)',
-  Secret: 'rgba(206, 209, 215, 0.4)',
+  'Everyday Talk': 'rgba(242, 143, 140, 0.4)',
+  'Social & Family': 'rgba(161, 193, 247, 0.4)',
+  'Work & Study': 'rgba(169, 214, 120, 0.4)',
+  'Getting Around': 'rgba(116, 242, 27, 0.4)',
+  'Food & Shopping': 'rgba(242, 143, 119, 0.4)',
+  'Health & Safety': 'rgba(212, 159, 192, 0.4)',
+  'Culture & Vibes': 'rgba(234, 200, 106, 0.4)',
+  'Numbers & Money': 'rgba(193, 163, 217, 0.4)',
 };

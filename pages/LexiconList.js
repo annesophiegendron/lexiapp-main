@@ -107,22 +107,18 @@ const LexiconList = () => {
         </TouchableOpacity>
         {Object.keys(categoryColors).map(category => (
           <TouchableOpacity
-            key={category}
-            style={[
-              styles.categoryButton,
-              selectedCategories.includes(category) &&
-                styles.selectedCategoryButton,
-            ]}
-            onPress={() => toggleCategorySelection(category)}>
-            <Text
-              style={[
-                styles.categoryButtonText,
-                selectedCategories.includes(category) &&
-                  styles.selectedCategoryButtonText,
-              ]}>
-              {category}
-            </Text>
-          </TouchableOpacity>
+          key={category}
+          style={[
+            styles.categoryButton,
+            selectedCategories.includes(category) ? { backgroundColor: categoryColors[category] } : { backgroundColor: '#ddd' }
+          ]}
+          onPress={() => toggleCategorySelection(category)}
+        >
+          <Text style={{ color: selectedCategories.includes(category) ? '#fff' : '#000' }}>
+            {category}
+          </Text>
+        </TouchableOpacity>
+        
         ))}
       </View>
 
