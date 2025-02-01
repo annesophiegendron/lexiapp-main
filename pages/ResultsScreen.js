@@ -212,6 +212,7 @@ const styles = StyleSheet.create({
   },
   streakContainer: {
     padding: 15,
+    marginBottom: 20,
     backgroundColor: '#e6e6e6',
     borderRadius: 10,
     alignItems: 'center',
