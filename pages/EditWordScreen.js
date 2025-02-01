@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   },
   categoryButton: {
     paddingVertical: 10,
-    paddingHorizontal: 13,
+    paddingHorizontal: 17,
     borderRadius: 50,
     marginBottom: 8,
     minWidth: '30%',
@@ -269,13 +269,14 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   input: {
-    height: 70,
+    height: 55,
     borderColor: '#262626',
     borderWidth: 2,
-    marginBottom: 8,
+    marginBottom: 5,
     paddingHorizontal: 10,
     borderRadius: 12,
     backgroundColor: '#fff',
+    fontSize: 18,
   },
   errorInput: {
     borderColor: 'red',
@@ -297,7 +298,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#aaa',
     textAlign: 'right',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   charCountError: {
     color: 'red',

@@ -101,13 +101,8 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
               <Ionicons name="create-outline" size={80} color="#fff" />
             </View>
 
-            <Text style={styles.title}>Add a New Word</Text>
-            <Text style={styles.description}>
-              Add a new translation to your lexicon
-            </Text>
-            <Text style={styles.subtitle}>
-              Add tag(s) to categorize this word
-            </Text>
+            <Text style={styles.title}>Add Translation</Text>
+            <Text style={styles.subtitle}>Pick at least one tag</Text>
 
             <View style={styles.buttonGrid}>
               {categories.map(cat => (
@@ -133,7 +128,7 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
                   styles.input,
                   error && !original ? styles.errorInput : null,
                 ]}
-                placeholder="New word"
+                placeholder="Enter word"
                 value={original}
                 onChangeText={text =>
                   setOriginal(text.slice(0, MAX_CHARACTERS))
@@ -151,7 +146,7 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
                   styles.input,
                   error && !translation ? styles.errorInput : null,
                 ]}
-                placeholder="Translation"
+                placeholder="Enter translation"
                 value={translation}
                 onChangeText={text =>
                   setTranslation(text.slice(0, MAX_CHARACTERS))
@@ -200,10 +195,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  image: {
-    width: 95,
-    height: 95,
-  },
 
   // Text styles
   title: {
@@ -219,12 +210,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontWeight: 'bold',
     textAlign: 'center',
-  },
-  description: {
-    fontSize: 18,
-    color: '#aaa',
-    textAlign: 'center',
-    marginBottom: 20,
   },
   categoryButtonText: {
     fontSize: 13,
@@ -246,7 +231,7 @@ const styles = StyleSheet.create({
   },
   categoryButton: {
     paddingVertical: 10,
-    paddingHorizontal: 13,
+    paddingHorizontal: 17,
     borderRadius: 50,
     marginBottom: 8,
     minWidth: '30%',
@@ -263,18 +248,19 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 8,
-    marginBottom: 40,
+    marginBottom:15,
   },
 
   // Input styles
   input: {
-    height: 70,
+    height: 55,
     borderColor: '#262626',
     borderWidth: 2,
-    marginBottom: 15,
+    marginBottom: 5,
     paddingHorizontal: 10,
     borderRadius: 12,
     backgroundColor: '#fff',
+    fontSize: 18,
   },
   errorInput: {
     borderColor: 'red',
