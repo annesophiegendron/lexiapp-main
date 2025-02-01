@@ -199,21 +199,21 @@ const styles = StyleSheet.create({
 
   // Text styles
   title: {
-    fontSize: 20,
+    fontSize: 26,
     fontWeight: 'bold',
     color: '#fff',
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#aaa',
     marginBottom: 16,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   description: {
-    fontSize: 12,
+    fontSize: 18,
     color: '#aaa',
     textAlign: 'center',
     marginBottom: 20,
@@ -237,27 +237,33 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   categoryButton: {
-    paddingVertical: 9,
-    paddingHorizontal: 14,
-    borderRadius: 16,
-    marginBottom: 7,
+    paddingVertical: 10,
+    paddingHorizontal: 13,
+    borderRadius: 50,
+    marginBottom: 8,
     minWidth: '30%',
     alignItems: 'center',
   },
   saveButton: {
-    backgroundColor: '#9babff',
-    borderRadius: 12,
-    paddingVertical: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 45,
+    backgroundColor: '#6200EE',
+    borderRadius: 30,
+    elevation: 5,
     alignItems: 'center',
-    marginBottom: 15,
+    shadowColor: '#6200EE',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    marginBottom: 40,
   },
 
   // Input styles
   input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 5,
+    height: 70,
+    borderColor: '#262626',
+    borderWidth: 2,
+    marginBottom: 15,
     paddingHorizontal: 10,
     borderRadius: 12,
     backgroundColor: '#fff',
@@ -265,14 +271,6 @@ const styles = StyleSheet.create({
   errorInput: {
     borderColor: 'red',
     backgroundColor: '#ffe6e6',
-  },
-
-  // Character count styles
-  characterCount: {
-    fontSize: 12,
-    color: '#aaa',
-    alignSelf: 'flex-end',
-    marginBottom: 15,
   },
 
   // Error message styles
