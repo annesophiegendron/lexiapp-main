@@ -5,7 +5,6 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Modal,
   TextInput,
   useColorScheme,
 } from 'react-native';
@@ -16,6 +15,7 @@ import EditWordScreen from './EditWordScreen';
 import {useTheme} from '../context/ThemeContext';
 import {categoryColors, categoryIcons} from '../constants';
 import DeleteConfirmationModal from './ui/DeleteConfirmationModal';
+
 const LexiconList = () => {
   const {lexicon, removeWord, updateWord} = useLexicon();
   const [isModalVisible, setModalVisible] = useState(false);
@@ -24,12 +24,14 @@ const LexiconList = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [wordToDelete, setWordToDelete] = useState(null);
   const [searchText, setSearchText] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  // Store multiple selected categories
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const colorScheme = useColorScheme();
   const {isDarkMode} = useTheme();
 
   const toggleModal = () => setModalVisible(!isModalVisible);
   const toggleEditModal = () => setEditModalVisible(!isEditModalVisible);
+
   const handleDelete = word => {
     setWordToDelete(word);
     setShowDeleteModal(true);
@@ -44,14 +46,33 @@ const LexiconList = () => {
     toggleEditModal();
   };
 
-  const filteredLexicon = lexicon.filter(
-    item =>
-      (item.original.toLowerCase().includes(searchText.toLowerCase()) ||
-        item.translation.toLowerCase().includes(searchText.toLowerCase())) &&
-      (selectedCategory ? item.categories?.includes(selectedCategory) : true),
-  );
+  // Filter words based on search text and selected categories
+  const filteredLexicon = lexicon.filter(item => {
+    const matchesSearch =
+      item.original.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.translation.toLowerCase().includes(searchText.toLowerCase());
+    const matchesCategory =
+      selectedCategories.length > 0
+        ? item.categories?.some(cat => selectedCategories.includes(cat))
+        : true;
+    return matchesSearch && matchesCategory;
+  });
 
   const styles = isDarkMode ? darkStyles : lightStyles;
+
+  // Toggle the selection for a category
+  const toggleCategorySelection = category => {
+    if (selectedCategories.includes(category)) {
+      setSelectedCategories(selectedCategories.filter(cat => cat !== category));
+    } else {
+      setSelectedCategories([...selectedCategories, category]);
+    }
+  };
+
+  // Clears all selected categories
+  const clearAllCategories = () => {
+    setSelectedCategories([]);
+  };
 
   return (
     <View
@@ -66,6 +87,45 @@ const LexiconList = () => {
         value={searchText}
         onChangeText={setSearchText}
       />
+
+      {/* Centered and wrapped Category Filter UI */}
+      <View style={styles.filterContainer}>
+        <TouchableOpacity
+          style={[
+            styles.categoryButton,
+            selectedCategories.length === 0 && styles.selectedCategoryButton,
+          ]}
+          onPress={clearAllCategories}>
+          <Text
+            style={[
+              styles.categoryButtonText,
+              selectedCategories.length === 0 &&
+                styles.selectedCategoryButtonText,
+            ]}>
+            All
+          </Text>
+        </TouchableOpacity>
+        {Object.keys(categoryColors).map(category => (
+          <TouchableOpacity
+            key={category}
+            style={[
+              styles.categoryButton,
+              selectedCategories.includes(category) &&
+                styles.selectedCategoryButton,
+            ]}
+            onPress={() => toggleCategorySelection(category)}>
+            <Text
+              style={[
+                styles.categoryButtonText,
+                selectedCategories.includes(category) &&
+                  styles.selectedCategoryButtonText,
+              ]}>
+              {category}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       {lexicon.length === 0 ? (
         <Text style={styles.emptyMessage}>No words in the lexicon</Text>
       ) : (
@@ -118,6 +178,7 @@ const LexiconList = () => {
           )}
         />
       )}
+
       <AddWordScreen isVisible={isModalVisible} onClose={toggleModal} />
       <EditWordScreen
         isVisible={isEditModalVisible}
@@ -163,7 +224,6 @@ const lightStyles = StyleSheet.create({
     flex: 1,
     marginRight: 10,
   },
-
   searchBar: {
     width: '100%',
     height: 45,
@@ -177,7 +237,31 @@ const lightStyles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 5,
   },
-
+  // Updated filter container is now centered with wrapping.
+  filterContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  categoryButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    backgroundColor: '#ddd',
+    marginHorizontal: 4,
+    marginBottom: 8,
+  },
+  selectedCategoryButton: {
+    backgroundColor: '#888',
+  },
+  categoryButtonText: {
+    color: '#000',
+    fontSize: 14,
+  },
+  selectedCategoryButtonText: {
+    color: '#fff',
+  },
   categoriesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -196,6 +280,11 @@ const lightStyles = StyleSheet.create({
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  emptyMessage: {
+    marginTop: 20,
+    fontSize: 16,
+    color: '#555',
   },
 });
 
@@ -221,7 +310,6 @@ const darkStyles = StyleSheet.create({
     flex: 1,
     marginRight: 10,
   },
-
   searchBar: {
     width: '100%',
     height: 45,
@@ -235,7 +323,30 @@ const darkStyles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 5,
   },
-
+  filterContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  categoryButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    backgroundColor: '#555',
+    marginHorizontal: 4,
+    marginBottom: 8,
+  },
+  selectedCategoryButton: {
+    backgroundColor: '#bbb',
+  },
+  categoryButtonText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  selectedCategoryButtonText: {
+    color: '#000',
+  },
   categoriesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -249,5 +360,17 @@ const darkStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  deleteButton: {
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyMessage: {
+    marginTop: 20,
+    fontSize: 16,
+    color: '#aaa',
+  },
 });
+
 export default LexiconList;
