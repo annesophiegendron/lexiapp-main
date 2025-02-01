@@ -227,12 +227,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    minHeight: 60,
   },
+
+  textWrapper: {
+    flexDirection: 'column',
+    flexShrink: 1,
+    maxWidth: '90%',
+  },
+
   deleteButton: {
     justifyContent: 'center',
     alignItems: 'center',
     padding: 5,
+    flexShrink: 0,
   },
+
   wordText: {
     fontSize: 15,
     fontWeight: '600',
