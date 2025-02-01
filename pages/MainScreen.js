@@ -84,23 +84,24 @@ const MainScreen = () => {
               },
             ]}
             onPress={() => navigateToCategoryWords(category)}>
-            <View style={styles.textContainer}>
-              <Ionicons
-                name={categoryIcons[category]}
-                size={22}
-                color={
-                  categoryColors[category] ||
-                  (isDarkMode ? textLight : textDark)
-                }
-              />
-              <Text
-                style={[
-                  styles.buttonText,
-                  {color: isDarkMode ? textLight : textDark},
-                ]}>
-                {category}
-              </Text>
-            </View>
+            {/* Background Icon */}
+            <Ionicons
+              name={categoryIcons[category]}
+              size={70}
+              color={
+                isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+              }
+              style={styles.categoryIconBackground}
+            />
+
+            {/* Category Title */}
+            <Text
+              style={[
+                styles.buttonText,
+                {color: isDarkMode ? textLight : textDark},
+              ]}>
+              {category}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -178,8 +179,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    transform: [{translateX: -45}, {translateY: -45}],
-    opacity: 0.2,
+    transform: [{translateX: -27}, {translateY: -27}],
   },
 
   // Button styles
@@ -194,30 +194,30 @@ const styles = StyleSheet.create({
 
   // Text styles
   topTitle: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: 'bold',
     marginVertical: 14,
     color: '#262626',
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     marginVertical: 7,
   },
   buttonText: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '600',
     marginTop: 8,
     textAlign: 'center',
   },
   buttonTextAction: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: '6',
   },
   descriptionText: {
-    fontSize: 13,
+    fontSize: 16,
     textAlign: 'center',
   },
 

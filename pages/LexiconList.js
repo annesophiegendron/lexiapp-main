@@ -146,7 +146,7 @@ const LexiconList = () => {
                       ]}>
                       <Ionicons
                         name={categoryIcons[cat] || 'help-circle'}
-                        size={12}
+                        size={13}
                         color={isDarkMode ? '#fff' : '#000'}
                       />
                     </View>
@@ -166,7 +166,7 @@ const LexiconList = () => {
                 onPress={() => handleDelete(item)}>
                 <Ionicons
                   name="trash"
-                  size={15}
+                  size={19}
                   color={isDarkMode ? '#aaa' : '#888'}
                 />
               </TouchableOpacity>
@@ -241,8 +241,8 @@ const lightStyles = StyleSheet.create({
     marginBottom: 15,
   },
   categoryButton: {
-    paddingVertical: 4,
-    paddingHorizontal: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
     borderRadius: 20,
     backgroundColor: '#ddd',
     marginHorizontal: 4,

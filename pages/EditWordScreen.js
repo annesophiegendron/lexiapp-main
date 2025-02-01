@@ -55,9 +55,14 @@ const EditWordScreen = ({isVisible, onClose, word, onUpdateWord}) => {
       return;
     }
     // Check for existing translation
-    const exists = lexicon.some(
-      word => word.translation.toLowerCase() === translation.toLowerCase(),
-    );
+    const isTranslationChanged =
+      word.translation.toLowerCase() !== translation.toLowerCase();
+    const exists =
+      isTranslationChanged &&
+      lexicon.some(
+        w => w.translation.toLowerCase() === translation.toLowerCase(),
+      );
+
     if (exists) {
       Alert.alert(
         'Duplicate Translation',
@@ -266,7 +271,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 8,
-    marginBottom:15,
+    marginBottom: 15,
   },
   input: {
     height: 55,
