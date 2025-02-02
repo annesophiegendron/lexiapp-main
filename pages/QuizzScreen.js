@@ -258,7 +258,7 @@ const QuizzScreen = () => {
         onPress={() => navigation.navigate('ResultsScreen')}
         activeOpacity={0.7}>
         <Ionicons
-          name="stats-chart-outline"
+          name="receipt-outline"
           size={28}
           color={isDarkMode ? '#ffffff' : '#333333'}
         />

@@ -35,16 +35,17 @@ export const LexiconProvider = ({ children }) => {
 
   // Add a word to the lexicon
   const addWord = async (original, translation, categories) => {
-    if (!Array.isArray(categories)) {
-      throw new Error('Categories must be an array');
+    // Default category to 'Uncategorized' if no valid categories are passed
+    if (!Array.isArray(categories) || categories.length === 0) {
+      categories = ['Uncategorized'];
     }
-
+  
     const newWord = { original, translation, categories };
     const updatedLexicon = [...lexicon, newWord];
     setLexicon(updatedLexicon);
     await AsyncStorage.setItem('lexicon', JSON.stringify(updatedLexicon));
   };
-
+  
   // Remove a word from the lexicon
   const removeWord = async index => {
     const updatedLexicon = lexicon.filter((_, i) => i !== index);
