@@ -15,6 +15,7 @@ import { QuizProvider } from './context/QuizzContext';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ThemeProvider } from './context/ThemeContext';
 import ResultsScreen from './pages/ResultsScreen';
+import SettingsScreen from './pages/SettingsScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -163,22 +164,16 @@ const BottomTabs = () => {
             ),
           }}
         />
-               <Tab.Screen
-          name="ResultsScreen"
-          component={ResultsScreen}
-          options={{
-            title: 'My score',
-            headerRight: () => (
-              <TouchableOpacity onPress={toggleTheme} style={{ marginRight: 15 }}>
-                <Ionicons
-                  name={isDarkMode ? 'sunny' : 'moon'}
-                  size={20}
-                  color={isDarkMode ? '#fff' : '#000'}
-                />
-              </TouchableOpacity>
-            ),
-          }}
-        />
+        <Tab.Screen
+  name="Settings"
+  component={SettingsScreen}
+  options={{
+    title: 'Settings',
+    tabBarIcon: ({ focused, color, size }) => (
+      <Ionicons name={focused ? 'settings' : 'settings-outline'} size={size} color={color} />
+    ),
+  }}
+/>
       </Tab.Navigator>
       <AddWordScreen isVisible={isModalVisible} onClose={closeModal} />
     </>
@@ -199,8 +194,8 @@ const App = () => {
               <Stack.Screen name="Splash" component={SplashScreen} />
               <Stack.Screen name="HomeTabs" component={BottomTabs} />
               <Stack.Screen name="CategoryWords" component={CategoryWordsScreen} />
-              <Stack.Screen name="ResultsScreen" component={ResultsScreen} />
               <Stack.Screen name="QuizzScreen" component={QuizzScreen} />
+              <Stack.Screen name="ResultsScreen" component={ResultsScreen} />
               <Stack.Screen name="MainScreen" component={MainScreen} />
             </Stack.Navigator>
           </NavigationContainer>

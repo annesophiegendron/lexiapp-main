@@ -14,7 +14,7 @@ import {useLexicon} from '../context/LexiconContext';
 import {categoryColors, categories} from '../constants.js';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const MAX_CHARACTERS = 200;
+const MAX_CHARACTERS = 80;
 
 const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
   const [original, setOriginal] = useState('');

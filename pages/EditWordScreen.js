@@ -27,8 +27,8 @@ const EditWordScreen = ({isVisible, onClose, word, onUpdateWord}) => {
   const {updateWord, lexicon} = useLexicon();
 
   const MAX_CHARACTERS = {
-    original: 200,
-    translation: 200,
+    original: 80,
+    translation: 80,
   };
 
   useEffect(() => {

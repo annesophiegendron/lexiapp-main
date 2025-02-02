@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -8,17 +8,17 @@ import {
   Animated,
 } from 'react-native';
 import HapticFeedback from 'react-native-haptic-feedback';
-import {useLexicon} from '../context/LexiconContext';
-import {useNavigation} from '@react-navigation/native';
-import {useTheme} from '../context/ThemeContext';
-import {useQuiz} from '../context/QuizzContext';
+import { useLexicon } from '../context/LexiconContext';
+import { useNavigation } from '@react-navigation/native';
+import { useTheme } from '../context/ThemeContext';
+import { useQuiz } from '../context/QuizzContext';
 import AddWordScreen from './AddWordScreen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const QuizzScreen = () => {
-  const {lexicon} = useLexicon();
+  const { lexicon } = useLexicon();
   const navigation = useNavigation();
-  const {isDarkMode} = useTheme();
+  const { isDarkMode } = useTheme();
   const {
     currentQuestionIndex,
     setCurrentQuestionIndex,
@@ -146,7 +146,7 @@ const QuizzScreen = () => {
               date: new Date().toLocaleString(),
             };
             setPastResults(prevResults => [...prevResults, result]);
-            navigation.navigate('ResultsScreen', {result});
+            navigation.navigate('ResultsScreen', { result });
             // Reset quiz after completing all questions
             setCurrentQuestionIndex(0);
             setScore(0);
@@ -155,17 +155,17 @@ const QuizzScreen = () => {
       });
     });
   };
+
   if (lexicon.length < 4) {
     return (
-      <View style={[styles.container(isDarkMode), {justifyContent: 'center'}]}>
+      <View style={[styles.container(isDarkMode), { justifyContent: 'center' }]}>
         <TouchableOpacity
           onPress={() => setModalVisible(true)}
           activeOpacity={0.7}>
           <View style={styles.card(isDarkMode)}>
             <Text style={styles.cardTitle(isDarkMode)}>Not Enough Words</Text>
             <Text style={styles.cardMessage(isDarkMode)}>
-              You need at least 4 words in your lexicon to start the quiz. Add
-              more words to continue learning!
+              You need at least 4 words in your lexicon to start the quiz. Add more words to continue learning!
             </Text>
             <Ionicons
               name="add-circle-outline"
@@ -175,7 +175,6 @@ const QuizzScreen = () => {
             />
           </View>
         </TouchableOpacity>
-
         <AddWordScreen isVisible={modalVisible} onClose={handleCloseModal} />
       </View>
     );
@@ -186,11 +185,11 @@ const QuizzScreen = () => {
       <View style={styles.progressBarContainer}>
         <Animated.View
           style={[
-            styles.progressBar(isDarkMode), // Use the dynamic progressBar style
+            styles.progressBar(isDarkMode),
             {
               width: progressAnim.interpolate({
                 inputRange: [0, 1],
-                outputRange: ['0%', '100%'], // Animate progress from 0% to 100%
+                outputRange: ['0%', '100%'],
               }),
             },
           ]}
@@ -232,7 +231,7 @@ const QuizzScreen = () => {
           <Text
             style={[
               styles.feedbackMessage,
-              {color: feedback.type === 'correct' ? '#479c93' : '#ff4d4d'},
+              { color: feedback.type === 'correct' ? '#479c93' : '#ff4d4d' },
             ]}>
             {feedback.type === 'correct'
               ? ''
@@ -240,6 +239,18 @@ const QuizzScreen = () => {
           </Text>
         )}
       </View>
+
+      {/* Discreet Results Button */}
+      <TouchableOpacity
+        style={styles.resultsButton}
+        onPress={() => navigation.navigate('ResultsScreen')}
+        activeOpacity={0.7}>
+        <Ionicons
+          name="stats-chart-outline"
+          size={28}
+          color={isDarkMode ? '#ffffff' : '#333333'}
+        />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -252,7 +263,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
@@ -318,18 +329,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   }),
   answersContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'column', // stacked vertically
+    justifyContent: 'center',
+    alignItems: 'stretch',
     width: '100%',
     paddingHorizontal: 15,
     marginVertical: 10,
-    minHeight: 150,
   },
   answerButton: isDarkMode => ({
     backgroundColor: isDarkMode ? '#37474f' : '#f6f6f6',
-    width: '48%',
+    width: '100%',
     height: 60,
     borderRadius: 8,
     justifyContent: 'center',
@@ -345,6 +354,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 10,
     textAlign: 'center',
+  },
+  resultsButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: 'transparent',
+    padding: 10,
+    borderRadius: 30,
   },
 });
 

@@ -1,11 +1,12 @@
 import React from 'react';
-import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
-import {useQuiz} from '../context/QuizzContext';
-import {useTheme} from '../context/ThemeContext';
-import {format, parseISO, isValid} from 'date-fns';
+import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { useQuiz } from '../context/QuizzContext';
+import { useTheme } from '../context/ThemeContext';
+import { format, parseISO, isValid } from 'date-fns';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const ResultsScreen = ({route, navigation}) => {
-  const {result} = route.params || {};
+const ResultsScreen = ({ route, navigation }) => {
+  const { result } = route.params || {};
   const {
     pastResults,
     setCurrentQuestionIndex,
@@ -14,19 +15,16 @@ const ResultsScreen = ({route, navigation}) => {
     totalQuestions,
     lastQuizDate,
   } = useQuiz();
-  const {isDarkMode} = useTheme();
+  const { isDarkMode } = useTheme();
 
-  const handleStartNewQuiz = () => {
-    setCurrentQuestionIndex(0);
-    setScore(0);
-    navigation.navigate('QuizzScreen');
+  const handleGoBack = () => {
+    navigation.goBack(); // Go back to the previous screen
   };
 
-  const formatDate = dateStr => {
+  const formatDate = (dateStr) => {
     if (!dateStr) return 'No date available';
     const cleanedDateStr = dateStr.replace(', ', 'T');
     const parsedDate = parseISO(cleanedDateStr);
-
     return isValid(parsedDate) ? format(parsedDate, 'PPP') : 'Invalid Date';
   };
 
@@ -74,7 +72,7 @@ const ResultsScreen = ({route, navigation}) => {
       <FlatList
         data={pastResults}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({item}) => {
+        renderItem={({ item }) => {
           const formattedDate = formatDate(item.date);
           const backgroundColor = calculateResultBackgroundColor(
             item.score,
@@ -82,13 +80,13 @@ const ResultsScreen = ({route, navigation}) => {
           );
           const emoji = getScoreEmoji(item.score, item.totalQuestions);
           const isBestScore =
-            item.score === Math.max(...pastResults.map(result => result.score));
+            item.score === Math.max(...pastResults.map((result) => result.score));
 
           return (
             <View
               style={[
                 styles.historyItem,
-                {backgroundColor: isBestScore ? '#FFD700' : backgroundColor},
+                { backgroundColor: isBestScore ? '#FFD700' : backgroundColor },
               ]}>
               <View style={styles.historyItemHeader}>
                 <Text style={styles.historyDate}>{formattedDate}</Text>
@@ -110,34 +108,51 @@ const ResultsScreen = ({route, navigation}) => {
     <View
       style={[
         styles.container,
-        {backgroundColor: isDarkMode ? '#121212' : '#FAFAFA'},
+        { backgroundColor: isDarkMode ? '#121212' : '#FAFAFA' },
       ]}>
+      {/* Back Button */}
+      <View style={styles.header}>
+        <Ionicons
+          name="arrow-back"
+          size={30}
+          color={isDarkMode ? '#fff' : '#212529'}
+          onPress={handleGoBack}
+        />
+      </View>
+
       {result && (
         <View style={styles.resultContainer}>
           <Text
-            style={[styles.title, {color: isDarkMode ? '#fff' : '#212529'}]}>
+            style={[styles.title, { color: isDarkMode ? '#fff' : '#212529' }]}>
             Quiz Results
           </Text>
           <Text
             style={[
               styles.resultText,
-              {color: isDarkMode ? '#bb86fc' : '#212121'},
+              { color: isDarkMode ? '#bb86fc' : '#212121' },
             ]}>
             You scored {result.score} out of {result.totalQuestions}!{' '}
             {getScoreEmoji(result.score, result.totalQuestions)}
           </Text>
           <Text
-            style={[styles.resultDate, {color: isDarkMode ? '#ccc' : '#666'}]}>
+            style={[styles.resultDate, { color: isDarkMode ? '#ccc' : '#666' }]}>
             Completed on {formatDate(result.date)}
           </Text>
         </View>
       )}
 
+      {/* Lightning Strike Icon */}
       <View style={styles.streakContainer}>
+        <Ionicons
+          name="flash"
+          size={50}
+          color={isDarkMode ? '#FFD700' : '#FF6347'}
+          style={styles.streakIcon}
+        />
         <Text
           style={[
             styles.streakTitle,
-            {color: isDarkMode ? '#fff' : '#212529'},
+            { color: isDarkMode ? '#fff' : '#212529' },
           ]}>
           Your Daily Streak: {getDailyStreak()}{' '}
           {getDailyStreak() === 1 ? 'day' : 'days'}
@@ -149,22 +164,13 @@ const ResultsScreen = ({route, navigation}) => {
           <Text
             style={[
               styles.historyTitle,
-              {color: isDarkMode ? '#fff' : '#212529'},
+              { color: isDarkMode ? '#fff' : '#212529' },
             ]}>
             Past Results
           </Text>
           {renderPastResults()}
         </View>
       )}
-
-      <TouchableOpacity
-        style={[
-          styles.startQuizButton,
-          {backgroundColor: isDarkMode ? '#3700B3' : '#6200EE'},
-        ]}
-        onPress={handleStartNewQuiz}>
-        <Text style={styles.startQuizButtonText}>Start New Quiz</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -172,11 +178,15 @@ const ResultsScreen = ({route, navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 30,
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 50,
-    backgroundColor: '#FAFAFA',
+    padding: 30,
+  },
+  header: {
+    position: 'absolute',
+    top: 30,
+    left: 10,
+    zIndex: 1,
   },
   title: {
     fontSize: 32,
@@ -184,7 +194,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     letterSpacing: 1.5,
     textAlign: 'center',
-    color: '#212529',
   },
   resultText: {
     fontSize: 22,
@@ -199,7 +208,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 6},
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 8,
@@ -217,11 +226,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: -30,
+    marginBottom: 40,
   },
   streakTitle: {
     fontSize: 22,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  streakIcon: {
+    marginBottom: 10,
   },
   historyContainer: {
     marginTop: 30,
@@ -240,7 +254,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 6},
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.2,
     shadowRadius: 12,
     elevation: 8,
@@ -267,23 +281,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
     color: '#212529',
-  },
-  startQuizButton: {
-    paddingVertical: 16,
-    paddingHorizontal: 45,
-    backgroundColor: '#6200EE',
-    borderRadius: 30,
-    elevation: 5,
-    alignItems: 'center',
-    shadowColor: '#6200EE',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-  },
-  startQuizButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
   },
 });
 
