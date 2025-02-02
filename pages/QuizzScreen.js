@@ -204,28 +204,41 @@ const QuizzScreen = () => {
         </Text>
       </View>
       <View style={styles.answersContainer}>
-        {answerOptions.map((translation, index) => (
-          <TouchableOpacity
-            key={index}
-            onPress={() => handleAnswer(translation)}
-            style={[
-              styles.answerButton(isDarkMode),
-              {
-                backgroundColor: isAnswerChecked
-                  ? selectedAnswer === translation
-                    ? buttonColor
-                    : isDarkMode
-                    ? '#37474f'
-                    : '#f6f6f6'
-                  : isDarkMode
-                  ? '#37474f'
-                  : '#f6f6f6',
-              },
-            ]}>
-            <Text style={styles.answerText(isDarkMode)}>{translation}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+  {answerOptions.map((translation, index) => (
+    <TouchableOpacity
+      key={index}
+      onPress={() => handleAnswer(translation)}
+      style={[
+        styles.answerButton(isDarkMode),
+        {
+          backgroundColor: isAnswerChecked
+            ? selectedAnswer === translation
+              ? buttonColor
+              : isDarkMode
+              ? '#37474f'
+              : '#f6f6f6'
+            : isDarkMode
+            ? '#37474f'
+            : '#f6f6f6',
+        },
+      ]}>
+      <Text style={styles.answerText(isDarkMode)}>{translation}</Text>
+    </TouchableOpacity>
+  ))}
+
+  {isAnswerChecked && feedback && (
+    <Text
+      style={[
+        styles.feedbackMessage,
+        { color: feedback.type === 'correct' ? '#479c93' : '#ff4d4d' },
+      ]}>
+      {feedback.type === 'correct'
+        ? 'Correct!'
+        : `The correct answer is: ${currentQuestion.translation}`}
+    </Text>
+  )}
+</View>
+
       <View style={styles.questionCard(isDarkMode)}>
         {isAnswerChecked && feedback && (
           <Text
@@ -235,12 +248,11 @@ const QuizzScreen = () => {
             ]}>
             {feedback.type === 'correct'
               ? ''
-              : `The correct answer is: ${currentQuestion.translation}`}
+              : ''}
           </Text>
         )}
       </View>
 
-      {/* Discreet Results Button */}
       <TouchableOpacity
         style={styles.resultsButton}
         onPress={() => navigation.navigate('ResultsScreen')}
@@ -352,7 +364,6 @@ const styles = StyleSheet.create({
   }),
   feedbackMessage: {
     fontSize: 16,
-    marginTop: 10,
     textAlign: 'center',
   },
   resultsButton: {
