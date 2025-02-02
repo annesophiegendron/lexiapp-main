@@ -10,6 +10,17 @@ export const categories = [
   'Numbers & Money',  // Prices, measurements, transactions
 ];
 
+export const categorySubtitles = {
+  'Everyday Talk': 'Daily life, casual convos, essential phrases',
+  'Social & Family': 'Chats with friends, parents, and networking',
+  'Work & Study': 'Office, school, productivity vocab',
+  'Getting Around': 'Travel, transport, directions',
+  'Food & Shopping': 'Restaurants, groceries, retail experiences',
+  'Health & Safety': 'Medical terms, emergencies, well-being',
+  'Culture & Vibes': 'Customs, etiquette, slang, local phrases',
+  'Numbers & Money': 'Prices, measurements, transactions',
+};
+
 // Category icons mapping
 export const categoryIcons = {
   'Everyday Talk': 'chatbubble-ellipses',

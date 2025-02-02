@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import {useLexicon} from '../context/LexiconContext';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {categoryColors} from '../constants.js';
+import {categoryColors,categorySubtitles} from '../constants.js';
 import {useTheme} from '../context/ThemeContext';
 
 // Components
@@ -95,6 +95,7 @@ const CategoryWordsScreen = ({route, navigation}) => {
       </TouchableOpacity>
 
       <Text style={[styles.title]}>{category}</Text>
+      <Text style={styles.subtitle}>{categorySubtitles[category]}</Text>
 
       <TouchableOpacity
         style={[
@@ -210,6 +211,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'right',
     color: '#262626',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'right',
+    marginTop: 15,
   },
   wordContainer: {
     paddingVertical: 10,
