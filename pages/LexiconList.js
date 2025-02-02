@@ -122,58 +122,61 @@ const LexiconList = () => {
         ))}
       </View>
 
-      {lexicon.length === 0 ? (
-        <Text style={styles.emptyMessage}>No words in the lexicon</Text>
-      ) : (
-        <FlatList
-          data={filteredLexicon}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({item}) => (
-            <TouchableOpacity
-              onPress={() => handleEdit(item)}
-              style={[
-                styles.wordContainer,
-                {backgroundColor: isDarkMode ? '#333' : '#F2F2F2'},
-              ]}>
-              <View style={styles.leftContainer}>
-                <View style={styles.categoriesContainer}>
-                  {item.categories?.map((cat, catIndex) => (
-                    <View
-                      key={catIndex}
-                      style={[
-                        styles.categoryTag,
-                        {backgroundColor: categoryColors[cat] || '#ccc'},
-                      ]}>
-                      <Ionicons
-                        name={categoryIcons[cat] || 'help-circle'}
-                        size={13}
-                        color={isDarkMode ? '#fff' : '#000'}
-                      />
-                    </View>
-                  ))}
-                </View>
-                <Text
-                  style={[
-                    styles.wordText,
-                    {color: isDarkMode ? '#D9D9D9' : '#000'},
-                  ]}>
-                  <Text style={styles.originalText}>{item.original}</Text> -{' '}
-                  {item.translation}
-                </Text>
-              </View>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => handleDelete(item)}>
+      {filteredLexicon.length === 0 ? (
+  <Text style={styles.emptyMessage}>
+    No words match your search or category filter.
+  </Text>
+) : (
+  <FlatList
+    data={filteredLexicon}
+    keyExtractor={(item, index) => index.toString()}
+    renderItem={({item}) => (
+      <TouchableOpacity
+        onPress={() => handleEdit(item)}
+        style={[
+          styles.wordContainer,
+          {backgroundColor: isDarkMode ? '#333' : '#F2F2F2'},
+        ]}>
+        <View style={styles.leftContainer}>
+          <View style={styles.categoriesContainer}>
+            {item.categories?.map((cat, catIndex) => (
+              <View
+                key={catIndex}
+                style={[
+                  styles.categoryTag,
+                  {backgroundColor: categoryColors[cat] || '#ccc'},
+                ]}>
                 <Ionicons
-                  name="trash"
-                  size={19}
-                  color={isDarkMode ? '#aaa' : '#888'}
+                  name={categoryIcons[cat] || 'help-circle'}
+                  size={13}
+                  color={isDarkMode ? '#fff' : '#000'}
                 />
-              </TouchableOpacity>
-            </TouchableOpacity>
-          )}
-        />
-      )}
+              </View>
+            ))}
+          </View>
+          <Text
+            style={[
+              styles.wordText,
+              {color: isDarkMode ? '#D9D9D9' : '#000'},
+            ]}>
+            <Text style={styles.originalText}>{item.original}</Text> -{' '}
+            {item.translation}
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => handleDelete(item)}>
+          <Ionicons
+            name="trash"
+            size={19}
+            color={isDarkMode ? '#aaa' : '#888'}
+          />
+        </TouchableOpacity>
+      </TouchableOpacity>
+    )}
+  />
+)}
+
 
       <AddWordScreen isVisible={isModalVisible} onClose={toggleModal} />
       <EditWordScreen
