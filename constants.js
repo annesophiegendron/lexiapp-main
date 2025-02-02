@@ -8,6 +8,7 @@ export const categories = [
   'Health & Safety',  // Medical terms, emergencies, well-being
   'Culture & Vibes',  // Customs, etiquette, slang, local phrases
   'Numbers & Money',  // Prices, measurements, transactions
+  'Wild Card',        // For all unexpected or random topics
 ];
 
 export const categorySubtitles = {
@@ -19,6 +20,7 @@ export const categorySubtitles = {
   'Health & Safety': 'Medical terms, emergencies, well-being',
   'Culture & Vibes': 'Customs, etiquette, slang, local phrases',
   'Numbers & Money': 'Prices, measurements, transactions',
+  'Wild Card': 'For all unexpected or random topics', // New subtitle
 };
 
 // Category icons mapping
@@ -31,6 +33,7 @@ export const categoryIcons = {
   'Health & Safety': 'medkit',
   'Culture & Vibes': 'globe',
   'Numbers & Money': 'cash',
+  'Wild Card': 'dice', // New icon (for a random vibe)
 };
 
 // Category color mappings
@@ -43,6 +46,7 @@ export const categoryColors = {
   'Health & Safety': '#D49FC0',
   'Culture & Vibes': '#EAC86A',
   'Numbers & Money': '#C1A3D9',
+  'Wild Card': '#FF6347', // New vibrant color (tomato red)
 };
 
 // Category light color mappings
@@ -55,4 +59,5 @@ export const categoryColorsLight = {
   'Health & Safety': 'rgba(212, 159, 192, 0.4)',
   'Culture & Vibes': 'rgba(234, 200, 106, 0.4)',
   'Numbers & Money': 'rgba(193, 163, 217, 0.4)',
+  'Wild Card': 'rgba(255, 99, 71, 0.4)', // Light version of tomato red
 };
