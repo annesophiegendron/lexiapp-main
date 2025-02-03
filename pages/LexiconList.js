@@ -16,7 +16,7 @@ import {useTheme} from '../context/ThemeContext';
 import {categoryColors, categoryIcons} from '../constants';
 import DeleteConfirmationModal from './ui/DeleteConfirmationModal';
 
-const LexiconList = () => {
+const LexiconList = (selectedCategory) => {
   const {lexicon, removeWord, updateWord} = useLexicon();
   const [isModalVisible, setModalVisible] = useState(false);
   const [isEditModalVisible, setEditModalVisible] = useState(false);
@@ -25,8 +25,12 @@ const LexiconList = () => {
   const [wordToDelete, setWordToDelete] = useState(null);
   const [searchText, setSearchText] = useState('');
   // Store multiple selected categories
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const colorScheme = useColorScheme();
+  const [selectedCategories, setSelectedCategories] = useState(
+    Array.isArray(selectedCategory) && selectedCategory.length > 0
+      ? selectedCategory
+      : []
+  );
+    const colorScheme = useColorScheme();
   const {isDarkMode} = useTheme();
 
   const toggleModal = () => setModalVisible(!isModalVisible);

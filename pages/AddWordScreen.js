@@ -26,20 +26,24 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
   const {addWord, lexicon} = useLexicon();
 
   const [selectedCategories, setSelectedCategories] = useState(
-    Array.isArray(selectedCategory) ? selectedCategory : [selectedCategory],
+    Array.isArray(selectedCategory) && selectedCategory.length > 0
+      ? selectedCategory
+      : []
   );
+  
 
   useEffect(() => {
     setSelectedCategories(
-      Array.isArray(selectedCategory) ? selectedCategory : [selectedCategory],
+      Array.isArray(selectedCategory) && selectedCategory.length > 0
+        ? selectedCategory
+        : []
     );
   }, [selectedCategory]);
-
+  
   useEffect(() => {
     console.log('Selected category updated:', selectedCategory);
     setCategory(selectedCategory);
   }, [selectedCategory]);
-
   const saveWord = () => {
     if (!original || !translation || selectedCategories.length === 0) {
       setError(true);
@@ -50,20 +54,20 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
       );
       return;
     }
-    // Check for existing translation
-    const exists = lexicon.some(
-      word => word.translation.toLowerCase() === translation.toLowerCase(),
+  
+    // Check for duplicates in the lexicon
+    const isDuplicate = lexicon.some(
+      word => word.original.toLowerCase() === original.toLowerCase()
     );
-    if (exists) {
-      Alert.alert(
-        'Duplicate Translation',
-        'The translation you entered already exists in your lexicon.',
-        [{text: 'OK'}],
-      );
+  
+    if (isDuplicate) {
+      Alert.alert('Duplicate Word', 'This word already exists in your lexicon.');
       return;
     }
-    // Add new word if it doesn't exist
-    addWord(original, translation, selectedCategories);
+  
+    const validCategories = selectedCategories.filter(cat => cat); // Remove undefined
+  
+    addWord(original, translation, validCategories);
     setOriginal('');
     setTranslation('');
     setSelectedCategories([]);
@@ -71,6 +75,7 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
     setErrorMessage('');
     onClose();
   };
+  
 
   const toggleCategory = category => {
     setSelectedCategories(
