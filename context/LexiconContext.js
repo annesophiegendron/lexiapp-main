@@ -35,12 +35,13 @@ export const LexiconProvider = ({ children }) => {
 
   // Add a word to the lexicon
   const addWord = async (original, translation, categories) => {
-    // Default category to 'Uncategorized' if no valid categories are passed
-    if (!Array.isArray(categories) || categories.length === 0) {
-      categories = ['Uncategorized'];
-    }
+    const newWord = {
+      original,
+      translation,
+      categories,
+      addedDate: new Date().toISOString(), // Store date as ISO string
+    };
   
-    const newWord = { original, translation, categories };
     const updatedLexicon = [...lexicon, newWord];
     setLexicon(updatedLexicon);
     await AsyncStorage.setItem('lexicon', JSON.stringify(updatedLexicon));

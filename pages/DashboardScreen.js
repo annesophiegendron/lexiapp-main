@@ -20,24 +20,44 @@ const DashboardScreen = () => {
 
   if (!lexicon) return null;
 
-  // Total words added
-  const totalWords = lexicon.length;
+ // Total words added
+const totalWords = lexicon.length;
 
-  // Calculate words added in the last 7 days
-  const recentWords = lexicon.filter(word => {
-    const wordDate = new Date(word.addedDate);
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    return wordDate >= sevenDaysAgo;
-  });
+// Words added in the last 7 days
+const today = new Date();
+const sevenDaysAgo = new Date();
+sevenDaysAgo.setDate(today.getDate() - 6);
 
-  // Track user streak
-  const streak = lexicon.reduce((acc, word) => {
-    const wordDate = new Date(word.addedDate);
-    const lastStreakDate = new Date();
-    lastStreakDate.setDate(lastStreakDate.getDate() - acc);
-    return wordDate >= lastStreakDate ? acc + 1 : acc;
-  }, 1);
+const recentWords = lexicon.filter(word => {
+  const wordDate = new Date(word.addedDate);
+  wordDate.setHours(0, 0, 0, 0); // Normalize time
+  return wordDate >= sevenDaysAgo && wordDate <= today;
+});
+
+
+// Streak calculation
+const sortedWords = lexicon
+  .map(word => new Date(word.addedDate).setHours(0, 0, 0, 0)) // Normalize time
+  .sort((a, b) => b - a); // Sort from newest to oldest
+
+// Get all unique days where words were added
+const uniqueDays = new Set(
+  lexicon.map(word => new Date(word.addedDate).setHours(0, 0, 0, 0))
+);
+
+// Check streak from today backward
+let streak = 0;
+let currentDate = new Date();
+currentDate.setHours(0, 0, 0, 0); // Normalize time
+
+while (uniqueDays.has(currentDate.getTime())) {
+  streak++;
+  currentDate.setDate(currentDate.getDate() - 1); // Move to previous day
+}
+console.log('Words added last 7 days:', recentWords.length);
+console.log('Current streak:', streak);
+console.log('Lexicon:', lexicon);
+
 
   // Motivation message
   const motivationalMessage =
