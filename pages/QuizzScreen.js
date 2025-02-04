@@ -252,17 +252,6 @@ const QuizzScreen = () => {
           </Text>
         )}
       </View>
-
-      <TouchableOpacity
-        style={styles.resultsButton}
-        onPress={() => navigation.navigate('ResultsScreen')}
-        activeOpacity={0.7}>
-        <Ionicons
-          name="receipt-outline"
-          size={28}
-          color={isDarkMode ? '#ffffff' : '#333333'}
-        />
-      </TouchableOpacity>
     </View>
   );
 };
@@ -365,14 +354,6 @@ const styles = StyleSheet.create({
   feedbackMessage: {
     fontSize: 16,
     textAlign: 'center',
-  },
-  resultsButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: 'transparent',
-    padding: 10,
-    borderRadius: 30,
   },
 });
 

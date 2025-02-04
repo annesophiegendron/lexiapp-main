@@ -21,13 +21,6 @@ const ResultsScreen = ({route, navigation}) => {
     navigation.goBack();
   };
 
-  const formatDate = dateStr => {
-    if (!dateStr) return 'No date available';
-    const cleanedDateStr = dateStr.replace(', ', 'T');
-    const parsedDate = parseISO(cleanedDateStr);
-    return isValid(parsedDate) ? format(parsedDate, 'PPP') : 'Invalid Date';
-  };
-
   const calculateResultBackgroundColor = (score, totalQuestions) => {
     const percentage = (score / totalQuestions) * 100;
     if (percentage < 50) return '#FF4F58'; // Trendy red
@@ -73,7 +66,6 @@ const ResultsScreen = ({route, navigation}) => {
         data={pastResults}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({item}) => {
-          const formattedDate = formatDate(item.date);
           const backgroundColor = calculateResultBackgroundColor(
             item.score,
             item.totalQuestions,
@@ -89,7 +81,6 @@ const ResultsScreen = ({route, navigation}) => {
                 {backgroundColor: isBestScore ? '#FFD700' : backgroundColor},
               ]}>
               <View style={styles.historyItemHeader}>
-                <Text style={styles.historyDate}>{formattedDate}</Text>
                 {isBestScore && (
                   <Text style={styles.bestScoreBadge}>🏆 Best Score</Text>
                 )}
@@ -123,20 +114,12 @@ const ResultsScreen = ({route, navigation}) => {
       {result && (
         <View style={styles.resultContainer}>
           <Text
-            style={[styles.title, {color: isDarkMode ? '#fff' : '#212529'}]}>
-            Quiz Results
-          </Text>
-          <Text
             style={[
               styles.resultText,
               {color: isDarkMode ? '#bb86fc' : '#212121'},
             ]}>
             You scored {result.score} out of {result.totalQuestions}!{' '}
             {getScoreEmoji(result.score, result.totalQuestions)}
-          </Text>
-          <Text
-            style={[styles.resultDate, {color: isDarkMode ? '#ccc' : '#666'}]}>
-            Completed on {formatDate(result.date)}
           </Text>
         </View>
       )}
@@ -154,19 +137,6 @@ const ResultsScreen = ({route, navigation}) => {
           {getDailyStreak() === 1 ? 'day' : 'days'}
         </Text>
       </View>
-
-      {pastResults.length > 0 && (
-        <View style={styles.historyContainer}>
-          <Text
-            style={[
-              styles.historyTitle,
-              {color: isDarkMode ? '#fff' : '#212529'},
-            ]}>
-            Past Results
-          </Text>
-          {renderPastResults()}
-        </View>
-      )}
     </View>
   );
 };
@@ -210,11 +180,6 @@ const styles = StyleSheet.create({
     elevation: 8,
     marginBottom: 20,
   },
-  resultDate: {
-    fontSize: 16,
-    marginTop: 10,
-    color: '#666',
-  },
   streakContainer: {
     padding: 15,
     marginBottom: 20,
@@ -233,16 +198,6 @@ const styles = StyleSheet.create({
   streakIcon: {
     marginBottom: 10,
   },
-  historyContainer: {
-    marginTop: 30,
-    width: '100%',
-  },
-  historyTitle: {
-    fontSize: 26,
-    fontWeight: '600',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
   historyItem: {
     width: '100%',
     paddingVertical: 20,
@@ -260,11 +215,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-  },
-  historyDate: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#666',
   },
   bestScoreBadge: {
     fontSize: 16,
