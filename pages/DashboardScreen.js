@@ -5,10 +5,8 @@ import {
   StyleSheet,
   ScrollView,
   Dimensions,
-  TouchableOpacity,
-  ProgressBarAndroid,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons'; // Import Ionicons
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useLexicon} from '../context/LexiconContext';
 import {useTheme} from '../context/ThemeContext';
 
@@ -27,24 +25,23 @@ const DashboardScreen = () => {
   const today = new Date();
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(today.getDate() - 6);
+  sevenDaysAgo.setHours(0, 0, 0, 0);
 
   const recentWords = lexicon.filter(word => {
+    if (!word.addedDate) return false; // Prevents crashing if addedDate is missing
     const wordDate = new Date(word.addedDate);
-    wordDate.setHours(0, 0, 0, 0); // Normalize time
+    wordDate.setHours(0, 0, 0, 0);
     return wordDate >= sevenDaysAgo && wordDate <= today;
   });
 
-  // Streak calculation
-  const sortedWords = lexicon
-    .map(word => new Date(word.addedDate).setHours(0, 0, 0, 0)) // Normalize time
-    .sort((a, b) => b - a); // Sort from newest to oldest
-
   // Get all unique days where words were added
   const uniqueDays = new Set(
-    lexicon.map(word => new Date(word.addedDate).setHours(0, 0, 0, 0)),
+    lexicon
+      .filter(word => word.addedDate) // Ensure valid date
+      .map(word => new Date(word.addedDate).setHours(0, 0, 0, 0))
   );
 
-  // Check streak from today backward
+  // Streak calculation
   let streak = 0;
   let currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0); // Normalize time
@@ -53,9 +50,12 @@ const DashboardScreen = () => {
     streak++;
     currentDate.setDate(currentDate.getDate() - 1); // Move to previous day
   }
-  console.log('Words added last 7 days:', recentWords.length);
-  console.log('Current streak:', streak);
-  console.log('Lexicon:', lexicon);
+
+  // Check if today is included in the streak
+  const todayTime = new Date().setHours(0, 0, 0, 0);
+  if (!uniqueDays.has(todayTime)) {
+    streak = 0; // Reset streak if no word was added today
+  }
 
   // Motivation message
   const motivationalMessage =
@@ -70,6 +70,7 @@ const DashboardScreen = () => {
         {backgroundColor: isDarkMode ? '#121212' : '#ffffff'},
       ]}
       contentContainerStyle={styles.scrollContent}>
+      
       {/* Total Words Section */}
       <View
         style={[
@@ -83,7 +84,6 @@ const DashboardScreen = () => {
             size={20}
             color={isDarkMode ? '#fff' : '#333'}
           />{' '}
-          {/* Icon added */}
           Total Words Added
         </Text>
         <Text
@@ -108,7 +108,6 @@ const DashboardScreen = () => {
             size={20}
             color={isDarkMode ? '#fff' : '#333'}
           />{' '}
-          {/* Icon added */}
           Words Added in the Last 7 Days
         </Text>
         <Text
@@ -116,7 +115,7 @@ const DashboardScreen = () => {
             styles.sectionContent,
             {color: isDarkMode ? '#fff' : '#333'},
           ]}>
-          {streak} {streak === 1 ? 'day' : 'days'} in a row!
+          {recentWords.length} words added
         </Text>
       </View>
 
@@ -133,7 +132,6 @@ const DashboardScreen = () => {
             size={20}
             color={isDarkMode ? '#fff' : '#333'}
           />{' '}
-          {/* Icon added */}
           Your Current Streak
         </Text>
         <Text
@@ -166,7 +164,6 @@ const DashboardScreen = () => {
             size={20}
             color={isDarkMode ? '#fff' : '#333'}
           />{' '}
-          {/* Icon added */}
           Progress
         </Text>
         <Text
