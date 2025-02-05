@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Dimensions,
-} from 'react-native';
+import {View, Text, StyleSheet, ScrollView, Dimensions} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useLexicon} from '../context/LexiconContext';
 import {useTheme} from '../context/ThemeContext';
@@ -38,24 +32,27 @@ const DashboardScreen = () => {
   const uniqueDays = new Set(
     lexicon
       .filter(word => word.addedDate) // Ensure valid date
-      .map(word => new Date(word.addedDate).setHours(0, 0, 0, 0))
+      .map(word => new Date(word.addedDate).setHours(0, 0, 0, 0)),
   );
 
-  // Streak calculation
+  // Streak Calculation (Fix)
   let streak = 0;
   let currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0); // Normalize time
 
   while (uniqueDays.has(currentDate.getTime())) {
     streak++;
-    currentDate.setDate(currentDate.getDate() - 1); // Move to previous day
+    currentDate.setDate(currentDate.getDate() - 1);
   }
 
-  // Check if today is included in the streak
+  // Reset streak if no word was added today
   const todayTime = new Date().setHours(0, 0, 0, 0);
   if (!uniqueDays.has(todayTime)) {
-    streak = 0; // Reset streak if no word was added today
+    streak = 0;
   }
+
+  // Ensure proper singular/plural form
+  const streakText = streak === 1 ? 'day' : 'days';
 
   // Motivation message
   const motivationalMessage =
@@ -70,7 +67,6 @@ const DashboardScreen = () => {
         {backgroundColor: isDarkMode ? '#121212' : '#ffffff'},
       ]}
       contentContainerStyle={styles.scrollContent}>
-      
       {/* Total Words Section */}
       <View
         style={[
@@ -115,7 +111,11 @@ const DashboardScreen = () => {
             styles.sectionContent,
             {color: isDarkMode ? '#fff' : '#333'},
           ]}>
-          {recentWords.length} words added
+          {recentWords.length === 0
+            ? 'No words added in the last 7 days'
+            : recentWords.length === 1
+            ? '1 word added'
+            : `${recentWords.length} words added`}
         </Text>
       </View>
 
@@ -139,7 +139,9 @@ const DashboardScreen = () => {
             styles.sectionContent,
             {color: isDarkMode ? '#fff' : '#333'},
           ]}>
-          {streak} {streak === 1 ? 'day' : 'days'} in a row!
+          {streak === 0
+            ? "Let's start building a streak! 🚀"
+            : `🔥 ${streak} ${streakText} in a row!`}
         </Text>
 
         <Text
