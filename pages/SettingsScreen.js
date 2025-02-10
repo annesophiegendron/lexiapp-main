@@ -32,11 +32,11 @@ const SettingsScreen = ({navigation}) => {
   };
 
   const openPrivacyPolicy = () => {
-    Linking.openURL('https://my-lexi.com/privacy');
+    Linking.openURL('https://mylexi.app/privacy');
   };
 
   const contactSupport = () => {
-    Linking.openURL('mailto:mylexisupport@gmail.com');
+    Linking.openURL('mailto:hellomylexi@outlook.com');
   };
 
   return (
@@ -53,7 +53,7 @@ const SettingsScreen = ({navigation}) => {
           <Ionicons
             name="arrow-back"
             size={24}
-            color={isDarkMode ? '#fff' : '#000'} // Adjusted color based on dark mode
+            color={isDarkMode ? '#fff' : '#000'}
           />
         </TouchableOpacity>
         <Text
