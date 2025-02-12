@@ -32,7 +32,7 @@ const SettingsScreen = ({navigation}) => {
   };
 
   const openPrivacyPolicy = () => {
-    Linking.openURL('https://mylexi.app/privacy');
+    Linking.openURL('https://mylexi.app/pages/privacy-policy');
   };
 
   const contactSupport = () => {
