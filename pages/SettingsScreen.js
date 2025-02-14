@@ -98,41 +98,6 @@ const SettingsScreen = ({navigation}) => {
         </View>
       </View>
 
-      {/* Notifications & Language Section
-      <View style={styles.section}>
-        <Text
-          style={[styles.sectionHeader, {color: isDarkMode ? '#fff' : '#333'}]}>
-          Preferences
-        </Text>
-        <View
-          style={[
-            styles.card,
-            {backgroundColor: isDarkMode ? '#1e1e1e' : '#fff'},
-          ]}>
-          <View style={styles.row}>
-            <Text style={[styles.label, {color: isDarkMode ? '#fff' : '#333'}]}>
-              Notifications
-            </Text>
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={toggleNotifications}
-            />
-          </View>
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() =>
-              Alert.alert('Select Language', 'Language selection goes here.')
-            }>
-            <Text style={[styles.label, {color: isDarkMode ? '#fff' : '#333'}]}>
-              Language
-            </Text>
-            <Text style={[styles.value, {color: isDarkMode ? '#aaa' : '#555'}]}>
-              English
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View> */}
-
       {/* App Info & Support Section */}
       <View style={styles.section}>
         <Text
