@@ -11,14 +11,11 @@ import {useNavigation} from '@react-navigation/native';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-// Context/hooks
 import {useLexicon} from '../context/LexiconContext';
 import {useTheme} from '../context/ThemeContext';
 
-// Components
 import AddWordScreen from './AddWordScreen';
 
-// Design and constants
 import {designSystem} from '../design';
 import {
   categoryIcons,
@@ -29,11 +26,8 @@ import {
 const MainScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const navigation = useNavigation();
-
-  // Context and theme
   const {lexicon} = useLexicon();
   const {isDarkMode} = useTheme();
-
   const {
     backgroundLight,
     backgroundDark,
@@ -43,7 +37,6 @@ const MainScreen = () => {
     textDark,
   } = designSystem.colors;
 
-  // Handlers
   const handleClose = () => {
     setModalVisible(false);
   };
@@ -177,27 +170,23 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     flexDirection: 'column',
   },
-  
+
   categoryIconBackground: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 70,  // Fixed size for the icon
-    height: 70, // Fixed size for the icon
+    width: 70,
+    height: 70,
   },
-  
+
   categoryText: {
     position: 'absolute',
-    transform: [
-      {translateX: -35},  // Move text back by half of its width (fontSize: 16)
-      {translateY: -35}   // Move text back by half of its height (fontSize: 16)
-    ],
+    transform: [{translateX: -35}, {translateY: -35}],
     fontWeight: '600',
     fontSize: 16,
-    color: 'white',   // Or use dynamic color based on theme
-    textAlign: 'center',  // Center the text horizontally within the container
-    width: '100%',    // Ensure text does not overflow
+    color: 'white',
+    textAlign: 'center',
+    width: '100%',
   },
-  
 
   // Button styles
   actionButton: {

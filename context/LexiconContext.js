@@ -1,10 +1,10 @@
 // context/LexiconContext.js
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {createContext, useContext, useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LexiconContext = createContext();
 
-export const LexiconProvider = ({ children }) => {
+export const LexiconProvider = ({children}) => {
   const [lexicon, setLexicon] = useState([]);
 
   const categoryColors = {
@@ -33,28 +33,25 @@ export const LexiconProvider = ({ children }) => {
     loadLexicon();
   }, []);
 
-  // Add a word to the lexicon
   const addWord = async (original, translation, categories) => {
     const newWord = {
       original,
       translation,
       categories,
-      addedDate: new Date().toISOString(), // Store date as ISO string
+      addedDate: new Date().toISOString(),
     };
-  
+
     const updatedLexicon = [...lexicon, newWord];
     setLexicon(updatedLexicon);
     await AsyncStorage.setItem('lexicon', JSON.stringify(updatedLexicon));
   };
-  
-  // Remove a word from the lexicon
+
   const removeWord = async index => {
     const updatedLexicon = lexicon.filter((_, i) => i !== index);
     setLexicon(updatedLexicon);
     await AsyncStorage.setItem('lexicon', JSON.stringify(updatedLexicon));
   };
 
-  // Update a word in the lexicon
   const updateWord = async (index, updatedWord) => {
     const updatedLexicon = lexicon.map((word, i) =>
       i === index ? updatedWord : word,
@@ -63,7 +60,6 @@ export const LexiconProvider = ({ children }) => {
     await AsyncStorage.setItem('lexicon', JSON.stringify(updatedLexicon));
   };
 
-  // Reset the lexicon to an empty state
   const resetLexicon = async () => {
     setLexicon([]);
     await AsyncStorage.removeItem('lexicon');
@@ -71,8 +67,14 @@ export const LexiconProvider = ({ children }) => {
 
   return (
     <LexiconContext.Provider
-      value={{ lexicon, addWord, removeWord, updateWord, resetLexicon, categoryColors }}
-    >
+      value={{
+        lexicon,
+        addWord,
+        removeWord,
+        updateWord,
+        resetLexicon,
+        categoryColors,
+      }}>
       {children}
     </LexiconContext.Provider>
   );

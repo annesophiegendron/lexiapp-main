@@ -56,11 +56,7 @@ const SettingsScreen = ({navigation}) => {
             color={isDarkMode ? '#fff' : '#000'}
           />
         </TouchableOpacity>
-        <Text
-          style={[
-            styles.header,
-            {color: isDarkMode ? '#fff' : '#000'}, // Adjusted color for dark mode
-          ]}>
+        <Text style={[styles.header, {color: isDarkMode ? '#fff' : '#000'}]}>
           Settings
         </Text>
       </View>

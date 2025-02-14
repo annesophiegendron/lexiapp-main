@@ -2,19 +2,12 @@ import React from 'react';
 import {View, Text, StyleSheet, FlatList} from 'react-native';
 import {useQuiz} from '../context/QuizzContext';
 import {useTheme} from '../context/ThemeContext';
-import {format, parseISO, isValid} from 'date-fns';
+import {parseISO} from 'date-fns';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const ResultsScreen = ({route, navigation}) => {
   const {result} = route.params || {};
-  const {
-    pastResults,
-    setCurrentQuestionIndex,
-    setScore,
-    score,
-    totalQuestions,
-    lastQuizDate,
-  } = useQuiz();
+  const {pastResults, score, totalQuestions} = useQuiz();
   const {isDarkMode} = useTheme();
 
   const handleGoBack = () => {
@@ -23,9 +16,9 @@ const ResultsScreen = ({route, navigation}) => {
 
   const calculateResultBackgroundColor = (score, totalQuestions) => {
     const percentage = (score / totalQuestions) * 100;
-    if (percentage < 50) return '#FF4F58'; // Trendy red
-    if (percentage >= 50 && percentage < 75) return '#FFCA2D'; // Trendy yellow
-    return '#27AE60'; // Trendy green
+    if (percentage < 50) return '#FF4F58';
+    if (percentage >= 50 && percentage < 75) return '#FFCA2D';
+    return '#27AE60';
   };
 
   const getScoreEmoji = (score, totalQuestions) => {
@@ -37,21 +30,19 @@ const ResultsScreen = ({route, navigation}) => {
 
   const getDailyStreak = () => {
     if (!pastResults || pastResults.length === 0) {
-      return 0; // No results means no streak
+      return 0;
     }
 
-    // Start from the most recent result
     let streak = 1;
     let lastDate = parseISO(pastResults[0].date);
 
     for (let i = 1; i < pastResults.length; i++) {
       const currentDate = parseISO(pastResults[i].date);
 
-      // Check if the current result is from the previous day
       if (currentDate.getDate() === lastDate.getDate() + 1) {
         streak++;
       } else {
-        break; // Streak breaks if there's a gap
+        break;
       }
 
       lastDate = currentDate;

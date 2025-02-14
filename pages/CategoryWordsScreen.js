@@ -9,10 +9,9 @@ import {
 } from 'react-native';
 import {useLexicon} from '../context/LexiconContext';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {categoryColors,categorySubtitles} from '../constants.js';
+import {categoryColors, categorySubtitles} from '../constants.js';
 import {useTheme} from '../context/ThemeContext';
 
-// Components
 import AddWordScreen from './AddWordScreen';
 import EditWordScreen from './EditWordScreen';
 import DeleteConfirmationModal from './ui/DeleteConfirmationModal';

@@ -1,21 +1,17 @@
 import React, {createContext, useContext, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Create a context for the quiz state
 const QuizContext = createContext();
 
-// Custom hook to use the quiz context in components
 export const useQuiz = () => {
   return useContext(QuizContext);
 };
 
-// Provider component to wrap the application and provide quiz state
 export const QuizProvider = ({children}) => {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // Tracks the current question index
-  const [score, setScore] = useState(0); // Tracks the user's score
-  const [pastResults, setPastResults] = useState([]); // Stores previous quiz results
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [pastResults, setPastResults] = useState([]);
 
-  // Function to submit the quiz and store the result
   const submitQuiz = finalScore => {
     setPastResults(prevResults => [
       ...prevResults,
@@ -23,7 +19,6 @@ export const QuizProvider = ({children}) => {
     ]);
   };
 
-  // Value provided to children components
   return (
     <QuizContext.Provider
       value={{
@@ -33,7 +28,7 @@ export const QuizProvider = ({children}) => {
         setScore,
         pastResults,
         setPastResults,
-        submitQuiz, // Pass submitQuiz function to the context
+        submitQuiz,
       }}>
       {children}
     </QuizContext.Provider>

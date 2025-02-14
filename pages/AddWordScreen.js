@@ -28,18 +28,17 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
   const [selectedCategories, setSelectedCategories] = useState(
     Array.isArray(selectedCategory) && selectedCategory.length > 0
       ? selectedCategory
-      : []
+      : [],
   );
-  
 
   useEffect(() => {
     setSelectedCategories(
       Array.isArray(selectedCategory) && selectedCategory.length > 0
         ? selectedCategory
-        : []
+        : [],
     );
   }, [selectedCategory]);
-  
+
   useEffect(() => {
     console.log('Selected category updated:', selectedCategory);
     setCategory(selectedCategory);
@@ -54,19 +53,20 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
       );
       return;
     }
-  
-    // Check for duplicates in the lexicon
+
     const isDuplicate = lexicon.some(
-      word => word.original.toLowerCase() === original.toLowerCase()
+      word => word.original.toLowerCase() === original.toLowerCase(),
     );
-  
+
     if (isDuplicate) {
-      Alert.alert('Duplicate Word', 'This word already exists in your lexicon.');
+      Alert.alert(
+        'Duplicate Word',
+        'This word already exists in your lexicon.',
+      );
       return;
     }
-  
-    const validCategories = selectedCategories.filter(cat => cat); // Remove undefined
-  
+
+    const validCategories = selectedCategories.filter(cat => cat);
     addWord(original, translation, validCategories);
     setOriginal('');
     setTranslation('');
@@ -75,7 +75,6 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
     setErrorMessage('');
     onClose();
   };
-  
 
   const toggleCategory = category => {
     setSelectedCategories(
@@ -118,7 +117,7 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
                     {
                       backgroundColor: selectedCategories.includes(cat)
                         ? categoryColors[cat]
-                        : '#ddd', // Highlight selected categories
+                        : '#ddd',
                     },
                   ]}
                   onPress={() => toggleCategory(cat)}>
@@ -253,7 +252,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 8,
-    marginBottom:15,
+    marginBottom: 15,
   },
 
   // Input styles

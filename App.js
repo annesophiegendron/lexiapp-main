@@ -21,18 +21,14 @@ import DashboardScreen from './pages/DashboardScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
-
-/**
- * A reusable header button that navigates to the Settings screen.
- */
 const SettingsButton = () => {
   const navigation = useNavigation();
-  const { isDarkMode } = useTheme();
+  const {isDarkMode} = useTheme();
 
   return (
     <TouchableOpacity
-      onPress={() => navigation.navigate('Settings')} // This will navigate to Settings from the top nav
-      style={{ marginRight: 15 }}>
+      onPress={() => navigation.navigate('Settings')}
+      style={{marginRight: 15}}>
       <Ionicons
         name="settings-outline"
         size={25}
@@ -41,10 +37,6 @@ const SettingsButton = () => {
     </TouchableOpacity>
   );
 };
-
-/**
- * Bottom Tab Navigator
- */
 const BottomTabs = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const {isDarkMode} = useTheme();
@@ -135,7 +127,7 @@ const BottomTabs = () => {
         />
         <Tab.Screen
           name="AddWord"
-          component={MainScreen} // Placeholder, real modal shown separately
+          component={MainScreen}
           options={{
             title: 'Add Word',
             tabBarButton: props => (
@@ -178,7 +170,6 @@ const BottomTabs = () => {
         />
       </Tab.Navigator>
 
-      {/* AddWord Modal */}
       <AddWordScreen isVisible={isModalVisible} onClose={closeModal} />
     </>
   );

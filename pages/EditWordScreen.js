@@ -54,7 +54,6 @@ const EditWordScreen = ({isVisible, onClose, word, onUpdateWord}) => {
       setError('At least one category must be selected.');
       return;
     }
-    // Check for existing translation
     const isTranslationChanged =
       word.translation.toLowerCase() !== translation.toLowerCase();
     const exists =
@@ -80,10 +79,10 @@ const EditWordScreen = ({isVisible, onClose, word, onUpdateWord}) => {
     };
 
     onUpdateWord(updatedWord);
-    setSuccess(true); // Show success feedback
+    setSuccess(true);
     setTimeout(() => {
-      setSuccess(false); // Hide after a brief delay
-      onClose(); // Close modal
+      setSuccess(false);
+      onClose();
     }, 1500);
   };
 

@@ -12,7 +12,6 @@ const DashboardScreen = () => {
 
   if (!lexicon) return null;
 
-  // Total words added
   const totalWords = lexicon.length;
 
   // Words added in the last 7 days
@@ -22,39 +21,34 @@ const DashboardScreen = () => {
   sevenDaysAgo.setHours(0, 0, 0, 0);
 
   const recentWords = lexicon.filter(word => {
-    if (!word.addedDate) return false; // Prevents crashing if addedDate is missing
+    if (!word.addedDate) return false;
     const wordDate = new Date(word.addedDate);
     wordDate.setHours(0, 0, 0, 0);
     return wordDate >= sevenDaysAgo && wordDate <= today;
   });
 
-  // Get all unique days where words were added
   const uniqueDays = new Set(
     lexicon
-      .filter(word => word.addedDate) // Ensure valid date
+      .filter(word => word.addedDate)
       .map(word => new Date(word.addedDate).setHours(0, 0, 0, 0)),
   );
 
-  // Streak Calculation (Fix)
   let streak = 0;
   let currentDate = new Date();
-  currentDate.setHours(0, 0, 0, 0); // Normalize time
+  currentDate.setHours(0, 0, 0, 0);
 
   while (uniqueDays.has(currentDate.getTime())) {
     streak++;
     currentDate.setDate(currentDate.getDate() - 1);
   }
 
-  // Reset streak if no word was added today
   const todayTime = new Date().setHours(0, 0, 0, 0);
   if (!uniqueDays.has(todayTime)) {
     streak = 0;
   }
 
-  // Ensure proper singular/plural form
   const streakText = streak === 1 ? 'day' : 'days';
 
-  // Motivation message
   const motivationalMessage =
     streak >= 7
       ? 'Great! You are on a streak! Keep going!'

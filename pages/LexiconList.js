@@ -24,7 +24,6 @@ const LexiconList = selectedCategory => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [wordToDelete, setWordToDelete] = useState(null);
   const [searchText, setSearchText] = useState('');
-  // Store multiple selected categories
   const [selectedCategories, setSelectedCategories] = useState(
     Array.isArray(selectedCategory) && selectedCategory.length > 0
       ? selectedCategory
@@ -50,7 +49,6 @@ const LexiconList = selectedCategory => {
     toggleEditModal();
   };
 
-  // Filter words based on search text and selected categories
   const filteredLexicon = lexicon.filter(item => {
     const matchesSearch =
       item.original.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -64,7 +62,6 @@ const LexiconList = selectedCategory => {
 
   const styles = isDarkMode ? darkStyles : lightStyles;
 
-  // Toggle the selection for a category
   const toggleCategorySelection = category => {
     if (selectedCategories.includes(category)) {
       setSelectedCategories(selectedCategories.filter(cat => cat !== category));
@@ -73,7 +70,6 @@ const LexiconList = selectedCategory => {
     }
   };
 
-  // Clears all selected categories
   const clearAllCategories = () => {
     setSelectedCategories([]);
   };
@@ -92,7 +88,6 @@ const LexiconList = selectedCategory => {
         onChangeText={setSearchText}
       />
 
-      {/* Centered and wrapped Category Filter UI */}
       <View style={styles.filterContainer}>
         <TouchableOpacity
           style={[
@@ -247,7 +242,6 @@ const lightStyles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 5,
   },
-  // Updated filter container is now centered with wrapping.
   filterContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
