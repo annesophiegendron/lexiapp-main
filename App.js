@@ -21,27 +21,6 @@ import DashboardScreen from './pages/DashboardScreen';
 import BottomTabs from './pages/BottomTabs';
 
 const Stack = createStackNavigator();
-
-const SettingsButton = () => {
-  const navigation = useNavigation();
-  const {isDarkMode} = useTheme();
-
-  return (
-    <TouchableOpacity
-      onPress={() => navigation.navigate('Settings')}
-      style={{marginRight: 15}}>
-      <Ionicons
-        name="settings-outline"
-        size={25}
-        color={isDarkMode ? '#fff' : '#000'}
-      />
-    </TouchableOpacity>
-  );
-};
-
-/**
- * Main App Component
- */
 const App = () => {
   return (
     <ThemeProvider>
