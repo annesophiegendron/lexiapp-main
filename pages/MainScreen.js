@@ -17,11 +17,7 @@ import {useTheme} from '../context/ThemeContext';
 import AddWordScreen from './AddWordScreen';
 
 import {designSystem} from '../design';
-import {
-  categoryIcons,
-  categoryColors,
-  categoryColorsLight,
-} from '../constants.js';
+import {categoryIcons, categoryColorsLight} from '../constants.js';
 
 const MainScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);

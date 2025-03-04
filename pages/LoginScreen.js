@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import {supabase} from '../supabase'; // Ensure the path to supabase.js is correct
+import {supabase} from '../supabase';
 import {useNavigation} from '@react-navigation/native';
-import {useAuth} from '../context/AuthContext'; // Import your AuthContext
+import {useAuth} from '../context/AuthContext';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -17,10 +17,8 @@ const LoginScreen = () => {
   const navigation = useNavigation();
   const {isLoggedIn, loading, login} = useAuth();
 
-  // Check if user is already logged in
   useEffect(() => {
     if (isLoggedIn) {
-      // Prevents stacking multiple login screens
       navigation.replace('HomeTabs');
     }
   }, [isLoggedIn, navigation]);
@@ -29,14 +27,13 @@ const LoginScreen = () => {
     setError(null);
 
     try {
-      const user = await login(email, password, navigation); // Pass navigation here
+      const user = await login(email, password, navigation);
 
       if (!user) {
         setError('Login failed, please check your credentials.');
         return;
       }
 
-      // Reset navigation stack after successful login
       setTimeout(() => {
         navigation.reset({
           index: 0,
@@ -49,9 +46,8 @@ const LoginScreen = () => {
     }
   };
 
-  // Display loading state while checking auth status
   if (loading) {
-    return <Text>Loading...</Text>; // You can customize a loading screen here
+    return <Text>Loading...</Text>;
   }
 
   return (

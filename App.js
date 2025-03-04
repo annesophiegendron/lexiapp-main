@@ -1,11 +1,11 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import {NavigationContainer} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
 
-import { ThemeProvider } from './context/ThemeContext';
-import { LexiconProvider } from './context/LexiconContext';
-import { QuizProvider } from './context/QuizzContext';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import {ThemeProvider} from './context/ThemeContext';
+import {LexiconProvider} from './context/LexiconContext';
+import {QuizProvider} from './context/QuizzContext';
+import {AuthProvider, useAuth} from './context/AuthContext';
 
 import SplashScreen from './pages/SplashScreen';
 import MainScreen from './pages/MainScreen';
@@ -23,7 +23,7 @@ import LoginScreen from './pages/LoginScreen';
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
-  const { isLoggedIn, loading } = useAuth();
+  const {isLoggedIn, loading} = useAuth();
 
   if (loading) {
     return <SplashScreen />;
@@ -31,14 +31,17 @@ const AppNavigator = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{headerShown: false}}>
         {!isLoggedIn ? (
           <Stack.Screen name="Login" component={LoginScreen} />
         ) : (
           <>
             <Stack.Screen name="HomeTabs" component={BottomTabs} />
             <Stack.Screen name="MainScreen" component={MainScreen} />
-            <Stack.Screen name="CategoryWords" component={CategoryWordsScreen} />
+            <Stack.Screen
+              name="CategoryWords"
+              component={CategoryWordsScreen}
+            />
             <Stack.Screen name="QuizzScreen" component={QuizzScreen} />
             <Stack.Screen name="ResultsScreen" component={ResultsScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
@@ -51,7 +54,6 @@ const AppNavigator = () => {
     </NavigationContainer>
   );
 };
-
 
 const App = () => {
   return (

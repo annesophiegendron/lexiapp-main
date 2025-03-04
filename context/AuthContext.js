@@ -18,7 +18,6 @@ export const AuthProvider = ({children}) => {
 
     checkAuthStatus();
 
-    // Listen for auth state changes
     const {data: authListener} = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setIsLoggedIn(!!session?.user);
@@ -31,7 +30,6 @@ export const AuthProvider = ({children}) => {
   }, []);
 
   const login = async (email, password, navigation) => {
-    // ⬅️ Accept navigation as an argument
     const {data, error} = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -42,14 +40,14 @@ export const AuthProvider = ({children}) => {
       return null;
     }
 
-    setIsLoggedIn(true); // ✅ Update state first
+    setIsLoggedIn(true);
 
     setTimeout(() => {
       navigation.reset({
         index: 0,
         routes: [{name: 'HomeTabs'}],
       });
-    }, 0); // 🕐 Allow state update before resetting
+    }, 0);
 
     return data.user;
   };
