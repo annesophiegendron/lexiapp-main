@@ -8,6 +8,7 @@ import {
   Alert,
   ScrollView,
   Linking,
+  TextInput,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useTheme} from '../context/ThemeContext';
@@ -21,6 +22,10 @@ const SettingsScreen = ({navigation}) => {
   const {logout} = useAuth();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [email, setEmail] = useState(null);
+  const [newEmail, setNewEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [isEmailEditing, setIsEmailEditing] = useState(false);
+  const [isPasswordEditing, setIsPasswordEditing] = useState(false);
 
   const [error, setError] = useState(null);
 
@@ -78,6 +83,45 @@ const SettingsScreen = ({navigation}) => {
     ]);
   };
 
+  const isValidEmail = email => {
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailPattern.test(email);
+  };
+
+  const handleUpdateEmail = async () => {
+    if (newEmail && isValidEmail(newEmail)) {
+      try {
+        const {user, error} = await supabase.auth.updateUser({email: newEmail});
+        if (error) {
+          setError(`Error updating email: ${error.message}`);
+        } else {
+          setEmail(newEmail);
+          setNewEmail('');
+          setIsEmailEditing(false);
+        }
+      } catch (error) {
+        setError(`Unexpected error: ${error.message}`);
+      }
+    } else {
+      setError('Please enter a valid email');
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (newPassword) {
+      const {error} = await supabase.auth.updateUser({password: newPassword});
+      if (error) {
+        console.error('Error updating password:', error);
+        setError('Failed to update password');
+      } else {
+        setNewPassword('');
+        setIsPasswordEditing(false);
+      }
+    } else {
+      setError('Please enter a valid password');
+    }
+  };
+
   return (
     <ScrollView
       contentContainerStyle={[
@@ -112,7 +156,7 @@ const SettingsScreen = ({navigation}) => {
             {backgroundColor: isDarkMode ? '#1e1e1e' : '#fff'},
           ]}>
           {email ? (
-            <View style={styles.row}>
+            <View style={styles.column}>
               <Text
                 style={[styles.label, {color: isDarkMode ? '#fff' : '#333'}]}>
                 Email
@@ -121,16 +165,69 @@ const SettingsScreen = ({navigation}) => {
                 style={[styles.value, {color: isDarkMode ? '#aaa' : '#555'}]}>
                 {email}
               </Text>
+              <TouchableOpacity onPress={() => setIsEmailEditing(true)}>
+                <Text style={styles.editText}>Update Email</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <Text style={[styles.value, {color: isDarkMode ? '#aaa' : '#555'}]}>
               No email found
             </Text>
           )}
+          {isEmailEditing && (
+            <View style={styles.row}>
+              <TextInput
+                style={styles.input}
+                placeholder="New email"
+                placeholderTextColor="#888"
+                value={newEmail}
+                onChangeText={setNewEmail}
+              />
+              <TouchableOpacity
+                onPress={handleUpdateEmail}
+                style={styles.updateButton}>
+                <Text style={styles.updateText}>Confirm</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </View>
 
-      {/* Appearance Section */}
+      {/* Password Section */}
+      <View style={styles.section}>
+        <Text
+          style={[styles.sectionHeader, {color: isDarkMode ? '#fff' : '#333'}]}>
+          Password
+        </Text>
+        <View
+          style={[
+            styles.card,
+            {backgroundColor: isDarkMode ? '#1e1e1e' : '#fff'},
+          ]}>
+          <TouchableOpacity onPress={() => setIsPasswordEditing(true)}>
+            <Text style={styles.editText}>Update Password</Text>
+          </TouchableOpacity>
+          {isPasswordEditing && (
+            <View style={styles.row}>
+              <TextInput
+                style={styles.input}
+                placeholder="New password"
+                placeholderTextColor="#888"
+                secureTextEntry
+                value={newPassword}
+                onChangeText={setNewPassword}
+              />
+              <TouchableOpacity
+                onPress={handleUpdatePassword}
+                style={styles.updateButton}>
+                <Text style={styles.updateText}>Confirm</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* Other Sections */}
       <View style={styles.section}>
         <Text
           style={[styles.sectionHeader, {color: isDarkMode ? '#fff' : '#333'}]}>
@@ -191,24 +288,22 @@ const SettingsScreen = ({navigation}) => {
             styles.card,
             {backgroundColor: isDarkMode ? '#1e1e1e' : '#fff'},
           ]}>
-          <View style={styles.item}>
-            <Text style={[styles.label, {color: isDarkMode ? '#fff' : '#333'}]}>
-              Version
-            </Text>
-            <Text style={[styles.value, {color: isDarkMode ? '#aaa' : '#555'}]}>
-              1.0.0
-            </Text>
-          </View>
-          <TouchableOpacity style={styles.item} onPress={openPrivacyPolicy}>
+          <View style={[styles.item, {marginBottom: 15}]}>
             <Text style={[styles.label, {color: isDarkMode ? '#fff' : '#333'}]}>
               Privacy Policy
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.item} onPress={contactSupport}>
+            <TouchableOpacity onPress={openPrivacyPolicy}>
+              <Text style={styles.linkText}>Open</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.item}>
             <Text style={[styles.label, {color: isDarkMode ? '#fff' : '#333'}]}>
               Contact Support
             </Text>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={contactSupport}>
+              <Text style={styles.linkText}>Email Us</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </ScrollView>
@@ -217,9 +312,9 @@ const SettingsScreen = ({navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    paddingTop: 90,
-    height: '100%',
+    flex: 1,
+    paddingTop: 60,
+    paddingHorizontal: 15,
   },
   headerContainer: {
     flexDirection: 'row',
@@ -227,60 +322,81 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   backButton: {
-    zIndex: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    padding: 10,
-    borderRadius: 50,
+    marginRight: 10,
   },
   header: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: 'bold',
-    flex: 1,
-    textAlign: 'right',
   },
   section: {
-    marginBottom: 30,
+    marginBottom: 20,
   },
   sectionHeader: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 18,
     marginBottom: 10,
   },
   card: {
-    borderRadius: 10,
     padding: 15,
+    borderRadius: 10,
     marginBottom: 10,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
-    shadowRadius: 5,
+    shadowRadius: 10,
     elevation: 3,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  item: {
-    marginTop: 15,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  label: {
-    fontSize: 16,
   },
   value: {
     fontSize: 16,
+    marginBottom: 10,
+  },
+  editText: {
+    color: '#007BFF',
+    fontSize: 14,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  label: {
+    fontSize: 14,
+    marginBottom: 5,
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginRight: 10,
+    color: '#333',
+  },
+  updateButton: {
+    backgroundColor: '#007BFF',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+  },
+  updateText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
   resetText: {
-    fontSize: 16,
-    color: 'red',
+    color: '#ff0000',
+    fontSize: 14,
   },
   logoutText: {
-    fontSize: 16,
-    color: 'red',
-    textAlign: 'center',
+    color: '#ff0000',
+    fontSize: 14,
+  },
+  linkText: {
+    color: '#007BFF',
+    fontSize: 14,
+  },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
 });
 

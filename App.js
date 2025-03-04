@@ -19,7 +19,7 @@ import DashboardScreen from './pages/DashboardScreen';
 
 import BottomTabs from './pages/BottomTabs';
 import LoginScreen from './pages/LoginScreen';
-import SignUpScreen from './pages/SignUpScreen';  // Import SignUpScreen
+import SignUpScreen from './pages/SignUpScreen';
 
 const Stack = createStackNavigator();
 
