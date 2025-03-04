@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -6,16 +6,16 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import { supabase } from '../supabase'; // Ensure the path to supabase.js is correct
-import { useNavigation } from '@react-navigation/native';
-import { useAuth } from '../context/AuthContext'; // Import your AuthContext
+import {supabase} from '../supabase'; // Ensure the path to supabase.js is correct
+import {useNavigation} from '@react-navigation/native';
+import {useAuth} from '../context/AuthContext'; // Import your AuthContext
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const navigation = useNavigation();
-  const { isLoggedIn, loading, login } = useAuth();
+  const {isLoggedIn, loading, login} = useAuth();
 
   // Check if user is already logged in
   useEffect(() => {
@@ -37,10 +37,12 @@ const LoginScreen = () => {
       }
 
       // Reset navigation stack after successful login
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'HomeTabs' }],
-      });
+      setTimeout(() => {
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'HomeTabs'}],
+        });
+      }, 0);
     } catch (error) {
       setError('An unexpected error occurred');
       console.error('Login error:', error);
