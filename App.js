@@ -23,7 +23,7 @@ import LoginScreen from './pages/LoginScreen';
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
-  const { isLoggedIn, loading } = useAuth(); 
+  const { isLoggedIn, loading } = useAuth();
 
   if (loading) {
     return <SplashScreen />;
@@ -51,6 +51,7 @@ const AppNavigator = () => {
     </NavigationContainer>
   );
 };
+
 
 const App = () => {
   return (

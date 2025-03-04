@@ -1,66 +1,89 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet, Alert } from 'react-native';
-import { supabase } from '../supabase';
-import { useAuth } from '../context/AuthContext';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
+import {supabase} from '../supabase'; // Ensure the path to supabase.js is correct
+import {useNavigation} from '@react-navigation/native';
+import {useAuth} from '../context/AuthContext'; // Import your AuthContext
 
-const LoginScreen = ({ navigation }) => {
-  const { setIsLoggedIn } = useAuth();
+const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const navigation = useNavigation();
+  const {isLoggedIn, loading, login} = useAuth();
 
-  const handleSignUp = async () => {
-    const { data, error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-    });
-
-    if (error) {
-      alert(error.message);
-    } else {
-      alert('Check your email to confirm your account!');
+  // Check if user is already logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigation.replace('MainScreen'); // Prevents stacking multiple login screens
     }
-  };
+  }, [isLoggedIn, navigation]);
 
   const handleLogin = async () => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    setError(null); // Clear previous error
 
-    if (error) {
-      console.error('Login Error:', error);
-      Alert.alert('Login Failed', error.message);
-    } else {
-      const user = supabase.auth.user();
-      if (user) {
-        setIsLoggedIn(true);
-        Alert.alert('Login Successful', 'Welcome back!');
-        navigation.navigate('MainScreen');
-      } else {
-        Alert.alert('Login Failed', 'Could not authenticate user.');
+    // Perform login with Supabase
+    try {
+      const user = await login(email, password);
+
+      if (!user) {
+        setError('Login failed, please check your credentials.');
+        return;
       }
+
+      // Successfully logged in, navigate to MainScreen
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'MainScreen'}],
+      });
+    } catch (error) {
+      setError('An unexpected error occurred');
+      console.error('Login error:', error);
     }
   };
+
+  // Display loading state while checking auth status
+  if (loading) {
+    return <Text>Loading...</Text>; // You can customize a loading screen here
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login / Sign Up</Text>
+      <Text style={styles.header}>Login</Text>
+
       <TextInput
         style={styles.input}
-        placeholder="Enter your email"
+        placeholder="Email"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
+        keyboardType="email-address"
       />
       <TextInput
         style={styles.input}
-        placeholder="Enter your password"
-        secureTextEntry
+        placeholder="Password"
         value={password}
         onChangeText={setPassword}
+        secureTextEntry
       />
-      <Button title="Login" onPress={handleLogin} />
-      <Button title="Sign Up" onPress={handleSignUp} color="green" />
+
+      {error && <Text style={styles.errorText}>{error}</Text>}
+
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Don't have an account?</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('SignUpScreen')}>
+          <Text style={styles.linkText}>Sign Up</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -69,19 +92,57 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#f4f4f4',
   },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
+  header: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 40,
+    textAlign: 'center',
+    color: '#333',
   },
   input: {
-    width: '80%',
-    height: 40,
+    height: 50,
     borderColor: '#ccc',
     borderWidth: 1,
-    marginBottom: 20,
-    paddingLeft: 10,
+    borderRadius: 5,
+    marginBottom: 15,
+    paddingLeft: 15,
+    fontSize: 16,
+    backgroundColor: '#fff',
+  },
+  button: {
+    backgroundColor: '#0066cc',
+    paddingVertical: 12,
+    borderRadius: 5,
+    marginBottom: 15,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  footerText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  linkText: {
+    fontSize: 16,
+    color: '#0066cc',
+    fontWeight: 'bold',
+    marginLeft: 5,
   },
 });
 
