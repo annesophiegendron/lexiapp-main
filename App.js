@@ -19,6 +19,7 @@ import DashboardScreen from './pages/DashboardScreen';
 
 import BottomTabs from './pages/BottomTabs';
 import LoginScreen from './pages/LoginScreen';
+import SignUpScreen from './pages/SignUpScreen';  // Import SignUpScreen
 
 const Stack = createStackNavigator();
 
@@ -33,7 +34,10 @@ const AppNavigator = () => {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{headerShown: false}}>
         {!isLoggedIn ? (
-          <Stack.Screen name="Login" component={LoginScreen} />
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
+          </>
         ) : (
           <>
             <Stack.Screen name="HomeTabs" component={BottomTabs} />
