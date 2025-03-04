@@ -30,7 +30,8 @@ export const AuthProvider = ({children}) => {
     };
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (email, password, navigation) => {
+    // ⬅️ Accept navigation as an argument
     const {data, error} = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -41,7 +42,15 @@ export const AuthProvider = ({children}) => {
       return null;
     }
 
-    setIsLoggedIn(true);
+    setIsLoggedIn(true); // ✅ Update state first
+
+    setTimeout(() => {
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'HomeTabs'}],
+      });
+    }, 0); // 🕐 Allow state update before resetting
+
     return data.user;
   };
 
