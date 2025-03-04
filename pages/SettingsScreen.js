@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,13 +13,44 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '../context/ThemeContext';
 import { useLexicon } from '../context/LexiconContext';
 import { useAuth } from '../context/AuthContext'; // Import logout function
+import { supabase } from '../supabase'; // Import Supabase client
 
 const SettingsScreen = ({ navigation }) => {
   const { isDarkMode, toggleTheme } = useTheme();
   const { resetLexicon } = useLexicon();
   const { logout } = useAuth(); // Get logout function
-
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [email, setEmail] = useState(null);
+
+
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (error) {
+          console.error('Error fetching user:', error);
+          setError('Failed to fetch user data');
+          return;
+        }
+
+        if (data && data.user) {
+          console.log('User data:', data.user); // Log the user data to see what we get
+          setEmail(data.user.email); // Set the email if user is found
+        } else {
+          console.log('No user found');
+          setEmail('No email found');
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        setError('Something went wrong');
+      }
+    };
+
+    fetchUser();
+  }, []);
+  
   const toggleNotifications = () => setNotificationsEnabled((prev) => !prev);
 
   const handleResetLexicon = () => {
@@ -74,6 +105,36 @@ const SettingsScreen = ({ navigation }) => {
         <Text style={[styles.header, { color: isDarkMode ? '#fff' : '#000' }]}>
           Settings
         </Text>
+      </View>
+
+      {/* User Email Section */}
+      <View style={styles.section}>
+        <Text
+          style={[styles.sectionHeader, { color: isDarkMode ? '#fff' : '#333' }]}
+        >
+          Account Info
+        </Text>
+        <View
+          style={[
+            styles.card,
+            { backgroundColor: isDarkMode ? '#1e1e1e' : '#fff' },
+          ]}
+        >
+          {email ? (
+            <View style={styles.row}>
+              <Text style={[styles.label, { color: isDarkMode ? '#fff' : '#333' }]}>
+                Email
+              </Text>
+              <Text style={[styles.value, { color: isDarkMode ? '#aaa' : '#555' }]}>
+                {email}
+              </Text>
+            </View>
+          ) : (
+            <Text style={[styles.value, { color: isDarkMode ? '#aaa' : '#555' }]}>
+              No email found
+            </Text>
+          )}
+        </View>
       </View>
 
       {/* Appearance Section */}

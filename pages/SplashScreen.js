@@ -1,14 +1,23 @@
-import React, {useEffect} from 'react';
-import {View, Image, StyleSheet} from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Image, StyleSheet } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 
-const SplashScreen = ({navigation}) => {
+const SplashScreen = ({ navigation }) => {
+  const { isLoggedIn, loading } = useAuth(); 
+
   useEffect(() => {
+    if (loading) return;
+
     const timer = setTimeout(() => {
-      navigation.replace('HomeTabs');
+      if (isLoggedIn) {
+        navigation.replace('MainScreen');
+      } else {
+        navigation.replace('Login');
+      }
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [navigation]);
+  }, [isLoggedIn, loading, navigation]);
 
   return (
     <View style={styles.container}>
@@ -32,10 +41,6 @@ const styles = StyleSheet.create({
     width: '80%',
     height: '40%',
     marginBottom: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
   },
 });
 
