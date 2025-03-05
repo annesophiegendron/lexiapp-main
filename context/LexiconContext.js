@@ -1,11 +1,13 @@
-// context/LexiconContext.js
 import React, {createContext, useContext, useState, useEffect} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {supabase} from '../supabase';
+import {useAuth} from './AuthContext';
 
 const LexiconContext = createContext();
 
 export const LexiconProvider = ({children}) => {
+  const {isLoggedIn} = useAuth();
   const [lexicon, setLexicon] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   const categoryColors = {
     'Daily Life': 'rgba(242, 143, 140, 0.4)',
@@ -21,62 +23,134 @@ export const LexiconProvider = ({children}) => {
     'Travel and Transportation': 'rgba(180, 213, 137, 0.4)',
   };
 
-  // Load lexicon from AsyncStorage on mount
-  useEffect(() => {
-    const loadLexicon = async () => {
-      const savedLexicon = await AsyncStorage.getItem('lexicon');
-      if (savedLexicon) {
-        setLexicon(JSON.parse(savedLexicon));
-      }
-    };
+  const fetchLexicon = async () => {
+    const {
+      data: {user},
+    } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('User is not logged in');
+      setLexicon([]);
+      return;
+    }
 
-    loadLexicon();
-  }, []);
+    try {
+      const {data, error} = await supabase
+        .from('lexicon')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setLexicon(data || []);
+    } catch (error) {
+      console.error('Error fetching lexicon:', error);
+      setLexicon([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchLexicon();
+  }, [isLoggedIn]);
 
   const addWord = async (original, translation, categories) => {
+    const {
+      data: {user},
+    } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('User is not logged in');
+      return;
+    }
+
     const newWord = {
       original,
       translation,
       categories,
-      addedDate: new Date().toISOString(),
+      user_id: user.id,
+      created_at: new Date().toISOString(),
     };
 
-    const updatedLexicon = [...lexicon, newWord];
-    setLexicon(updatedLexicon);
-    await AsyncStorage.setItem('lexicon', JSON.stringify(updatedLexicon));
+    try {
+      const {data, error} = await supabase.from('lexicon').insert([newWord]);
+      if (error) throw error;
+
+      setLexicon(prev => [...prev, data[0]]);
+    } catch (error) {
+      console.error('Error adding word:', error);
+    }
   };
 
   const removeWord = async index => {
-    const updatedLexicon = lexicon.filter((_, i) => i !== index);
-    setLexicon(updatedLexicon);
-    await AsyncStorage.setItem('lexicon', JSON.stringify(updatedLexicon));
+    const wordToRemove = lexicon[index];
+    if (!wordToRemove || !wordToRemove.id) {
+      console.error('Invalid word to remove or no ID found');
+      return;
+    }
+
+    try {
+      const {error} = await supabase
+        .from('lexicon')
+        .delete()
+        .eq('id', wordToRemove.id);
+      if (error) throw new Error(error.message);
+
+      setLexicon(lexicon.filter((_, i) => i !== index));
+    } catch (error) {
+      console.error('Error removing word:', error);
+    }
   };
 
   const updateWord = async (index, updatedWord) => {
-    const updatedLexicon = lexicon.map((word, i) =>
-      i === index ? updatedWord : word,
-    );
-    setLexicon(updatedLexicon);
-    await AsyncStorage.setItem('lexicon', JSON.stringify(updatedLexicon));
+    const wordToUpdate = lexicon[index];
+    if (!wordToUpdate || !wordToUpdate.id) {
+      console.error('Invalid word to update or no ID found');
+      return;
+    }
+
+    try {
+      const {error} = await supabase
+        .from('lexicon')
+        .update(updatedWord)
+        .eq('id', wordToUpdate.id);
+      if (error) throw new Error(error.message);
+
+      setLexicon(
+        lexicon.map((word, i) =>
+          i === index ? {...word, ...updatedWord} : word,
+        ),
+      );
+    } catch (error) {
+      console.error('Error updating word:', error);
+    }
   };
 
-  const resetLexicon = async () => {
+  const resetLexicon = () => {
     setLexicon([]);
-    await AsyncStorage.removeItem('lexicon');
+  };
+
+  const updateCategory = category => {
+    if (!category || !categoryColors[category]) {
+      console.error('Invalid category:', category);
+      setSelectedCategory('');
+      return;
+    }
+
+    console.log(`Category updated: ${category}`);
+    setSelectedCategory(category);
+  };
+
+  const value = {
+    lexicon: lexicon || [],
+    addWord,
+    removeWord,
+    updateWord,
+    resetLexicon,
+    categoryColors,
+    selectedCategory: selectedCategory || '',
+    updateCategory,
   };
 
   return (
-    <LexiconContext.Provider
-      value={{
-        lexicon,
-        addWord,
-        removeWord,
-        updateWord,
-        resetLexicon,
-        categoryColors,
-      }}>
-      {children}
-    </LexiconContext.Provider>
+    <LexiconContext.Provider value={value}>{children}</LexiconContext.Provider>
   );
 };
 
