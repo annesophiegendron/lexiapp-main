@@ -35,7 +35,7 @@ const AppNavigator = () => {
       <Stack.Navigator screenOptions={{headerShown: false}}>
         {!isLoggedIn ? (
           <>
-            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="LoginScreen" component={LoginScreen} />
             <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
           </>
         ) : (
