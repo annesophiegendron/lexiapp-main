@@ -23,10 +23,7 @@ const SettingsScreen = ({navigation}) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [email, setEmail] = useState(null);
   const [newEmail, setNewEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
   const [isEmailEditing, setIsEmailEditing] = useState(false);
-  const [isPasswordEditing, setIsPasswordEditing] = useState(false);
-
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -34,20 +31,16 @@ const SettingsScreen = ({navigation}) => {
       try {
         const {data, error} = await supabase.auth.getUser();
         if (error) {
-          console.error('Error fetching user:', error);
           setError('Failed to fetch user data');
           return;
         }
 
         if (data && data.user) {
-          console.log('User data:', data.user);
           setEmail(data.user.email);
         } else {
-          console.log('No user found');
           setEmail('No email found');
         }
       } catch (err) {
-        console.error('Error:', err);
         setError('Something went wrong');
       }
     };
@@ -107,18 +100,16 @@ const SettingsScreen = ({navigation}) => {
     }
   };
 
-  const handleUpdatePassword = async () => {
-    if (newPassword) {
-      const {error} = await supabase.auth.updateUser({password: newPassword});
+  const handlePasswordReset = async () => {
+    if (email) {
+      const {error} = await supabase.auth.api.resetPasswordForEmail(email);
       if (error) {
-        console.error('Error updating password:', error);
-        setError('Failed to update password');
+        setError(`Error sending password reset email: ${error.message}`);
       } else {
-        setNewPassword('');
-        setIsPasswordEditing(false);
+        Alert.alert('Check your email', 'A password reset email has been sent.');
       }
     } else {
-      setError('Please enter a valid password');
+      setError('No email found');
     }
   };
 
@@ -126,7 +117,7 @@ const SettingsScreen = ({navigation}) => {
     <ScrollView
       contentContainerStyle={[
         styles.container,
-        {backgroundColor: isDarkMode ? '#121212' : '#f2f2f2'},
+        {backgroundColor: isDarkMode ? '#121212' : '#f8f8f8'},
       ]}>
       {/* Back button and title */}
       <View style={styles.headerContainer}>
@@ -139,12 +130,12 @@ const SettingsScreen = ({navigation}) => {
             color={isDarkMode ? '#fff' : '#000'}
           />
         </TouchableOpacity>
-        <Text style={[styles.header, {color: isDarkMode ? '#fff' : '#000'}]}>
+        <Text style={[styles.header, {color: isDarkMode ? '#fff' : '#222'}]}>
           Settings
         </Text>
       </View>
 
-      {/* User Email Section */}
+      {/* Account Info Section */}
       <View style={styles.section}>
         <Text
           style={[styles.sectionHeader, {color: isDarkMode ? '#fff' : '#333'}]}>
@@ -153,7 +144,7 @@ const SettingsScreen = ({navigation}) => {
         <View
           style={[
             styles.card,
-            {backgroundColor: isDarkMode ? '#1e1e1e' : '#fff'},
+            {backgroundColor: isDarkMode ? '#1f1f1f' : '#fff'},
           ]}>
           {email ? (
             <View style={styles.column}>
@@ -193,7 +184,7 @@ const SettingsScreen = ({navigation}) => {
         </View>
       </View>
 
-      {/* Password Section */}
+      {/* Password Reset Section */}
       <View style={styles.section}>
         <Text
           style={[styles.sectionHeader, {color: isDarkMode ? '#fff' : '#333'}]}>
@@ -202,32 +193,15 @@ const SettingsScreen = ({navigation}) => {
         <View
           style={[
             styles.card,
-            {backgroundColor: isDarkMode ? '#1e1e1e' : '#fff'},
+            {backgroundColor: isDarkMode ? '#1f1f1f' : '#fff'},
           ]}>
-          <TouchableOpacity onPress={() => setIsPasswordEditing(true)}>
-            <Text style={styles.editText}>Update Password</Text>
+          <TouchableOpacity onPress={handlePasswordReset}>
+            <Text style={styles.editText}>Reset Password</Text>
           </TouchableOpacity>
-          {isPasswordEditing && (
-            <View style={styles.row}>
-              <TextInput
-                style={styles.input}
-                placeholder="New password"
-                placeholderTextColor="#888"
-                secureTextEntry
-                value={newPassword}
-                onChangeText={setNewPassword}
-              />
-              <TouchableOpacity
-                onPress={handleUpdatePassword}
-                style={styles.updateButton}>
-                <Text style={styles.updateText}>Confirm</Text>
-              </TouchableOpacity>
-            </View>
-          )}
         </View>
       </View>
 
-      {/* Other Sections */}
+      {/* Dark Mode Toggle Section */}
       <View style={styles.section}>
         <Text
           style={[styles.sectionHeader, {color: isDarkMode ? '#fff' : '#333'}]}>
@@ -236,7 +210,7 @@ const SettingsScreen = ({navigation}) => {
         <View
           style={[
             styles.card,
-            {backgroundColor: isDarkMode ? '#1e1e1e' : '#fff'},
+            {backgroundColor: isDarkMode ? '#1f1f1f' : '#fff'},
           ]}>
           <View style={styles.row}>
             <Text style={[styles.label, {color: isDarkMode ? '#fff' : '#333'}]}>
@@ -256,7 +230,7 @@ const SettingsScreen = ({navigation}) => {
         <View
           style={[
             styles.card,
-            {backgroundColor: isDarkMode ? '#1e1e1e' : '#fff'},
+            {backgroundColor: isDarkMode ? '#1f1f1f' : '#fff'},
           ]}>
           <TouchableOpacity onPress={handleResetLexicon}>
             <Text style={styles.resetText}>Reset Lexicon</Text>
@@ -269,7 +243,7 @@ const SettingsScreen = ({navigation}) => {
         <View
           style={[
             styles.card,
-            {backgroundColor: isDarkMode ? '#1e1e1e' : '#fff'},
+            {backgroundColor: isDarkMode ? '#1f1f1f' : '#fff'},
           ]}>
           <TouchableOpacity onPress={handleLogout}>
             <Text style={styles.logoutText}>Log Out</Text>
@@ -286,14 +260,14 @@ const SettingsScreen = ({navigation}) => {
         <View
           style={[
             styles.card,
-            {backgroundColor: isDarkMode ? '#1e1e1e' : '#fff'},
+            {backgroundColor: isDarkMode ? '#1f1f1f' : '#fff'},
           ]}>
           <View style={[styles.item, {marginBottom: 15}]}>
             <Text style={[styles.label, {color: isDarkMode ? '#fff' : '#333'}]}>
               Privacy Policy
             </Text>
             <TouchableOpacity onPress={openPrivacyPolicy}>
-              <Text style={styles.linkText}>Open</Text>
+              <Text style={styles.linkText}>View</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.item}>
@@ -301,7 +275,7 @@ const SettingsScreen = ({navigation}) => {
               Contact Support
             </Text>
             <TouchableOpacity onPress={contactSupport}>
-              <Text style={styles.linkText}>Email Us</Text>
+              <Text style={styles.linkText}>Email Support</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -313,8 +287,9 @@ const SettingsScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
-    paddingHorizontal: 15,
+    padding: 20,
+    marginTop: 50,
+    backgroundColor: '#f8f8f8',
   },
   headerContainer: {
     flexDirection: 'row',
@@ -325,27 +300,37 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   header: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
+    color: '#333',
   },
   section: {
-    marginBottom: 20,
+    marginTop: 20,
   },
   sectionHeader: {
     fontSize: 18,
-    marginBottom: 10,
+    fontWeight: 'bold',
   },
   card: {
+    marginTop: 10,
     padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+    borderRadius: 12,
     elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  column: {
+    flexDirection: 'column',
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   value: {
     fontSize: 16,
+    marginTop: 5,
     marginBottom: 10,
   },
   editText: {
@@ -357,24 +342,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  label: {
-    fontSize: 14,
-    marginBottom: 5,
-    marginRight: 10,
-  },
   input: {
     flex: 1,
-    padding: 10,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
+    padding: 10,
     marginRight: 10,
-    color: '#333',
+    fontSize: 14,
   },
   updateButton: {
     backgroundColor: '#007BFF',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    padding: 10,
     borderRadius: 5,
   },
   updateText: {
@@ -382,21 +361,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   resetText: {
-    color: '#ff0000',
+    color: 'red',
     fontSize: 14,
   },
   logoutText: {
-    color: '#ff0000',
+    color: 'red',
     fontSize: 14,
   },
   linkText: {
     color: '#007BFF',
-    fontSize: 14,
-  },
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
   },
 });
 
