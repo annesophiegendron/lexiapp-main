@@ -60,13 +60,13 @@ export const LexiconProvider = ({children}) => {
       return;
     }
 
-    const user_id = userData.user.id; // Ensure this is defined
+    const user_id = userData.user.id;
 
     const newWord = {
       original,
       translation,
       categories,
-      user_id, // Assign user ID
+      user_id,
       created_at: new Date().toISOString(),
     };
 
