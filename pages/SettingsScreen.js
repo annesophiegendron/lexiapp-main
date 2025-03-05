@@ -102,11 +102,23 @@ const SettingsScreen = ({navigation}) => {
 
   const handlePasswordReset = async () => {
     if (email) {
-      const {error} = await supabase.auth.api.resetPasswordForEmail(email);
-      if (error) {
-        setError(`Error sending password reset email: ${error.message}`);
-      } else {
-        Alert.alert('Check your email', 'A password reset email has been sent.');
+      try {
+        const {data, error} = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: 'https://your-app-url.com/reset-password',
+        });
+
+        if (error) {
+          setError(`Error resetting password: ${error.message}`);
+          alert(error.message);
+        } else {
+          alert('Password reset email sent successfully!');
+        }
+      } catch (err) {
+        console.error('Unexpected error:', err);
+        setError(
+          'Unexpected error occurred while trying to reset the password.',
+        );
+        alert('Something went wrong!');
       }
     } else {
       setError('No email found');
