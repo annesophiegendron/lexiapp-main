@@ -53,25 +53,35 @@ export const LexiconProvider = ({children}) => {
   }, [isLoggedIn]);
 
   const addWord = async (original, translation, categories) => {
-    const {
-      data: {user},
-    } = await supabase.auth.getUser();
-    if (!user) {
-      console.error('User is not logged in');
+    const {data: userData, error: authError} = await supabase.auth.getUser();
+
+    if (authError || !userData?.user) {
+      console.error('User is not logged in or error fetching user:', authError);
       return;
     }
+
+    const user_id = userData.user.id; // Ensure this is defined
 
     const newWord = {
       original,
       translation,
       categories,
-      user_id: user.id,
+      user_id, // Assign user ID
       created_at: new Date().toISOString(),
     };
 
     try {
-      const {data, error} = await supabase.from('lexicon').insert([newWord]);
+      const {data, error} = await supabase
+        .from('lexicon')
+        .insert([newWord])
+        .select('*');
+
       if (error) throw error;
+
+      if (!data || data.length === 0) {
+        console.error('Error: Supabase did not return the inserted data.');
+        return;
+      }
 
       setLexicon(prev => [...prev, data[0]]);
     } catch (error) {
