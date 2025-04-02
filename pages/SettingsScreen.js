@@ -103,8 +103,9 @@ const SettingsScreen = ({navigation}) => {
   const handlePasswordReset = async () => {
     if (email) {
       try {
+        // Request a password reset for the provided email
         const {data, error} = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: 'https://your-app-url.com/reset-password',
+          redirectTo: 'https://your-app-url.com/reset-password', // Redirect URL after password reset
         });
 
         if (error) {
