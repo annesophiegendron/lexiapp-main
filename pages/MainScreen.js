@@ -56,13 +56,18 @@ const MainScreen = () => {
         styles.container,
         {backgroundColor: isDarkMode ? backgroundDark : backgroundLight},
       ]}>
-      <Text
-        style={[styles.topTitle, {color: isDarkMode ? textLight : textDark}]}>
-        Add words with translations and meanings to your lexicon
-      </Text>
+      <View style={styles.dateContainer}>
+        <Text style={styles.dateText}>
+          {new Date().getDate()}{' '}
+          {new Date().toLocaleString('en-US', {month: 'long'})}
+        </Text>
+        <Text style={styles.weekdayText}>
+          {new Date().toLocaleString('en-US', {weekday: 'long'})}
+        </Text>
+      </View>
 
       <Text style={[styles.title, {color: isDarkMode ? textLight : textDark}]}>
-        Categories
+        Browse by Category
       </Text>
       <View style={styles.categoriesContainer}>
         {Object.keys(categoryIcons).map(category => (
@@ -207,9 +212,10 @@ const styles = StyleSheet.create({
     color: '#262626',
   },
   title: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
     marginVertical: 7,
+    color: '#8C8C8C',
   },
   buttonText: {
     fontSize: 18,
@@ -234,6 +240,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     position: 'relative',
   },
+  dateContainer: {
+    marginBottom: 10,
+  },
+  dateText: {
+    fontSize: 14,
+    color: '#888',
+    fontWeight: '700',
+  },
+  weekdayText: {
+    fontSize: 26,
+    fontWeight: '500',
+  },
+  
 });
 
 export default MainScreen;
