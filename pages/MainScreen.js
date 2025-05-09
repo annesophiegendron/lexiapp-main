@@ -81,45 +81,49 @@ const MainScreen = () => {
         </Text>
       </View>
 
-      <TextInput
-        style={[styles.searchBar, searchText ? styles.searchBarFocused : {}]}
-        placeholder="Search..."
-        placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
-        value={searchText}
-        onChangeText={setSearchText}
-      />
-      {searchText.length > 0 && (
-        <View style={{marginBottom: 20}}>
-          {filteredItems.length > 0 ? (
-            filteredItems.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[
-                  styles.searchResultItem,
-                  {
-                    backgroundColor: isDarkMode ? cardBackgroundDark : '#fff',
-                    borderColor: '#ccc',
-                  },
-                ]}
-                onPress={
-                  () => navigation.navigate('WordDetail', {word: item}) // Optional navigation
-                }>
-                <Text
-                  style={{
-                    color: isDarkMode ? textLight : textDark,
-                    fontWeight: '600',
-                  }}>
-                  {item.original} → {item.translation}
-                </Text>
-              </TouchableOpacity>
-            ))
-          ) : (
-            <Text style={{color: isDarkMode ? textLight : textDark}}>
-              No results found.
-            </Text>
-          )}
-        </View>
-      )}
+      <View style={styles.searchWrapper}>
+        <TextInput
+          style={[styles.searchBar, searchText ? styles.searchBarFocused : {}]}
+          placeholder="Search..."
+          placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
+          value={searchText}
+          onChangeText={setSearchText}
+        />
+
+        {searchText.length > 0 && (
+          <View style={styles.dropdown}>
+            {filteredItems.length > 0 ? (
+              filteredItems.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.searchResultItem,
+                    {
+                      backgroundColor: isDarkMode ? cardBackgroundDark : '#fff',
+                      borderColor: '#ccc',
+                    },
+                  ]}
+                  onPress={() =>
+                    navigation.navigate('WordDetail', {word: item})
+                  }>
+                  <Text
+                    style={{
+                      color: isDarkMode ? textLight : textDark,
+                      fontWeight: '600',
+                    }}>
+                    {item.original} → {item.translation}
+                  </Text>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <Text
+                style={{padding: 10, color: isDarkMode ? textLight : textDark}}>
+                No results found.
+              </Text>
+            )}
+          </View>
+        )}
+      </View>
 
       <Text style={[styles.title, {color: isDarkMode ? textLight : textDark}]}>
         Browse by Category
@@ -311,8 +315,7 @@ const styles = StyleSheet.create({
   searchResultItem: {
     padding: 10,
     marginVertical: 4,
-    borderRadius: 8,
-    borderWidth: 1,
+    marginHorizontal: 4,
   },
   searchBar: {
     width: '100%',
@@ -322,10 +325,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#fff',
     marginBottom: 20,
+    elevation: 5,
+    borderColor: '#000',
+    borderWidth: 1,
+  },
+
+  searchWrapper: {
+    position: 'relative',
+    marginBottom: 20,
+    zIndex: 10,
+  },
+  dropdown: {
+    position: 'absolute',
+    top: 50,
+    width: '100%',
+    maxHeight: 200,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    zIndex: 10,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 10,
-    elevation: 5,
+    elevation: 10,
   },
 });
 
