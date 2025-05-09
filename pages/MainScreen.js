@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  TextInput,
 } from 'react-native';
 
 import {useNavigation} from '@react-navigation/native';
@@ -25,6 +26,8 @@ import {
 
 const MainScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const navigation = useNavigation();
   const {lexicon} = useLexicon();
   const {isDarkMode} = useTheme();
@@ -50,6 +53,18 @@ const MainScreen = () => {
     navigation.navigate('QuizzScreen');
   };
 
+  const filteredItems = lexicon.filter(item => {
+    const matchesSearch =
+      item.original.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.translation.toLowerCase().includes(searchText.toLowerCase());
+
+    const matchesCategory =
+      selectedCategories.length === 0 ||
+      item.categories?.some(cat => selectedCategories.includes(cat));
+
+    return matchesSearch && matchesCategory;
+  });
+
   return (
     <ScrollView
       style={[
@@ -65,6 +80,46 @@ const MainScreen = () => {
           {new Date().toLocaleString('en-US', {weekday: 'long'})}
         </Text>
       </View>
+
+      <TextInput
+        style={[styles.searchBar, searchText ? styles.searchBarFocused : {}]}
+        placeholder="Search..."
+        placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
+        value={searchText}
+        onChangeText={setSearchText}
+      />
+      {searchText.length > 0 && (
+        <View style={{marginBottom: 20}}>
+          {filteredItems.length > 0 ? (
+            filteredItems.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.searchResultItem,
+                  {
+                    backgroundColor: isDarkMode ? cardBackgroundDark : '#fff',
+                    borderColor: '#ccc',
+                  },
+                ]}
+                onPress={
+                  () => navigation.navigate('WordDetail', {word: item}) // Optional navigation
+                }>
+                <Text
+                  style={{
+                    color: isDarkMode ? textLight : textDark,
+                    fontWeight: '600',
+                  }}>
+                  {item.original} → {item.translation}
+                </Text>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <Text style={{color: isDarkMode ? textLight : textDark}}>
+              No results found.
+            </Text>
+          )}
+        </View>
+      )}
 
       <Text style={[styles.title, {color: isDarkMode ? textLight : textDark}]}>
         Browse by Category
@@ -252,7 +307,26 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: '500',
   },
-  
+
+  searchResultItem: {
+    padding: 10,
+    marginVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  searchBar: {
+    width: '100%',
+    height: 45,
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    fontSize: 16,
+    backgroundColor: '#fff',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
 });
 
 export default MainScreen;
