@@ -82,13 +82,25 @@ const MainScreen = () => {
       </View>
 
       <View style={styles.searchWrapper}>
-        <TextInput
-          style={[styles.searchBar, searchText ? styles.searchBarFocused : {}]}
-          placeholder="Search..."
-          placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
-          value={searchText}
-          onChangeText={setSearchText}
-        />
+        <View style={styles.searchInputContainer}>
+          <Ionicons
+            name="search"
+            size={20}
+            color={isDarkMode ? '#aaa' : '#555'}
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={[
+              styles.searchBar,
+              searchText ? styles.searchBarFocused : {},
+              {paddingLeft: 40},
+            ]}
+            placeholder="Search"
+            placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+        </View>
 
         {searchText.length > 0 && (
           <View style={styles.dropdown}>
@@ -326,8 +338,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     marginBottom: 20,
     elevation: 5,
-    borderColor: '#000',
-    borderWidth: 1,
+    backgroundColor: '#F2F2F2',
   },
 
   searchWrapper: {
@@ -349,6 +360,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 10,
+  },
+  searchInputContainer: {
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: 15,
+    zIndex: 1,
+    top: '35%',
+    marginTop: -10,
   },
 });
 
