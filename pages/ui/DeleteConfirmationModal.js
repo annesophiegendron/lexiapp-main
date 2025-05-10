@@ -11,20 +11,17 @@ const DeleteConfirmationModal = ({isVisible, onClose, onDelete}) => {
       visible={isVisible}
       onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalText}>
-            Are you sure you want to delete this word?
+        <View style={styles.modalContent}>
+          <Text style={styles.title}>Delete Word</Text>
+          <Text style={styles.subtitle}>
+            Are you sure you want to delete this word from your lexicon?
           </Text>
           <View style={styles.buttonContainer}>
-            {/* Delete Button */}
             <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
-              <Text style={styles.buttonText}>Delete</Text>
+              <Text style={styles.deleteButtonText}>Delete</Text>
             </TouchableOpacity>
-            {/* Cancel Button */}
             <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={[styles.buttonText, styles.cancelButtonText]}>
-                Cancel
-              </Text>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -36,52 +33,56 @@ const DeleteConfirmationModal = ({isVisible, onClose, onDelete}) => {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'flex-end',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  modalContainer: {
-    width: 300,
+  modalContent: {
+    backgroundColor: '#f7f7f9',
     padding: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    alignItems: 'center',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    elevation: 5,
   },
-  modalText: {
-    fontSize: 18,
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#0D0D0D',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#242540',
+    textAlign: 'center',
     marginBottom: 20,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
+    gap: 12,
   },
-  // Styled Delete Button with Centered Text
   deleteButton: {
-    backgroundColor: '#e63946', // Red for delete action
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    margin: 5,
-    borderRadius: 5,
-    justifyContent: 'center',
+    backgroundColor: '#e63946',
+    paddingVertical: 16,
+    borderRadius: 30,
     alignItems: 'center',
   },
-  // Styled Cancel Button with Border
   cancelButton: {
+    backgroundColor: '#fff',
+    borderColor: '#D7D7D9',
     borderWidth: 2,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    margin: 5,
-    borderRadius: 5,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 30,
     alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 17,
+    fontWeight: 'bold',
   },
   cancelButtonText: {
-    color: '#444',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: '#0D0D0D',
+    fontSize: 17,
+    fontWeight: 'bold',
   },
 });
 
