@@ -6,28 +6,22 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
+  Image,
 } from 'react-native';
-
 import {useNavigation} from '@react-navigation/native';
-
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import QuizImage from '../assets/images/brazuca.png'; // adjust path if needed
 
 import {useLexicon} from '../context/LexiconContext';
 import {useTheme} from '../context/ThemeContext';
-
 import AddWordScreen from './AddWordScreen';
 
 import {designSystem} from '../design';
-import {
-  categoryIcons,
-  categoryColors,
-  categoryColorsLight,
-} from '../constants.js';
+import {categoryIcons, categoryColorsLight} from '../constants.js';
 
 const MainScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState([]);
   const navigation = useNavigation();
   const {lexicon} = useLexicon();
   const {isDarkMode} = useTheme();
@@ -40,9 +34,14 @@ const MainScreen = () => {
     textDark,
   } = designSystem.colors;
 
-  const handleClose = () => {
-    setModalVisible(false);
-  };
+  const handleClose = () => setModalVisible(false);
+
+  const filteredItems = lexicon.filter(item => {
+    const matchesSearch =
+      item.original.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.translation.toLowerCase().includes(searchText.toLowerCase());
+    return matchesSearch;
+  });
 
   const navigateToCategoryWords = category => {
     const filteredWords = lexicon.filter(word => word.category === category);
@@ -53,76 +52,72 @@ const MainScreen = () => {
     navigation.navigate('QuizzScreen');
   };
 
-  const filteredItems = lexicon.filter(item => {
-    const matchesSearch =
-      item.original.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.translation.toLowerCase().includes(searchText.toLowerCase());
-
-    const matchesCategory =
-      selectedCategories.length === 0 ||
-      item.categories?.some(cat => selectedCategories.includes(cat));
-
-    return matchesSearch && matchesCategory;
-  });
-
   return (
     <ScrollView
       style={[
         styles.container,
         {backgroundColor: isDarkMode ? backgroundDark : backgroundLight},
-      ]}>
+      ]}
+      contentContainerStyle={{paddingBottom: 40}}>
+      {/* Date Header */}
       <View style={styles.dateContainer}>
-        <Text style={styles.dateText}>
+        <Text style={[styles.dateText, {color: isDarkMode ? '#AAA' : '#666'}]}>
           {new Date().getDate()}{' '}
           {new Date().toLocaleString('en-US', {month: 'long'})}
         </Text>
-        <Text style={styles.weekdayText}>
+        <Text
+          style={[
+            styles.weekdayText,
+            {color: isDarkMode ? textLight : textDark},
+          ]}>
           {new Date().toLocaleString('en-US', {weekday: 'long'})}
         </Text>
       </View>
 
+      {/* Search */}
       <View style={styles.searchWrapper}>
-        <View style={styles.searchInputContainer}>
+        <View
+          style={[
+            styles.searchInputContainer,
+            {
+              backgroundColor: isDarkMode ? '#333' : '#F0F0F0',
+            },
+          ]}>
           <Ionicons
             name="search"
             size={20}
-            color={isDarkMode ? '#aaa' : '#555'}
+            color={isDarkMode ? '#aaa' : '#666'}
             style={styles.searchIcon}
           />
           <TextInput
             style={[
               styles.searchBar,
-              searchText ? styles.searchBarFocused : {},
-              {paddingLeft: 40},
+              {
+                color: isDarkMode ? textLight : textDark,
+              },
             ]}
             placeholder="Search a word or phrase"
-            placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
+            placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
             value={searchText}
             onChangeText={setSearchText}
           />
         </View>
 
         {searchText.length > 0 && (
-          <View style={styles.dropdown}>
+          <View
+            style={[
+              styles.dropdown,
+              {backgroundColor: isDarkMode ? cardBackgroundDark : '#fff'},
+            ]}>
             {filteredItems.length > 0 ? (
               filteredItems.map((item, index) => (
                 <TouchableOpacity
                   key={index}
-                  style={[
-                    styles.searchResultItem,
-                    {
-                      backgroundColor: isDarkMode ? cardBackgroundDark : '#fff',
-                      borderColor: '#ccc',
-                    },
-                  ]}
+                  style={styles.searchResultItem}
                   onPress={() =>
                     navigation.navigate('WordDetail', {word: item})
                   }>
-                  <Text
-                    style={{
-                      color: isDarkMode ? textLight : textDark,
-                      fontWeight: '600',
-                    }}>
+                  <Text style={{color: isDarkMode ? textLight : textDark}}>
                     {item.original} → {item.translation}
                   </Text>
                 </TouchableOpacity>
@@ -136,8 +131,42 @@ const MainScreen = () => {
           </View>
         )}
       </View>
+      {/* Quiz Section */}
+      <TouchableOpacity
+        style={[
+          styles.quizCard,
+          {backgroundColor: isDarkMode ? '#2a2a2a' : '#f4f4f4'},
+        ]}
+        onPress={navigateToQuizScreen}>
+        <Image
+          source={QuizImage}
+          style={styles.quizImage}
+          resizeMode="contain"
+        />
+        <View style={styles.textContainer}>
+          <Text
+            style={[
+              styles.quizTitle,
+              {color: isDarkMode ? textLight : '#1a1a1a'},
+            ]}>
+            Daily Challenge
+          </Text>
+          <Text
+            style={[
+              styles.quizSubtitle,
+              {color: isDarkMode ? '#bbb' : '#555'},
+            ]}>
+            Test your memory and track your progress.
+          </Text>
+        </View>
+      </TouchableOpacity>
 
-      <Text style={[styles.title, {color: isDarkMode ? textLight : textDark}]}>
+      {/* Categories */}
+      <Text
+        style={[
+          styles.sectionTitle,
+          {color: isDarkMode ? textLight : textDark},
+        ]}>
         Browse by Category
       </Text>
       <View style={styles.categoriesContainer}>
@@ -153,16 +182,11 @@ const MainScreen = () => {
               },
             ]}
             onPress={() => navigateToCategoryWords(category)}>
-            {/* Background Icon */}
             <Ionicons
               name={categoryIcons[category]}
-              size={70}
-              color={
-                isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
-              }
-              style={styles.categoryIconBackground}
+              size={34}
+              color={isDarkMode ? textLight : '#444'}
             />
-
             <Text
               style={[
                 styles.categoryText,
@@ -174,202 +198,125 @@ const MainScreen = () => {
         ))}
       </View>
 
-      <Text style={[styles.title, {color: isDarkMode ? textLight : textDark}]}>
-        Challenge yourself
-      </Text>
-
-      <TouchableOpacity
-        style={[
-          styles.card,
-          styles.actionButton,
-          {
-            backgroundColor: isDarkMode
-              ? cardBackgroundDark
-              : cardBackgroundLight,
-          },
-        ]}
-        onPress={navigateToQuizScreen}>
-        <View style={styles.textContainer}>
-          <Text
-            style={[
-              styles.buttonTextAction,
-              {color: isDarkMode ? textLight : textDark},
-            ]}>
-            Start Quiz
-          </Text>
-          <Text
-            style={[
-              styles.descriptionText,
-              {color: isDarkMode ? '#CCC' : '#666'},
-            ]}>
-            Test the words you've added.
-          </Text>
-        </View>
-      </TouchableOpacity>
-
+      {/* Add Word Modal */}
       <AddWordScreen isVisible={modalVisible} onClose={handleClose} />
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  // Container styles
   container: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 24,
+  },
+  dateContainer: {
+    marginBottom: 16,
+  },
+  dateText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  weekdayText: {
+    fontSize: 28,
+    fontWeight: '600',
+  },
+  searchWrapper: {
+    marginBottom: 20,
+    zIndex: 10,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 25,
+    paddingHorizontal: 16,
+    elevation: 2,
+    height: 45,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchBar: {
+    flex: 1,
+    fontSize: 16,
+  },
+  dropdown: {
+    marginTop: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    elevation: 4,
+    padding: 8,
+    maxHeight: 200,
+  },
+  searchResultItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#ddd',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 10,
   },
   categoriesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    gap: 12,
     justifyContent: 'space-between',
-  },
-
-  // Card styles
-  card: {
-    borderRadius: 12,
-    padding: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    flexDirection: 'column',
-    elevation: 5,
+    marginBottom: 20,
   },
   categoryCard: {
-    borderRadius: 12,
     width: '30%',
-    marginVertical: 10,
-    padding: 8,
+    padding: 12,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    height: 100,
-    position: 'relative',
-    overflow: 'hidden',
-    flexDirection: 'column',
+    elevation: 3,
+    marginBottom: 12,
   },
-
-  categoryIconBackground: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 70,
-    height: 70,
-  },
-
   categoryText: {
-    position: 'absolute',
-    transform: [{translateX: -35}, {translateY: -35}],
+    fontSize: 14,
     fontWeight: '600',
-    fontSize: 16,
-    color: 'white',
+    marginTop: 6,
     textAlign: 'center',
-    width: '100%',
+  },
+  quizCard: {
+    borderRadius: 20,
+    padding: 20,
+    marginTop: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: 20,
+    minHeight: 180,
+    marginBottom: 20
   },
 
-  // Button styles
-  actionButton: {
-    backgroundColor: 'rgba(217, 217, 217, 0.3)',
-    elevation: 5,
-    transform: [{scale: 1}],
-    transition: 'transform 0.3s',
-    padding: 24,
-    marginVertical: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  // Text styles
-  topTitle: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    marginVertical: 14,
-    color: '#262626',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginVertical: 7,
-    color: '#8C8C8C',
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  buttonTextAction: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: '6',
-  },
-  descriptionText: {
-    fontSize: 16,
-    textAlign: 'center',
+  quizImage: {
+    width: 160,
+    height: 160,
   },
 
   textContainer: {
-    alignItems: 'center',
+    flex: 1,
     justifyContent: 'center',
-    textAlign: 'center',
-    position: 'relative',
-  },
-  dateContainer: {
-    marginBottom: 10,
-  },
-  dateText: {
-    fontSize: 14,
-    color: '#888',
-    fontWeight: '700',
-  },
-  weekdayText: {
-    fontSize: 26,
-    fontWeight: '500',
+    alignItems: 'flex-end',
   },
 
-  searchResultItem: {
-    padding: 10,
-    marginVertical: 4,
-    marginHorizontal: 4,
+  quizTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'right',
+    flexWrap: 'wrap',
   },
-  searchBar: {
-    width: '100%',
-    height: 45,
-    borderRadius: 25,
-    paddingHorizontal: 20,
+
+  quizSubtitle: {
     fontSize: 16,
-    marginBottom: 20,
-    elevation: 5,
-    backgroundColor: '#F2F2F2'
-  },
-
-  searchWrapper: {
-    position: 'relative',
-    marginBottom: 20,
-    zIndex: 10,
-  },
-  dropdown: {
-    position: 'absolute',
-    top: 50,
-    width: '100%',
-    maxHeight: 200,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    zIndex: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 10,
-  },
-  searchInputContainer: {
-    position: 'relative',
-    justifyContent: 'center',
-  },
-  searchIcon: {
-    position: 'absolute',
-    left: 15,
-    zIndex: 1,
-    top: '35%',
-    marginTop: -10,
+    lineHeight: 22,
+    textAlign: 'right',
+    flexWrap: 'wrap',
   },
 });
 
