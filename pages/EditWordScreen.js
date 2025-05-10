@@ -11,63 +11,46 @@ import {
   Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
 import {useLexicon} from '../context/LexiconContext';
-
 import {categoryColors, categories} from '../constants.js';
+
+const MAX_CHARACTERS = 80;
 
 const EditWordScreen = ({isVisible, onClose, word, onUpdateWord}) => {
   const [original, setOriginal] = useState(word?.original || '');
   const [translation, setTranslation] = useState(word?.translation || '');
-  const [selectedCategories, setSelectedCategories] = useState(
-    word?.categories || [],
-  );
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-  const {updateWord, lexicon} = useLexicon();
-
-  const MAX_CHARACTERS = {
-    original: 80,
-    translation: 80,
-  };
+  const [selectedCategories, setSelectedCategories] = useState(word?.categories || []);
+  const [errorMessage, setErrorMessage] = useState('');
+  const {lexicon} = useLexicon();
 
   useEffect(() => {
     if (word) {
       setOriginal(word.original || '');
       setTranslation(word.translation || '');
       setSelectedCategories(word.categories || []);
-      setError('');
-      setSuccess(false);
+      setErrorMessage('');
     }
   }, [word]);
 
   const saveWord = () => {
-    if (!original) {
-      setError('Original word is required.');
+    if (!original || !translation) {
+      setErrorMessage('All fields are required.');
       return;
     }
-    if (!translation) {
-      setError('Translation is required.');
-      return;
-    }
+
     if (selectedCategories.length === 0) {
-      setError('At least one category must be selected.');
+      setErrorMessage('At least one category must be selected.');
       return;
     }
+
     const isTranslationChanged =
       word.translation.toLowerCase() !== translation.toLowerCase();
     const exists =
       isTranslationChanged &&
-      lexicon.some(
-        w => w.translation.toLowerCase() === translation.toLowerCase(),
-      );
+      lexicon.some(w => w.translation.toLowerCase() === translation.toLowerCase());
 
     if (exists) {
-      Alert.alert(
-        'Duplicate Translation',
-        'The translation you entered already exists in your lexicon.',
-        [{text: 'OK'}],
-      );
+      Alert.alert('Duplicate Translation', 'This translation already exists in your lexicon.');
       return;
     }
 
@@ -79,18 +62,14 @@ const EditWordScreen = ({isVisible, onClose, word, onUpdateWord}) => {
     };
 
     onUpdateWord(updatedWord);
-    setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-      onClose();
-    }, 1500);
+    onClose();
   };
 
   const toggleCategory = category => {
-    setSelectedCategories(prevCategories =>
-      prevCategories.includes(category)
-        ? prevCategories.filter(cat => cat !== category)
-        : [...prevCategories, category],
+    setSelectedCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(cat => cat !== category)
+        : [...prev, category],
     );
   };
 
@@ -110,13 +89,8 @@ const EditWordScreen = ({isVisible, onClose, word, onUpdateWord}) => {
           <View
             style={styles.modalContent}
             onTouchEnd={e => e.stopPropagation()}>
-            <View style={styles.imagePlaceholder}>
-              <Ionicons name="create-outline" size={80} color="#fff" />
-            </View>
             <Text style={styles.title}>Edit Word</Text>
-            <Text style={styles.description}>
-              Update the details of your word
-            </Text>
+            <Text style={styles.subtitle}>Update your word and its categories</Text>
 
             <View style={styles.buttonGrid}>
               {categories.map(cat => (
@@ -136,60 +110,58 @@ const EditWordScreen = ({isVisible, onClose, word, onUpdateWord}) => {
               ))}
             </View>
 
-            {/* Original Word Input */}
-            <TextInput
-              style={[
-                styles.input,
-                error.includes('Original') ? styles.errorInput : null,
-              ]}
-              placeholder="Original Word"
-              placeholderTextColor="#404040"
-              value={original}
-              onChangeText={text =>
-                text.length <= MAX_CHARACTERS.original && setOriginal(text)
-              }
-            />
-            <Text
-              style={[
-                styles.charCount,
-                original.length >= MAX_CHARACTERS.original
-                  ? styles.charCountError
-                  : null,
-              ]}>
-              {original.length}/{MAX_CHARACTERS.original}
-            </Text>
+            <View>
+              <View
+                style={[
+                  styles.inputWrapper,
+                  !original && errorMessage && styles.errorInput,
+                ]}>
+                <Ionicons
+                  name="create-outline"
+                  size={20}
+                  color="#999"
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Edit the word or phrase"
+                  value={original}
+                  onChangeText={text => setOriginal(text.slice(0, MAX_CHARACTERS))}
+                  maxLength={MAX_CHARACTERS}
+                />
+              </View>
+              <Text style={styles.charCount}>{original.length}/{MAX_CHARACTERS}</Text>
+            </View>
 
-            {/* Translation Input */}
-            <TextInput
-              style={[
-                styles.input,
-                error.includes('Translation') ? styles.errorInput : null,
-              ]}
-              placeholder="Translation"
-              placeholderTextColor="#404040"
-              value={translation}
-              onChangeText={text =>
-                text.length <= MAX_CHARACTERS.translation &&
-                setTranslation(text)
-              }
-            />
-            <Text
-              style={[
-                styles.charCount,
-                translation.length >= MAX_CHARACTERS.translation
-                  ? styles.charCountError
-                  : null,
-              ]}>
-              {translation.length}/{MAX_CHARACTERS.translation}
-            </Text>
+            <View>
+              <View
+                style={[
+                  styles.inputWrapper,
+                  !translation && errorMessage && styles.errorInput,
+                ]}>
+                <Ionicons
+                  name="language-outline"
+                  size={20}
+                  color="#999"
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Edit its translation or meaning"
+                  value={translation}
+                  onChangeText={text => setTranslation(text.slice(0, MAX_CHARACTERS))}
+                  maxLength={MAX_CHARACTERS}
+                />
+              </View>
+              <Text style={styles.charCount}>{translation.length}/{MAX_CHARACTERS}</Text>
+            </View>
 
-            {error && <Text style={styles.errorText}>{error}</Text>}
-            {success && (
-              <Text style={styles.successText}>Word updated successfully!</Text>
-            )}
+            {errorMessage ? (
+              <Text style={styles.errorMessage}>{errorMessage}</Text>
+            ) : null}
 
             <TouchableOpacity style={styles.saveButton} onPress={saveWord}>
-              <Text style={styles.saveButtonText}>Save</Text>
+              <Text style={styles.saveButtonText}>Save changes</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -205,45 +177,25 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: '#262526',
+    backgroundColor: '#f7f7f9',
     padding: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     elevation: 5,
   },
-  imagePlaceholder: {
-    height: 70,
-    borderRadius: 12,
-    marginBottom: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  image: {
-    width: 95,
-    height: 95,
-  },
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#0D0D0D',
     textAlign: 'center',
-    marginBottom: 8,
   },
-  description: {
+  subtitle: {
     fontSize: 14,
-    color: '#aaa',
+    color: '#242540',
+    marginBottom: 16,
+    fontWeight: 'normal',
     textAlign: 'center',
-    marginBottom: 20,
-  },
-  categoryButtonText: {
-    fontSize: 13,
-    color: '#262626',
-    fontWeight: 'bold',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    marginTop: 16,
   },
   buttonGrid: {
     flexDirection: 'row',
@@ -259,44 +211,30 @@ const styles = StyleSheet.create({
     minWidth: '30%',
     alignItems: 'center',
   },
-  saveButton: {
-    paddingVertical: 16,
-    paddingHorizontal: 45,
-    backgroundColor: '#6200EE',
-    borderRadius: 30,
-    elevation: 5,
+  categoryButtonText: {
+    fontSize: 13,
+    color: '#262626',
+    fontWeight: 'bold',
+  },
+  inputWrapper: {
+    flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#6200EE',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    marginBottom: 15,
+    backgroundColor: '#fff',
+    borderColor: '#D7D7D9',
+    borderWidth: 2,
+    borderRadius: 50,
+    paddingHorizontal: 10,
+    height: 55,
+    marginBottom: 5,
   },
   input: {
-    height: 55,
-    borderColor: '#262626',
-    borderWidth: 2,
-    marginBottom: 5,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-    backgroundColor: '#fff',
-    fontSize: 18,
+    flex: 1,
+    fontSize: 16,
+    paddingLeft: 10,
+    color: '#000',
   },
-  errorInput: {
-    borderColor: 'red',
-    backgroundColor: '#ffe6e6',
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 14,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  successText: {
-    color: 'green',
-    fontSize: 14,
-    marginBottom: 10,
-    textAlign: 'center',
+  inputIcon: {
+    marginLeft: 2,
   },
   charCount: {
     fontSize: 12,
@@ -304,8 +242,29 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     marginBottom: 10,
   },
-  charCountError: {
+  errorInput: {
+    borderColor: 'red',
+    backgroundColor: '#ffe6e6',
+  },
+  errorMessage: {
     color: 'red',
+    fontSize: 12,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  saveButton: {
+    paddingVertical: 16,
+    paddingHorizontal: 45,
+    backgroundColor: '#0D0D0D',
+    borderRadius: 30,
+    elevation: 5,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 
