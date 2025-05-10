@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,24 +9,24 @@ import {
   useColorScheme,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {useLexicon} from '../context/LexiconContext';
+import { useLexicon } from '../context/LexiconContext';
 import AddWordScreen from './AddWordScreen';
 import EditWordScreen from './EditWordScreen';
-import {useTheme} from '../context/ThemeContext';
-import {categoryColors, categoryIcons} from '../constants';
+import { useTheme } from '../context/ThemeContext';
+import { categoryColors, categoryIcons } from '../constants';
 import DeleteConfirmationModal from './ui/DeleteConfirmationModal';
 
-const LexiconList = ({selectedCategory = []}) => {
-  const {lexicon, removeWord, updateWord} = useLexicon();
+const LexiconList = ({ selectedCategory = [] }) => {
+  const { lexicon, removeWord, updateWord } = useLexicon();
   const [isModalVisible, setModalVisible] = useState(false);
   const [isEditModalVisible, setEditModalVisible] = useState(false);
   const [currentWord, setCurrentWord] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [wordToDelete, setWordToDelete] = useState(null);
   const [searchText, setSearchText] = useState('');
-  const [selectedCategories, setSelectedCategories] =
-    useState(selectedCategory);
-  const {isDarkMode} = useTheme();
+  const [selectedCategories, setSelectedCategories] = useState(selectedCategory);
+  const [isCategoryVisible, setCategoryVisible] = useState(false); // Added state for category visibility
+  const { isDarkMode } = useTheme();
 
   const toggleModal = () => setModalVisible(!isModalVisible);
   const toggleEditModal = () => setEditModalVisible(!isEditModalVisible);
@@ -73,53 +73,64 @@ const LexiconList = ({selectedCategory = []}) => {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={[styles.searchBar, searchText ? styles.searchBarFocused : {}]}
-        placeholder="Search words..."
-        placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
-        value={searchText}
-        onChangeText={setSearchText}
-      />
-
-      <View style={styles.filterContainer}>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={[styles.searchBar, searchText ? styles.searchBarFocused : {}]}
+          placeholder="Search words..."
+          placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
+          value={searchText}
+          onChangeText={setSearchText}
+        />
         <TouchableOpacity
-          style={[
-            styles.categoryButton,
-            selectedCategories.length === 0 && styles.selectedCategoryButton,
-          ]}
-          onPress={clearAllCategories}>
-          <Text
-            style={[
-              styles.categoryButtonText,
-              selectedCategories.length === 0 &&
-                styles.selectedCategoryButtonText,
-            ]}>
-            All
-          </Text>
+          style={styles.filterIconContainer}
+          onPress={() => setCategoryVisible(!isCategoryVisible)} // Toggle category visibility
+        >
+          <Ionicons name="filter" size={20} color={isDarkMode ? '#fff' : '#000'} />
         </TouchableOpacity>
-        {Object.keys(categoryColors).map(category => (
+      </View>
+
+      {/* Category tags visible when user clicks the filter icon */}
+      {isCategoryVisible && (
+        <View style={styles.filterContainer}>
           <TouchableOpacity
-            key={category}
             style={[
               styles.categoryButton,
-              selectedCategories.includes(category)
-                ? {backgroundColor: categoryColors[category]}
-                : {},
+              selectedCategories.length === 0 && styles.selectedCategoryButton,
             ]}
-            onPress={() => toggleCategorySelection(category)}>
+            onPress={clearAllCategories}>
             <Text
-              style={{
-                color: selectedCategories.includes(category)
-                  ? '#fff'
-                  : isDarkMode
-                  ? '#fff'
-                  : '#000',
-              }}>
-              {category}
+              style={[
+                styles.categoryButtonText,
+                selectedCategories.length === 0 &&
+                  styles.selectedCategoryButtonText,
+              ]}>
+              All
             </Text>
           </TouchableOpacity>
-        ))}
-      </View>
+          {Object.keys(categoryColors).map(category => (
+            <TouchableOpacity
+              key={category}
+              style={[
+                styles.categoryButton,
+                selectedCategories.includes(category)
+                  ? { backgroundColor: categoryColors[category] }
+                  : {},
+              ]}
+              onPress={() => toggleCategorySelection(category)}>
+              <Text
+                style={{
+                  color: selectedCategories.includes(category)
+                    ? '#fff'
+                    : isDarkMode
+                    ? '#fff'
+                    : '#000',
+                }}>
+                {category}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
 
       {lexicon.length === 0 || filteredLexicon.length === 0 ? (
         <View style={styles.emptyStateContainer}>
@@ -129,7 +140,7 @@ const LexiconList = ({selectedCategory = []}) => {
         <FlatList
           data={filteredLexicon}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => handleEdit(item)}
               style={styles.wordContainer}>
@@ -140,7 +151,7 @@ const LexiconList = ({selectedCategory = []}) => {
                       key={catIndex}
                       style={[
                         styles.categoryTag,
-                        {backgroundColor: categoryColors[cat] || '#ccc'},
+                        { backgroundColor: categoryColors[cat] || '#ccc' },
                       ]}>
                       <Ionicons
                         name={categoryIcons[cat] || 'help-circle'}
@@ -153,10 +164,9 @@ const LexiconList = ({selectedCategory = []}) => {
                 <Text
                   style={[
                     styles.wordText,
-                    {color: isDarkMode ? '#D9D9D9' : '#000'},
+                    { color: isDarkMode ? '#D9D9D9' : '#000' },
                   ]}>
-                  <Text style={styles.originalText}>{item.original}</Text> -{' '}
-                  {item.translation}
+                  <Text style={styles.originalText}>{item.original}</Text> - {item.translation}
                 </Text>
               </View>
               <TouchableOpacity
@@ -219,15 +229,29 @@ const baseStyles = {
     flex: 1,
     marginRight: 10,
   },
-  searchBar: {
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
+    marginHorizontal: 15,  // Added margin to left and right of the search bar and filter icon
     width: '100%',
+  },
+  searchBar: {
+    flex: 1,  // Makes the search bar take up available space
     height: 45,
     borderRadius: 25,
     paddingHorizontal: 20,
     fontSize: 16,
-    marginBottom: 20,
     backgroundColor: 'transparent',
     borderWidth: 1,
+  },
+  filterIconContainer: {
+    padding: 10,
+    borderRadius: 50,
+    marginLeft: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
   },
   filterContainer: {
     flexDirection: 'row',
