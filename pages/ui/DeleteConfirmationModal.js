@@ -12,9 +12,9 @@ const DeleteConfirmationModal = ({isVisible, onClose, onDelete}) => {
       onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modalContent}>
-          <Text style={styles.title}>Delete Word</Text>
+          <Text style={styles.title}>Delete</Text>
           <Text style={styles.subtitle}>
-            Are you sure you want to delete this word from your lexicon?
+            This will delete the selected item. Are you sure?
           </Text>
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>

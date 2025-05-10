@@ -1,5 +1,12 @@
 import React from 'react';
-import {View, Text, StyleSheet, ScrollView, Dimensions} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+  Image,
+} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useLexicon} from '../context/LexiconContext';
 import {useTheme} from '../context/ThemeContext';
@@ -14,9 +21,8 @@ const DashboardScreen = () => {
 
   const totalWords = lexicon.length;
 
-  // Words added in the last 7 days
   const today = new Date();
-  const sevenDaysAgo = new Date();
+  const sevenDaysAgo = new Date(today);
   sevenDaysAgo.setDate(today.getDate() - 6);
   sevenDaysAgo.setHours(0, 0, 0, 0);
 
@@ -36,14 +42,12 @@ const DashboardScreen = () => {
   let streak = 0;
   let currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
-
   while (uniqueDays.has(currentDate.getTime())) {
     streak++;
     currentDate.setDate(currentDate.getDate() - 1);
   }
 
-  const todayTime = new Date().setHours(0, 0, 0, 0);
-  if (!uniqueDays.has(todayTime)) {
+  if (!uniqueDays.has(new Date().setHours(0, 0, 0, 0))) {
     streak = 0;
   }
 
@@ -52,125 +56,100 @@ const DashboardScreen = () => {
   const motivationalMessage =
     streak >= 7
       ? 'Great! You are on a streak! Keep going!'
-      : "You are doing great! Let's continue adding more words!";
+      : "You're doing great — let’s add more words!";
 
   return (
     <ScrollView
       style={[
         styles.container,
-        {backgroundColor: isDarkMode ? '#121212' : '#ffffff'},
+        {backgroundColor: isDarkMode ? '#121212' : '#FAFAFA'},
       ]}
       contentContainerStyle={styles.scrollContent}>
-      {/* Total Words Section */}
-      <View
-        style={[
-          styles.section,
-          {backgroundColor: isDarkMode ? '#333' : '#e9f7ff'},
-        ]}>
-        <Text
-          style={[styles.sectionHeader, {color: isDarkMode ? '#fff' : '#333'}]}>
-          <Ionicons
-            name="book"
-            size={20}
-            color={isDarkMode ? '#fff' : '#333'}
-          />{' '}
-          Total Words Added
-        </Text>
-        <Text
-          style={[
-            styles.sectionContent,
-            {color: isDarkMode ? '#fff' : '#333'},
-          ]}>
-          {totalWords}
-        </Text>
-      </View>
+      <DashboardCard
+        icon="book"
+        title="Total Words Added"
+        value={`${totalWords}`}
+        bgColor={isDarkMode ? '#2a2a2a' : '#e0f7fa'}
+        isDarkMode={isDarkMode}
+      />
 
-      {/* Recent Activity Section */}
-      <View
-        style={[
-          styles.section,
-          {backgroundColor: isDarkMode ? '#333' : '#f5f5f5'},
-        ]}>
-        <Text
-          style={[styles.sectionHeader, {color: isDarkMode ? '#fff' : '#333'}]}>
-          <Ionicons
-            name="time"
-            size={20}
-            color={isDarkMode ? '#fff' : '#333'}
-          />{' '}
-          Words Added in the Last 7 Days
-        </Text>
-        <Text
-          style={[
-            styles.sectionContent,
-            {color: isDarkMode ? '#fff' : '#333'},
-          ]}>
-          {recentWords.length === 0
-            ? 'No words added in the last 7 days'
+      <DashboardCard
+        icon="time"
+        title="Words Added in the Last 7 Days"
+        value={
+          recentWords.length === 0
+            ? 'No words added'
             : recentWords.length === 1
             ? '1 word added'
-            : `${recentWords.length} words added`}
-        </Text>
-      </View>
+            : `${recentWords.length} words added`
+        }
+        bgColor={isDarkMode ? '#2a2a2a' : '#fffde7'}
+        isDarkMode={isDarkMode}
+      />
 
-      {/* Streak Section */}
-      <View
-        style={[
-          styles.section,
-          {backgroundColor: isDarkMode ? '#333' : '#ffe5b4'},
-        ]}>
-        <Text
-          style={[styles.sectionHeader, {color: isDarkMode ? '#fff' : '#333'}]}>
-          <Ionicons
-            name="flame"
-            size={20}
-            color={isDarkMode ? '#fff' : '#333'}
-          />{' '}
-          Your Current Streak
-        </Text>
-        <Text
-          style={[
-            styles.sectionContent,
-            {color: isDarkMode ? '#fff' : '#333'},
-          ]}>
-          {streak === 0
-            ? "Let's start building a streak! 🚀"
-            : `🔥 ${streak} ${streakText} in a row!`}
-        </Text>
+      <DashboardCard
+        icon="flame"
+        title="Current Streak"
+        value={
+          streak === 0
+            ? 'Start your streak today! 🚀'
+            : `🔥 ${streak} ${streakText} in a row`
+        }
+        subtitle={motivationalMessage}
+        bgColor={isDarkMode ? '#2a2a2a' : '#fce4ec'}
+        isDarkMode={isDarkMode}
+      />
 
-        <Text
-          style={[
-            styles.motivationalText,
-            {color: isDarkMode ? '#fff' : '#333'},
-          ]}>
-          {motivationalMessage}
-        </Text>
-      </View>
-
-      {/* Progress Bar */}
-      <View
-        style={[
-          styles.section,
-          {backgroundColor: isDarkMode ? '#333' : '#d0e8e2'},
-        ]}>
-        <Text
-          style={[styles.sectionHeader, {color: isDarkMode ? '#fff' : '#333'}]}>
-          <Ionicons
-            name="rocket"
-            size={20}
-            color={isDarkMode ? '#fff' : '#333'}
-          />{' '}
-          Progress
-        </Text>
-        <Text
-          style={[
-            styles.sectionContent,
-            {color: isDarkMode ? '#fff' : '#333'},
-          ]}>
-          {totalWords} / 1000 words
-        </Text>
-      </View>
+      <DashboardCard
+        icon="rocket"
+        title="Progress"
+        value={`${totalWords} / 1000 words`}
+        bgColor={isDarkMode ? '#2a2a2a' : '#e3f2fd'}
+        isDarkMode={isDarkMode}
+      />
     </ScrollView>
+  );
+};
+
+const DashboardCard = ({
+  icon,
+  title,
+  value,
+  subtitle,
+  bgColor,
+  isDarkMode,
+}: {
+  icon: string;
+  title: string;
+  value: string;
+  subtitle?: string;
+  bgColor: string;
+  isDarkMode: boolean;
+}) => {
+  return (
+    <View style={[styles.card, {backgroundColor: bgColor}]}>
+      <View style={styles.headerRow}>
+        <Ionicons name={icon} size={20} color={isDarkMode ? '#fff' : '#333'} />
+        <Text style={[styles.cardTitle, {color: isDarkMode ? '#fff' : '#333'}]}>
+          {title}
+        </Text>
+      </View>
+      <Text style={[styles.cardValue, {color: isDarkMode ? '#fff' : '#222'}]}>
+        {value}
+      </Text>
+      {subtitle && (
+        <Text
+          style={[
+            styles.cardSubtitle,
+            {
+              color: isDarkMode ? '#ccc' : '#555',
+              maxWidth: '90%',
+            },
+          ]}>
+          {subtitle}
+        </Text>
+      )}
+    </View>
   );
 };
 
@@ -182,31 +161,31 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 30,
   },
-  section: {
+  card: {
     marginBottom: 20,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 3,
   },
-  sectionHeader: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 10,
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 8,
+    gap: 8,
   },
-  sectionContent: {
+  cardTitle: {
     fontSize: 18,
-    fontWeight: '400',
+    fontWeight: '600',
+    marginLeft: 8,
   },
-  motivationalText: {
-    fontSize: 16,
-    marginTop: 10,
+  cardValue: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  cardSubtitle: {
+    fontSize: 15,
     fontStyle: 'italic',
+    marginTop: 4,
   },
 });
 
