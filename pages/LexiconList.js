@@ -16,7 +16,7 @@ import {useTheme} from '../context/ThemeContext';
 import {categoryColors, categoryIcons} from '../constants';
 import DeleteConfirmationModal from './ui/DeleteConfirmationModal';
 
-const LexiconList = selectedCategory => {
+const LexiconList = ({selectedCategory = []}) => {
   const {lexicon, removeWord, updateWord} = useLexicon();
   const [isModalVisible, setModalVisible] = useState(false);
   const [isEditModalVisible, setEditModalVisible] = useState(false);
@@ -24,12 +24,8 @@ const LexiconList = selectedCategory => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [wordToDelete, setWordToDelete] = useState(null);
   const [searchText, setSearchText] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState(
-    Array.isArray(selectedCategory) && selectedCategory.length > 0
-      ? selectedCategory
-      : [],
-  );
-  const colorScheme = useColorScheme();
+  const [selectedCategories, setSelectedCategories] =
+    useState(selectedCategory);
   const {isDarkMode} = useTheme();
 
   const toggleModal = () => setModalVisible(!isModalVisible);
@@ -39,11 +35,12 @@ const LexiconList = selectedCategory => {
     setWordToDelete(word);
     setShowDeleteModal(true);
   };
+
   const confirmDelete = () => {
     removeWord(lexicon.findIndex(w => w === wordToDelete));
     setShowDeleteModal(false);
   };
-  const cancelDelete = () => setShowDeleteModal(false);
+
   const handleEdit = word => {
     setCurrentWord(word);
     toggleEditModal();
@@ -60,8 +57,6 @@ const LexiconList = selectedCategory => {
     return matchesSearch && matchesCategory;
   });
 
-  const styles = isDarkMode ? darkStyles : lightStyles;
-
   const toggleCategorySelection = category => {
     if (selectedCategories.includes(category)) {
       setSelectedCategories(selectedCategories.filter(cat => cat !== category));
@@ -74,12 +69,10 @@ const LexiconList = selectedCategory => {
     setSelectedCategories([]);
   };
 
+  const styles = isDarkMode ? darkStyles : lightStyles;
+
   return (
-    <View
-      style={[
-        styles.container,
-        {backgroundColor: isDarkMode ? '#121212' : '#ffffff'},
-      ]}>
+    <View style={styles.container}>
       <TextInput
         style={[styles.searchBar, searchText ? styles.searchBarFocused : {}]}
         placeholder="Search words..."
@@ -111,12 +104,16 @@ const LexiconList = selectedCategory => {
               styles.categoryButton,
               selectedCategories.includes(category)
                 ? {backgroundColor: categoryColors[category]}
-                : {backgroundColor: '#ddd'},
+                : {},
             ]}
             onPress={() => toggleCategorySelection(category)}>
             <Text
               style={{
-                color: selectedCategories.includes(category) ? '#fff' : '#000',
+                color: selectedCategories.includes(category)
+                  ? '#fff'
+                  : isDarkMode
+                  ? '#fff'
+                  : '#000',
               }}>
               {category}
             </Text>
@@ -124,12 +121,7 @@ const LexiconList = selectedCategory => {
         ))}
       </View>
 
-      {/* Show message if lexicon is empty */}
-      {lexicon.length === 0 ? (
-        <View style={styles.emptyStateContainer}>
-          <Text style={styles.emptyMessage}>No words added yet.</Text>
-        </View>
-      ) : filteredLexicon.length === 0 ? (
+      {lexicon.length === 0 || filteredLexicon.length === 0 ? (
         <View style={styles.emptyStateContainer}>
           <Text style={styles.emptyMessage}>No words added yet.</Text>
         </View>
@@ -140,10 +132,7 @@ const LexiconList = selectedCategory => {
           renderItem={({item}) => (
             <TouchableOpacity
               onPress={() => handleEdit(item)}
-              style={[
-                styles.wordContainer,
-                {backgroundColor: isDarkMode ? '#333' : '#F2F2F2'},
-              ]}>
+              style={styles.wordContainer}>
               <View style={styles.leftContainer}>
                 <View style={styles.categoriesContainer}>
                   {item.categories?.map((cat, catIndex) => (
@@ -197,7 +186,6 @@ const LexiconList = selectedCategory => {
           toggleEditModal();
         }}
       />
-
       <DeleteConfirmationModal
         isVisible={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -207,19 +195,21 @@ const LexiconList = selectedCategory => {
   );
 };
 
-const lightStyles = StyleSheet.create({
+export default LexiconList;
+
+const baseStyles = {
   container: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#f4f2ec',
     padding: 20,
+    backgroundColor: 'transparent',
   },
   wordContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 11,
-    marginVertical: 5,
+    padding: 14,
+    marginVertical: 6,
     borderRadius: 12,
     width: '100%',
   },
@@ -235,12 +225,9 @@ const lightStyles = StyleSheet.create({
     borderRadius: 25,
     paddingHorizontal: 20,
     fontSize: 16,
-    backgroundColor: '#fff',
     marginBottom: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
   },
   filterContainer: {
     flexDirection: 'row',
@@ -249,22 +236,24 @@ const lightStyles = StyleSheet.create({
     marginBottom: 15,
   },
   categoryButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    backgroundColor: '#ddd',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 18,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
     marginHorizontal: 4,
     marginBottom: 8,
   },
   selectedCategoryButton: {
-    backgroundColor: '#888',
+    backgroundColor: 'transparent',
+    borderColor: '#888',
+    borderWidth: 1.5,
   },
   categoryButtonText: {
-    color: '#000',
     fontSize: 14,
   },
   selectedCategoryButtonText: {
-    color: '#fff',
+    fontWeight: 'bold',
   },
   categoriesContainer: {
     flexDirection: 'row',
@@ -272,9 +261,8 @@ const lightStyles = StyleSheet.create({
     marginBottom: 8,
   },
   categoryTag: {
-    borderRadius: 16,
-    paddingVertical: 5,
-    paddingHorizontal: 5,
+    borderRadius: 12,
+    padding: 4,
     marginRight: 5,
     justifyContent: 'center',
     alignItems: 'center',
@@ -285,96 +273,61 @@ const lightStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  wordText: {
+    fontSize: 16,
+  },
+  originalText: {
+    fontWeight: 'bold',
+  },
   emptyMessage: {
     marginTop: 20,
     fontSize: 16,
-    color: '#555',
+    textAlign: 'center',
+  },
+  emptyStateContainer: {
+    marginTop: 50,
+    alignItems: 'center',
+  },
+};
+
+const lightStyles = StyleSheet.create({
+  ...baseStyles,
+  container: {
+    ...baseStyles.container,
+    backgroundColor: 'transparent',
+  },
+  wordContainer: {
+    ...baseStyles.wordContainer,
+    backgroundColor: '#e0e0e0',
+  },
+  searchBar: {
+    ...baseStyles.searchBar,
+    borderColor: '#ccc',
+    color: '#000',
+  },
+  categoryButtonText: {
+    ...baseStyles.categoryButtonText,
+    color: '#000',
   },
 });
 
 const darkStyles = StyleSheet.create({
+  ...baseStyles,
   container: {
-    flex: 1,
-    alignItems: 'center',
-    backgroundColor: '#121212',
-    padding: 20,
+    ...baseStyles.container,
+    backgroundColor: 'transparent',
   },
   wordContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 11,
-    marginVertical: 5,
-    borderRadius: 12,
-    width: '100%',
-  },
-  leftContainer: {
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    flex: 1,
-    marginRight: 10,
+    ...baseStyles.wordContainer,
+    backgroundColor: '#2c2c2c',
   },
   searchBar: {
-    width: '100%',
-    height: 45,
-    borderRadius: 25,
-    paddingHorizontal: 20,
-    fontSize: 16,
-    backgroundColor: '#333',
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  filterContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    marginBottom: 15,
-  },
-  categoryButton: {
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 20,
-    backgroundColor: '#555',
-    marginHorizontal: 4,
-    marginBottom: 8,
-  },
-  selectedCategoryButton: {
-    backgroundColor: '#bbb',
+    ...baseStyles.searchBar,
+    borderColor: '#555',
+    color: '#fff',
   },
   categoryButtonText: {
+    ...baseStyles.categoryButtonText,
     color: '#fff',
-    fontSize: 14,
-  },
-  selectedCategoryButtonText: {
-    color: '#000',
-  },
-  categoriesContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 8,
-  },
-  categoryTag: {
-    borderRadius: 16,
-    paddingVertical: 5,
-    paddingHorizontal: 5,
-    marginRight: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  deleteButton: {
-    padding: 10,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyMessage: {
-    marginTop: 20,
-    fontSize: 16,
-    color: '#aaa',
   },
 });
-
-export default LexiconList;
