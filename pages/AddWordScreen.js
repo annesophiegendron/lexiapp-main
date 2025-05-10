@@ -18,8 +18,6 @@ const MAX_CHARACTERS = 80;
 
 const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
   const [original, setOriginal] = useState('');
-  const [category, setCategory] = useState(selectedCategory);
-
   const [translation, setTranslation] = useState('');
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -39,18 +37,10 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
     );
   }, [selectedCategory]);
 
-  useEffect(() => {
-    console.log('Selected category updated:', selectedCategory);
-    setCategory(selectedCategory);
-  }, [selectedCategory]);
   const saveWord = () => {
-    if (!original || !translation || selectedCategories.length === 0) {
+    if (!original || !translation) {
       setError(true);
-      setErrorMessage(
-        selectedCategories.length === 0
-          ? 'Please add at least one tag.'
-          : 'All fields are required.',
-      );
+      setErrorMessage('All fields are required.');
       return;
     }
 
@@ -66,8 +56,12 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
       return;
     }
 
-    const validCategories = selectedCategories.filter(cat => cat);
-    addWord(original, translation, validCategories);
+    // Assign to "Wild card" if user picked no tag
+    const finalCategories =
+      selectedCategories.length === 0 ? ['Wild Card'] : selectedCategories;
+
+    addWord(original, translation, finalCategories);
+
     setOriginal('');
     setTranslation('');
     setSelectedCategories([]);
@@ -77,11 +71,10 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
   };
 
   const toggleCategory = category => {
-    setSelectedCategories(
-      prevCategories =>
-        prevCategories.includes(category)
-          ? prevCategories.filter(cat => cat !== category) // Remove category if already selected
-          : [...prevCategories, category], // Add category if not already selected
+    setSelectedCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(cat => cat !== category)
+        : [...prev, category],
     );
   };
 
@@ -101,12 +94,11 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
           <View
             style={styles.modalContent}
             onTouchEnd={e => e.stopPropagation()}>
-            <View style={styles.imagePlaceholder}>
-              <Ionicons name="create-outline" size={80} color="#fff" />
-            </View>
-
-            <Text style={styles.title}>Add Translation</Text>
-            <Text style={styles.subtitle}>Pick at least one tag</Text>
+            <Text style={styles.title}>Add a New Translation</Text>
+            <Text style={styles.subtitle}>
+              Pick a tag, or it will automatically go to the "Wild card"
+              category!
+            </Text>
 
             <View style={styles.buttonGrid}>
               {categories.map(cat => (
@@ -127,47 +119,63 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
             </View>
 
             <View>
-              <TextInput
+              <View
                 style={[
-                  styles.input,
-                  error && !original ? styles.errorInput : null,
-                ]}
-                placeholder="Enter word"
-                value={original}
-                onChangeText={text =>
-                  setOriginal(text.slice(0, MAX_CHARACTERS))
-                }
-                maxLength={MAX_CHARACTERS}
-              />
+                  styles.inputWrapper,
+                  error && !original && styles.errorInput,
+                ]}>
+                <Ionicons
+                  name="create-outline"
+                  size={20}
+                  color="#999"
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Add a word or phrase"
+                  value={original}
+                  onChangeText={text =>
+                    setOriginal(text.slice(0, MAX_CHARACTERS))
+                  }
+                  maxLength={MAX_CHARACTERS}
+                />
+              </View>
               <Text style={styles.charCount}>
                 {original.length}/{MAX_CHARACTERS}
               </Text>
             </View>
 
             <View>
-              <TextInput
+              <View
                 style={[
-                  styles.input,
-                  error && !translation ? styles.errorInput : null,
-                ]}
-                placeholder="Enter translation"
-                value={translation}
-                onChangeText={text =>
-                  setTranslation(text.slice(0, MAX_CHARACTERS))
-                }
-                maxLength={MAX_CHARACTERS}
-              />
+                  styles.inputWrapper,
+                  error && !translation && styles.errorInput,
+                ]}>
+                <Ionicons
+                  name="language-outline"
+                  size={20}
+                  color="#999"
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Add its translation or meaning"
+                  value={translation}
+                  onChangeText={text =>
+                    setTranslation(text.slice(0, MAX_CHARACTERS))
+                  }
+                  maxLength={MAX_CHARACTERS}
+                />
+              </View>
               <Text style={styles.charCount}>
                 {translation.length}/{MAX_CHARACTERS}
               </Text>
             </View>
 
-            {error && selectedCategories.length === 0 && (
-              <Text style={styles.errorMessage}>{errorMessage}</Text>
-            )}
+            {error && <Text style={styles.errorMessage}>{errorMessage}</Text>}
 
             <TouchableOpacity style={styles.saveButton} onPress={saveWord}>
-              <Text style={styles.saveButtonText}>Save to my lexicon</Text>
+              <Text style={styles.saveButtonText}>Save to list</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -177,56 +185,32 @@ const AddWordScreen = ({isVisible, onClose, selectedCategory}) => {
 };
 
 const styles = StyleSheet.create({
-  // Modal styles
   modalContainer: {
     flex: 1,
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: '#262526',
+    backgroundColor: '#f7f7f9',
     padding: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     elevation: 5,
   },
-
-  // Image styles
-  imagePlaceholder: {
-    height: 70,
-    borderRadius: 12,
-    marginBottom: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  // Text styles
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#0D0D0D',
     textAlign: 'center',
-    marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
-    color: '#aaa',
+    color: '#242540',
     marginBottom: 16,
-    fontWeight: 'bold',
+    fontWeight: 'normal',
     textAlign: 'center',
+    marginTop: 16,
   },
-  categoryButtonText: {
-    fontSize: 13,
-    color: '#262626',
-    fontWeight: 'bold',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-
-  // Button styles
   buttonGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -241,48 +225,60 @@ const styles = StyleSheet.create({
     minWidth: '30%',
     alignItems: 'center',
   },
-  saveButton: {
-    paddingVertical: 16,
-    paddingHorizontal: 45,
-    backgroundColor: '#6200EE',
-    borderRadius: 30,
-    elevation: 5,
+  categoryButtonText: {
+    fontSize: 13,
+    color: '#262626',
+    fontWeight: 'bold',
+  },
+  inputWrapper: {
+    flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#6200EE',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    marginBottom: 15,
-  },
-
-  // Input styles
-  input: {
-    height: 55,
-    borderColor: '#262626',
-    borderWidth: 2,
-    marginBottom: 5,
-    paddingHorizontal: 10,
-    borderRadius: 12,
     backgroundColor: '#fff',
-    fontSize: 18,
+    borderColor: '#D7D7D9',
+    borderWidth: 2,
+    borderRadius: 50,
+    paddingHorizontal: 10,
+    height: 55,
+    marginBottom: 5,
   },
-  errorInput: {
-    borderColor: 'red',
-    backgroundColor: '#ffe6e6',
+  input: {
+    flex: 1,
+    fontSize: 16,
+    paddingLeft: 10,
+    color: '#000',
   },
-
-  // Error message styles
-  errorMessage: {
-    color: 'red',
-    fontSize: 12,
-    marginBottom: 10,
-    textAlign: 'center',
+  inputIcon: {
+    marginLeft: 2,
   },
   charCount: {
     fontSize: 12,
     color: '#aaa',
     textAlign: 'right',
     marginBottom: 10,
+  },
+  errorInput: {
+    borderColor: 'red',
+    backgroundColor: '#ffe6e6',
+  },
+  errorMessage: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  saveButton: {
+    paddingVertical: 16,
+    paddingHorizontal: 45,
+    backgroundColor: '#0D0D0D',
+    borderRadius: 30,
+    elevation: 5,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 

@@ -95,7 +95,7 @@ const MainScreen = () => {
               searchText ? styles.searchBarFocused : {},
               {paddingLeft: 40},
             ]}
-            placeholder="Search"
+            placeholder="Search a word or phrase"
             placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
             value={searchText}
             onChangeText={setSearchText}
@@ -335,10 +335,9 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     paddingHorizontal: 20,
     fontSize: 16,
-    backgroundColor: '#fff',
     marginBottom: 20,
     elevation: 5,
-    backgroundColor: '#F2F2F2',
+    backgroundColor: '#F2F2F2'
   },
 
   searchWrapper: {
