@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   Dimensions,
-  Image,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useLexicon} from '../context/LexiconContext';
@@ -21,42 +20,14 @@ const DashboardScreen = () => {
 
   const totalWords = lexicon.length;
 
-  const today = new Date();
-  const sevenDaysAgo = new Date(today);
-  sevenDaysAgo.setDate(today.getDate() - 6);
-  sevenDaysAgo.setHours(0, 0, 0, 0);
-
   const recentWords = lexicon.filter(word => {
     if (!word.addedDate) return false;
     const wordDate = new Date(word.addedDate);
     wordDate.setHours(0, 0, 0, 0);
-    return wordDate >= sevenDaysAgo && wordDate <= today;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return wordDate >= today.setDate(today.getDate() - 6) && wordDate <= new Date();
   });
-
-  const uniqueDays = new Set(
-    lexicon
-      .filter(word => word.addedDate)
-      .map(word => new Date(word.addedDate).setHours(0, 0, 0, 0)),
-  );
-
-  let streak = 0;
-  let currentDate = new Date();
-  currentDate.setHours(0, 0, 0, 0);
-  while (uniqueDays.has(currentDate.getTime())) {
-    streak++;
-    currentDate.setDate(currentDate.getDate() - 1);
-  }
-
-  if (!uniqueDays.has(new Date().setHours(0, 0, 0, 0))) {
-    streak = 0;
-  }
-
-  const streakText = streak === 1 ? 'day' : 'days';
-
-  const motivationalMessage =
-    streak >= 7
-      ? 'Great! You are on a streak! Keep going!'
-      : "You're doing great — let’s add more words!";
 
   return (
     <ScrollView
@@ -84,19 +55,6 @@ const DashboardScreen = () => {
             : `${recentWords.length} words added`
         }
         bgColor={isDarkMode ? '#2a2a2a' : '#fffde7'}
-        isDarkMode={isDarkMode}
-      />
-
-      <DashboardCard
-        icon="flame"
-        title="Current Streak"
-        value={
-          streak === 0
-            ? 'Start your streak today! 🚀'
-            : `🔥 ${streak} ${streakText} in a row`
-        }
-        subtitle={motivationalMessage}
-        bgColor={isDarkMode ? '#2a2a2a' : '#fce4ec'}
         isDarkMode={isDarkMode}
       />
 
