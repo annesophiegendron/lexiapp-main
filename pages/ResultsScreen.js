@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {useQuiz} from '../context/QuizzContext';
 import {useTheme} from '../context/ThemeContext';
 import {designSystem} from '../design';
 
@@ -18,7 +17,7 @@ const {height} = Dimensions.get('window');
 const ResultScreen = ({route}) => {
   const navigation = useNavigation();
   const {isDarkMode} = useTheme();
-  const {backgroundLight, backgroundDark, textLight, textDark} =
+  const {backgroundLight, backgroundDark} =
     designSystem.colors;
 
   const {result} = route.params;

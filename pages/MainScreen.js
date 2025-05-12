@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingRight: 20,
     minHeight: 180,
-    marginBottom: 20
+    marginBottom: 20,
   },
 
   quizImage: {
