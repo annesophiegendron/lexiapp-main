@@ -1,13 +1,18 @@
-import React, {useState, useRef, useEffect} from 'react';
-import {TouchableOpacity, Animated, StyleSheet, View} from 'react-native';
-import {NavigationContainer, useNavigation} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  TouchableOpacity,
+  Animated,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import {useTheme, ThemeProvider} from './context/ThemeContext';
-import {LexiconProvider} from './context/LexiconContext';
-import {QuizProvider} from './context/QuizzContext';
+import { useTheme, ThemeProvider } from './context/ThemeContext';
+import { LexiconProvider } from './context/LexiconContext';
+import { QuizProvider } from './context/QuizzContext';
 
 import SplashScreen from './pages/SplashScreen';
 import MainScreen from './pages/MainScreen';
@@ -21,14 +26,15 @@ import DashboardScreen from './pages/DashboardScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
+
 const SettingsButton = () => {
   const navigation = useNavigation();
-  const {isDarkMode} = useTheme();
+  const { isDarkMode } = useTheme();
 
   return (
     <TouchableOpacity
       onPress={() => navigation.navigate('Settings')}
-      style={{marginRight: 15}}>
+      style={{ marginRight: 15 }}>
       <Ionicons
         name="settings-outline"
         size={25}
@@ -37,9 +43,10 @@ const SettingsButton = () => {
     </TouchableOpacity>
   );
 };
+
 const BottomTabs = () => {
   const [isModalVisible, setModalVisible] = useState(false);
-  const {isDarkMode} = useTheme();
+  const { isDarkMode } = useTheme();
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(1)).current;
@@ -71,7 +78,7 @@ const BottomTabs = () => {
             useNativeDriver: true,
           }),
         ]),
-      ]),
+      ])
     ).start();
   }, [scaleAnim, opacityAnim]);
 
@@ -81,8 +88,8 @@ const BottomTabs = () => {
   return (
     <>
       <Tab.Navigator
-        screenOptions={({route}) => ({
-          tabBarIcon: ({focused, color, size}) => {
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
             let iconName;
             switch (route.name) {
               case 'Main':
@@ -112,18 +119,18 @@ const BottomTabs = () => {
             height: 80,
             paddingBottom: 25,
           },
-          headerStyle: {backgroundColor: isDarkMode ? '#121212' : '#ffffff'},
+          headerStyle: { backgroundColor: isDarkMode ? '#121212' : '#ffffff' },
           headerTintColor: isDarkMode ? '#fff' : '#000',
         })}>
         <Tab.Screen
           name="Main"
           component={MainScreen}
-          options={{title: 'Home', headerRight: () => <SettingsButton />}}
+          options={{ title: 'Home', headerRight: () => <SettingsButton /> }}
         />
         <Tab.Screen
           name="LexiconList"
           component={LexiconList}
-          options={{title: 'Lexicon', headerRight: () => <SettingsButton />}}
+          options={{ title: 'Lexicon', headerRight: () => <SettingsButton /> }}
         />
         <Tab.Screen
           name="AddWord"
@@ -139,7 +146,7 @@ const BottomTabs = () => {
                   style={[
                     styles.halo,
                     {
-                      transform: [{scale: scaleAnim}],
+                      transform: [{ scale: scaleAnim }],
                       opacity: opacityAnim,
                       backgroundColor: isDarkMode
                         ? 'rgba(191, 189, 180, 0.4)'
@@ -161,12 +168,12 @@ const BottomTabs = () => {
         <Tab.Screen
           name="QuizzScreen"
           component={QuizzScreen}
-          options={{title: 'Quiz', headerRight: () => <SettingsButton />}}
+          options={{ title: 'Quiz', headerRight: () => <SettingsButton /> }}
         />
         <Tab.Screen
           name="Dashboard"
           component={DashboardScreen}
-          options={{title: 'Dashboard', headerRight: () => <SettingsButton />}}
+          options={{ title: 'Dashboard', headerRight: () => <SettingsButton /> }}
         />
       </Tab.Navigator>
 
@@ -175,23 +182,16 @@ const BottomTabs = () => {
   );
 };
 
-/**
- * Main App Component
- */
 const App = () => {
   return (
     <ThemeProvider>
       <LexiconProvider>
         <QuizProvider>
           <NavigationContainer>
-            <Stack.Navigator screenOptions={{headerShown: false}}>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
               <Stack.Screen name="Splash" component={SplashScreen} />
               <Stack.Screen name="HomeTabs" component={BottomTabs} />
-              <Stack.Screen
-                name="CategoryWords"
-                component={CategoryWordsScreen}
-              />
-              <Stack.Screen name="QuizzScreen" component={QuizzScreen} />
+              <Stack.Screen name="CategoryWords" component={CategoryWordsScreen} />
               <Stack.Screen name="ResultsScreen" component={ResultsScreen} />
               <Stack.Screen name="MainScreen" component={MainScreen} />
               <Stack.Screen name="Settings" component={SettingsScreen} />
@@ -203,9 +203,6 @@ const App = () => {
   );
 };
 
-/**
- * Styles
- */
 const styles = StyleSheet.create({
   addButtonContainer: {
     position: 'relative',

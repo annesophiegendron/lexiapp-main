@@ -1,233 +1,179 @@
 import React from 'react';
-import {View, Text, StyleSheet, FlatList} from 'react-native';
-import {useQuiz} from '../context/QuizzContext';
-import {useTheme} from '../context/ThemeContext';
-import {parseISO} from 'date-fns';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Dimensions,
+} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {useTheme} from '../context/ThemeContext';
+import {designSystem} from '../design';
 
-const ResultsScreen = ({route, navigation}) => {
-  const {result} = route.params || {};
-  const {pastResults, score, totalQuestions} = useQuiz();
+const {height} = Dimensions.get('window');
+
+const ResultScreen = () => {
+  const navigation = useNavigation();
   const {isDarkMode} = useTheme();
+  const {backgroundLight, backgroundDark, textLight, textDark} =
+    designSystem.colors;
 
-  const handleGoBack = () => {
-    navigation.goBack();
+  const quizResults = {
+    correctAnswers: 8,
+    totalQuestions: 10,
+    score: '80%',
   };
 
-  const calculateResultBackgroundColor = (score, totalQuestions) => {
-    const percentage = (score / totalQuestions) * 100;
-    if (percentage < 50) return '#FF4F58';
-    if (percentage >= 50 && percentage < 75) return '#FFCA2D';
-    return '#27AE60';
-  };
-
-  const getScoreEmoji = (score, totalQuestions) => {
-    const percentage = (score / totalQuestions) * 100;
-    if (percentage < 50) return '😞';
-    if (percentage >= 50 && percentage < 75) return '😐';
-    return '😊';
-  };
-
-  const getDailyStreak = () => {
-    if (!pastResults || pastResults.length === 0) {
-      return 0;
-    }
-
-    let streak = 1;
-    let lastDate = parseISO(pastResults[0].date);
-
-    for (let i = 1; i < pastResults.length; i++) {
-      const currentDate = parseISO(pastResults[i].date);
-
-      if (currentDate.getDate() === lastDate.getDate() + 1) {
-        streak++;
-      } else {
-        break;
-      }
-
-      lastDate = currentDate;
-    }
-
-    return streak;
-  };
-
-  const renderPastResults = () => {
-    return (
-      <FlatList
-        data={pastResults}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({item}) => {
-          const backgroundColor = calculateResultBackgroundColor(
-            item.score,
-            item.totalQuestions,
-          );
-          const emoji = getScoreEmoji(item.score, item.totalQuestions);
-          const isBestScore =
-            item.score === Math.max(...pastResults.map(result => result.score));
-
-          return (
-            <View
-              style={[
-                styles.historyItem,
-                {backgroundColor: isBestScore ? '#FFD700' : backgroundColor},
-              ]}>
-              <View style={styles.historyItemHeader}>
-                {isBestScore && (
-                  <Text style={styles.bestScoreBadge}>🏆 Best Score</Text>
-                )}
-              </View>
-              <Text style={styles.historyText}>
-                Score: {item.score}/{item.totalQuestions} {emoji}
-              </Text>
-            </View>
-          );
-        }}
-      />
-    );
-  };
+  const motivationalText =
+    quizResults.correctAnswers >= 7
+      ? "Nice work! You're making real progress 🧠"
+      : "Every step counts — you're getting better! 💡";
 
   return (
-    <View
+    <ScrollView
       style={[
         styles.container,
-        {backgroundColor: isDarkMode ? '#121212' : '#FAFAFA'},
-      ]}>
-      {/* Back Button */}
-      <View style={styles.backButton}>
-        <Ionicons
-          name="arrow-back"
-          size={30}
-          color={isDarkMode ? '#fff' : '#212529'}
-          onPress={handleGoBack}
-        />
-      </View>
-
-      {result && (
-        <View style={styles.resultContainer}>
-          <Text
-            style={[
-              styles.resultText,
-              {color: isDarkMode ? '#bb86fc' : '#212121'},
-            ]}>
-            You scored {result.score} out of {result.totalQuestions}!{' '}
-            {getScoreEmoji(result.score, result.totalQuestions)}
-          </Text>
-        </View>
-      )}
-
-      {/* Lightning Strike Icon */}
-      <View style={styles.streakContainer}>
-        <Ionicons
-          name="flash"
-          size={50}
-          color={isDarkMode ? '#FFD700' : '#FF6347'}
-          style={styles.streakIcon}
-        />
-        <Text style={[styles.streakTitle]}>
-          Your Daily Streak: {getDailyStreak()}{' '}
-          {getDailyStreak() === 1 ? 'day' : 'days'}
+        {backgroundColor: isDarkMode ? backgroundDark : backgroundLight},
+      ]}
+      contentContainerStyle={styles.contentContainer}>
+      <View style={styles.innerWrapper}>
+        <Text
+          style={[styles.title, {color: isDarkMode ? textLight : textDark}]}>
+          Your Result
         </Text>
+
+        <View style={styles.resultCard}>
+          <Text style={styles.cardTitle}>Great Job!</Text>
+          <Text style={styles.cardScore}>
+            {quizResults.correctAnswers} / {quizResults.totalQuestions} correct
+          </Text>
+          <Text style={styles.cardSubtitle}>
+            Score:{' '}
+            <Text style={styles.scoreHighlight}>{quizResults.score}</Text>
+          </Text>
+          <Text style={styles.motivationalText}>{motivationalText}</Text>
+        </View>
+
+        <View style={styles.actionButtonsWrapper}>
+          <TouchableOpacity
+            style={styles.backHomeButton}
+            onPress={() => navigation.navigate('Main')}>
+            <Ionicons name="home" size={20} color="#000" />
+            <Text style={styles.backHomeText}>Back Home</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.playAgainButton}
+            onPress={() => navigation.navigate('QuizzScreen')}>
+            <Ionicons name="refresh" size={20} color="#fff" />
+            <Text style={styles.playAgainText}>Play Again</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  contentContainer: {
+    minHeight: height,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 30,
+    paddingHorizontal: 20,
+    paddingVertical: 40,
   },
-  header: {
-    position: 'absolute',
-    top: 30,
-    left: 10,
-    zIndex: 1,
+  innerWrapper: {
+    width: '100%',
+    alignItems: 'center',
   },
   title: {
-    fontSize: 32,
-    fontWeight: '500',
-    marginBottom: 20,
-    letterSpacing: 1.5,
-    textAlign: 'center',
+    fontSize: 28,
+    fontWeight: '700',
+    marginBottom: 30,
   },
-  resultText: {
-    fontSize: 22,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginVertical: 10,
-    lineHeight: 28,
-  },
-  resultContainer: {
+  resultCard: {
+    backgroundColor: '#d7d0fd',
+    borderRadius: 20,
+    paddingVertical: 32,
+    paddingHorizontal: 24,
     width: '100%',
-    paddingVertical: 30,
-    borderRadius: 25,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 6},
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
-    marginBottom: 20,
-  },
-  streakContainer: {
-    padding: 15,
-    marginBottom: 20,
-    backgroundColor: '#e6e6e6',
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: -30,
     marginBottom: 40,
   },
-  streakTitle: {
+  cardTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 12,
+  },
+  cardScore: {
     fontSize: 22,
     fontWeight: '600',
+    color: '#333',
+    marginBottom: 6,
+  },
+  cardSubtitle: {
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 16,
+  },
+  scoreHighlight: {
+    backgroundColor: '#ffecbb',
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  motivationalText: {
+    fontSize: 16,
+    color: '#555',
     textAlign: 'center',
+    paddingHorizontal: 10,
+    marginTop: 8,
   },
-  streakIcon: {
-    marginBottom: 10,
-  },
-  historyItem: {
-    width: '100%',
-    paddingVertical: 20,
-    paddingHorizontal: 25,
-    borderRadius: 15,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 6},
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 8,
-    alignItems: 'center',
-  },
-  historyItemHeader: {
+  actionButtonsWrapper: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
   },
-  bestScoreBadge: {
+  backHomeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginHorizontal: 8,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#000',
+  },
+  backHomeText: {
     fontSize: 16,
-    color: '#FFD700',
     fontWeight: '600',
+    color: '#000',
+    marginLeft: 8,
   },
-  historyText: {
-    fontSize: 18,
-    fontWeight: '500',
-    textAlign: 'center',
-    marginTop: 10,
-    color: '#212529',
+  playAgainButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginHorizontal: 8,
+    backgroundColor: '#000',
   },
-  backButton: {
-    position: 'absolute',
-    top: 70,
-    left: 15,
-    zIndex: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    padding: 10,
-    borderRadius: 50,
+  playAgainText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+    marginLeft: 8,
   },
 });
 
-export default ResultsScreen;
+export default ResultScreen;
