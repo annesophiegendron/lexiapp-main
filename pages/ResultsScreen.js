@@ -7,51 +7,53 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {useTheme} from '../context/ThemeContext';
-import {designSystem} from '../design';
+import { useQuiz } from '../context/QuizzContext'; 
+import { useTheme } from '../context/ThemeContext';
+import { designSystem } from '../design';
 
-const {height} = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
-const ResultScreen = () => {
+const ResultScreen = ({ route }) => {
   const navigation = useNavigation();
-  const {isDarkMode} = useTheme();
-  const {backgroundLight, backgroundDark, textLight, textDark} =
-    designSystem.colors;
+  const { isDarkMode } = useTheme();
+  const { backgroundLight, backgroundDark, textLight, textDark } = designSystem.colors;
 
-  const quizResults = {
-    correctAnswers: 8,
-    totalQuestions: 10,
-    score: '80%',
-  };
+  const { score, totalQuestions } = useQuiz(); 
+
+  const scorePercentage = totalQuestions > 0 ? `${Math.round((score / totalQuestions) * 100)}%` : '0%';
 
   const motivationalText =
-    quizResults.correctAnswers >= 7
+    score >= 70
       ? "Nice work! You're making real progress 🧠"
-      : "Every step counts — you're getting better! 💡";
+      : score >= 50
+      ? "You're getting there! Keep it up 💡"
+      : "Every step counts — you're learning and improving! 💪";
+
+  const cardTitle = score >= 70 ? 'Great Job!' : 'Nice Try!';
 
   return (
     <ScrollView
       style={[
         styles.container,
-        {backgroundColor: isDarkMode ? backgroundDark : backgroundLight},
+        { backgroundColor: isDarkMode ? backgroundDark : backgroundLight },
       ]}
       contentContainerStyle={styles.contentContainer}>
       <View style={styles.innerWrapper}>
         <Text
-          style={[styles.title, {color: isDarkMode ? textLight : textDark}]}>
+          style={[styles.title, { color: isDarkMode ? textLight : textDark }]}>
           Your Result
         </Text>
 
         <View style={styles.resultCard}>
-          <Text style={styles.cardTitle}>Great Job!</Text>
+          <Text style={styles.cardTitle}>{cardTitle}</Text>
           <Text style={styles.cardScore}>
-            {quizResults.correctAnswers} / {quizResults.totalQuestions} correct
+            {score} / {totalQuestions} correct
           </Text>
           <Text style={styles.cardSubtitle}>
             Score:{' '}
-            <Text style={styles.scoreHighlight}>{quizResults.score}</Text>
+            <Text style={styles.scoreHighlight}>{scorePercentage}</Text>
           </Text>
           <Text style={styles.motivationalText}>{motivationalText}</Text>
         </View>
