@@ -173,7 +173,7 @@ const BottomTabs = () => {
         <Tab.Screen
           name="Dashboard"
           component={DashboardScreen}
-          options={{ title: 'Dashboard', headerRight: () => <SettingsButton /> }}
+          options={{ title: 'Stats', headerRight: () => <SettingsButton /> }}
         />
       </Tab.Navigator>
 
