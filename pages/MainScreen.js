@@ -10,8 +10,7 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import QuizImage from '../assets/images/brazuca.png'; // adjust path if needed
-
+import QuizImage from '../assets/images/brazuca.png';
 import {useLexicon} from '../context/LexiconContext';
 import {useTheme} from '../context/ThemeContext';
 import AddWordScreen from './AddWordScreen';
