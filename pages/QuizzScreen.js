@@ -183,8 +183,7 @@ const QuizzScreen = () => {
         />
       </View>
       <Text style={styles.quizzTitle(isDarkMode)}>
-        Can you find the translation for this word?
-      </Text>
+Find the correct translation      </Text>
       <View style={styles.questionCard(isDarkMode)}>
         <Text style={styles.questionText(isDarkMode)}>
           {currentQuestion.original}
