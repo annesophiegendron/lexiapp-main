@@ -1,11 +1,5 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, Animated} from 'react-native';
 import HapticFeedback from 'react-native-haptic-feedback';
 import {useLexicon} from '../context/LexiconContext';
 import {useNavigation} from '@react-navigation/native';
@@ -37,8 +31,9 @@ const QuizzScreen = () => {
   const [feedback, setFeedback] = useState(null);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [isAnswerChecked, setIsAnswerChecked] = useState(false);
-  const [buttonColor, setButtonColor] = useState(null); // Track button color separately
-  const [modalVisible, setModalVisible] = useState(false); // Add modalVisible state
+  const [buttonColor, setButtonColor] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const {setTotalQuestions} = useQuiz();
 
   const currentQuestion = shuffledLexicon[currentQuestionIndex];
 
@@ -67,6 +62,8 @@ const QuizzScreen = () => {
       setSelectedAnswer(null);
       setIsAnswerChecked(false);
       setButtonColor(null);
+      setTotalQuestions(shuffledLexicon.length);
+
     }
   }, [currentQuestion, shuffledLexicon]);
 
@@ -183,7 +180,8 @@ const QuizzScreen = () => {
         />
       </View>
       <Text style={styles.quizzTitle(isDarkMode)}>
-Find the correct translation      </Text>
+        Find the correct translation{' '}
+      </Text>
       <View style={styles.questionCard(isDarkMode)}>
         <Text style={styles.questionText(isDarkMode)}>
           {currentQuestion.original}

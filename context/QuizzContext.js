@@ -11,6 +11,8 @@ export const QuizProvider = ({children}) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [pastResults, setPastResults] = useState([]);
+  const [totalQuestions, setTotalQuestions] = useState(0);
+
 
   const submitQuiz = finalScore => {
     setPastResults(prevResults => [
@@ -22,13 +24,15 @@ export const QuizProvider = ({children}) => {
   return (
     <QuizContext.Provider
       value={{
-        currentQuestionIndex,
-        setCurrentQuestionIndex,
-        score,
-        setScore,
-        pastResults,
-        setPastResults,
-        submitQuiz,
+     currentQuestionIndex,
+    setCurrentQuestionIndex,
+    score,
+    setScore,
+    totalQuestions,
+    setTotalQuestions,
+    pastResults,
+    setPastResults,
+    submitQuiz,
       }}>
       {children}
     </QuizContext.Provider>

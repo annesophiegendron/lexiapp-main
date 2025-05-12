@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useQuiz } from '../context/QuizzContext'; 
+import { useQuiz } from '../context/QuizzContext';
 import { useTheme } from '../context/ThemeContext';
 import { designSystem } from '../design';
 
@@ -20,10 +20,13 @@ const ResultScreen = ({ route }) => {
   const { isDarkMode } = useTheme();
   const { backgroundLight, backgroundDark, textLight, textDark } = designSystem.colors;
 
-  const { score, totalQuestions } = useQuiz(); 
+  const { result } = route.params; // Assuming `result` is passed through the route params
+  const { score, totalQuestions } = result; // Destructure the score and totalQuestions from result
 
+  // Calculate the score percentage
   const scorePercentage = totalQuestions > 0 ? `${Math.round((score / totalQuestions) * 100)}%` : '0%';
 
+  // Define motivational text based on score
   const motivationalText =
     score >= 70
       ? "Nice work! You're making real progress 🧠"
@@ -31,6 +34,7 @@ const ResultScreen = ({ route }) => {
       ? "You're getting there! Keep it up 💡"
       : "Every step counts — you're learning and improving! 💪";
 
+  // Card title based on score
   const cardTitle = score >= 70 ? 'Great Job!' : 'Nice Try!';
 
   return (
@@ -41,19 +45,13 @@ const ResultScreen = ({ route }) => {
       ]}
       contentContainerStyle={styles.contentContainer}>
       <View style={styles.innerWrapper}>
-        <Text
-          style={[styles.title, { color: isDarkMode ? textLight : textDark }]}>
-          Your Result
-        </Text>
-
         <View style={styles.resultCard}>
           <Text style={styles.cardTitle}>{cardTitle}</Text>
           <Text style={styles.cardScore}>
             {score} / {totalQuestions} correct
           </Text>
           <Text style={styles.cardSubtitle}>
-            Score:{' '}
-            <Text style={styles.scoreHighlight}>{scorePercentage}</Text>
+            Score: <Text style={styles.scoreHighlight}>{scorePercentage}</Text>
           </Text>
           <Text style={styles.motivationalText}>{motivationalText}</Text>
         </View>
@@ -93,13 +91,8 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 30,
-  },
   resultCard: {
-    backgroundColor: '#d7d0fd',
+    backgroundColor: '#d7d0fd', // Keep the original color
     borderRadius: 20,
     paddingVertical: 32,
     paddingHorizontal: 24,
