@@ -7,41 +7,40 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useQuiz } from '../context/QuizzContext';
-import { useTheme } from '../context/ThemeContext';
-import { designSystem } from '../design';
+import {useQuiz} from '../context/QuizzContext';
+import {useTheme} from '../context/ThemeContext';
+import {designSystem} from '../design';
 
-const { height } = Dimensions.get('window');
+const {height} = Dimensions.get('window');
 
-const ResultScreen = ({ route }) => {
+const ResultScreen = ({route}) => {
   const navigation = useNavigation();
-  const { isDarkMode } = useTheme();
-  const { backgroundLight, backgroundDark, textLight, textDark } = designSystem.colors;
+  const {isDarkMode} = useTheme();
+  const {backgroundLight, backgroundDark, textLight, textDark} =
+    designSystem.colors;
 
-  const { result } = route.params; // Assuming `result` is passed through the route params
-  const { score, totalQuestions } = result; // Destructure the score and totalQuestions from result
+  const {result} = route.params;
+  const {score, totalQuestions} = result;
 
-  // Calculate the score percentage
-  const scorePercentage = totalQuestions > 0 ? `${Math.round((score / totalQuestions) * 100)}%` : '0%';
+  const scorePercentage =
+    totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
 
-  // Define motivational text based on score
   const motivationalText =
-    score >= 70
+    scorePercentage >= 70
       ? "Nice work! You're making real progress 🧠"
-      : score >= 50
+      : scorePercentage >= 50
       ? "You're getting there! Keep it up 💡"
       : "Every step counts — you're learning and improving! 💪";
 
-  // Card title based on score
-  const cardTitle = score >= 70 ? 'Great Job!' : 'Nice Try!';
+  const cardTitle = scorePercentage >= 70 ? 'Great Job!' : 'Nice Try!';
 
   return (
     <ScrollView
       style={[
         styles.container,
-        { backgroundColor: isDarkMode ? backgroundDark : backgroundLight },
+        {backgroundColor: isDarkMode ? backgroundDark : backgroundLight},
       ]}
       contentContainerStyle={styles.contentContainer}>
       <View style={styles.innerWrapper}>
@@ -92,7 +91,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   resultCard: {
-    backgroundColor: '#d7d0fd', // Keep the original color
+    backgroundColor: '#d7d0fd',
     borderRadius: 20,
     paddingVertical: 32,
     paddingHorizontal: 24,
