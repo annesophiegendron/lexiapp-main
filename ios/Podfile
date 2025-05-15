@@ -1,7 +1,11 @@
-require_relative '../node_modules/react-native/scripts/react_native_pods'
+# Resolve react_native_pods.rb with node to allow for hoisting
+require Pod::Executable.execute_command('node', ['-p',
+  'require.resolve(
+    "react-native/scripts/react_native_pods.rb",
+    {paths: [process.argv[1]]},
+  )', __dir__]).strip
 
-platform :ios, '13.0'  # use actual version instead of min_ios_version_supported
-
+platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
@@ -10,32 +14,27 @@ if linkage != nil
   use_frameworks! :linkage => :static 
 end
 
-config = use_native_modules!  # move here, outside target block
-
 target 'SwedishLearningApp' do
-  # config is already defined above, no need to define again
+  config = use_native_modules!
 
   use_react_native!(
     :path => config[:reactNativePath],
+    # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
   target 'SwedishLearningAppTests' do
     inherit! :complete
+    # Pods for testing
   end
-end
 
-post_install do |installer|
-  react_native_post_install(
-    installer,
-    config[:reactNativePath],  # now accessible here
-    :mac_catalyst_enabled => false,
-  )
-  
-  # (optional) force deployment target for all pods to 13.0 here if needed
-  installer.pods_project.targets.each do |target|
-    target.build_configurations.each do |config|
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
-    end
+  post_install do |installer|
+    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
+    react_native_post_install(
+      installer,
+      config[:reactNativePath],
+      :mac_catalyst_enabled => false,
+      # :ccache_enabled => true
+    )
   end
 end

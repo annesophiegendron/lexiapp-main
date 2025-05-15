@@ -11,9 +11,9 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		22983E62BB15E57D1D3CE889 /* Pods_SwedishLearningApp_SwedishLearningAppTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A045C88BA01CD5D5325E17CE /* Pods_SwedishLearningApp_SwedishLearningAppTests.framework */; };
+		386F7EDC7BCCF36D740EF764 /* Pods_SwedishLearningApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A23DBDEFAE6365420C8A1C8 /* Pods_SwedishLearningApp.framework */; };
 		396BCB4A566C8E985BE43668 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
-		3A874FEF1C6C731AD74E5BE1 /* Pods_SwedishLearningApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA60660DFE4C80C72586E8F2 /* Pods_SwedishLearningApp.framework */; };
+		7E2535853A729B848F5E73B1 /* Pods_SwedishLearningApp_SwedishLearningAppTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0397E0AB2D10B9CAF2D349E0 /* Pods_SwedishLearningApp_SwedishLearningAppTests.framework */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
@@ -31,7 +31,7 @@
 		00E356EE1AD99517003FC87E /* SwedishLearningAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwedishLearningAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* SwedishLearningAppTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SwedishLearningAppTests.m; sourceTree = "<group>"; };
-		116F0D226A9CFFCF416D7735 /* Pods-SwedishLearningApp-SwedishLearningAppTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwedishLearningApp-SwedishLearningAppTests.release.xcconfig"; path = "Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests.release.xcconfig"; sourceTree = "<group>"; };
+		0397E0AB2D10B9CAF2D349E0 /* Pods_SwedishLearningApp_SwedishLearningAppTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwedishLearningApp_SwedishLearningAppTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07F961A680F5B00A75B9A /* SwedishLearningApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwedishLearningApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = SwedishLearningApp/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = SwedishLearningApp/AppDelegate.mm; sourceTree = "<group>"; };
@@ -39,12 +39,12 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = SwedishLearningApp/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = SwedishLearningApp/main.m; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = SwedishLearningApp/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		64CF0637FD19074744FCA5B7 /* Pods-SwedishLearningApp-SwedishLearningAppTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwedishLearningApp-SwedishLearningAppTests.debug.xcconfig"; path = "Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests.debug.xcconfig"; sourceTree = "<group>"; };
+		2A23DBDEFAE6365420C8A1C8 /* Pods_SwedishLearningApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwedishLearningApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		74FB44EA35C4A98902370D72 /* Pods-SwedishLearningApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwedishLearningApp.debug.xcconfig"; path = "Target Support Files/Pods-SwedishLearningApp/Pods-SwedishLearningApp.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = SwedishLearningApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		9702DFBCAF73038D1A225208 /* Pods-SwedishLearningApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwedishLearningApp.debug.xcconfig"; path = "Target Support Files/Pods-SwedishLearningApp/Pods-SwedishLearningApp.debug.xcconfig"; sourceTree = "<group>"; };
-		A045C88BA01CD5D5325E17CE /* Pods_SwedishLearningApp_SwedishLearningAppTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwedishLearningApp_SwedishLearningAppTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		A3B342EF10E9785E60524E9A /* Pods-SwedishLearningApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwedishLearningApp.release.xcconfig"; path = "Target Support Files/Pods-SwedishLearningApp/Pods-SwedishLearningApp.release.xcconfig"; sourceTree = "<group>"; };
-		EA60660DFE4C80C72586E8F2 /* Pods_SwedishLearningApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwedishLearningApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A979CEA0693F73398D513ACA /* Pods-SwedishLearningApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwedishLearningApp.release.xcconfig"; path = "Target Support Files/Pods-SwedishLearningApp/Pods-SwedishLearningApp.release.xcconfig"; sourceTree = "<group>"; };
+		CCA315A7499B45C7495FECE0 /* Pods-SwedishLearningApp-SwedishLearningAppTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwedishLearningApp-SwedishLearningAppTests.release.xcconfig"; path = "Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests.release.xcconfig"; sourceTree = "<group>"; };
+		D2AD20D54B7DDE9932A0930F /* Pods-SwedishLearningApp-SwedishLearningAppTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwedishLearningApp-SwedishLearningAppTests.debug.xcconfig"; path = "Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -53,7 +53,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				22983E62BB15E57D1D3CE889 /* Pods_SwedishLearningApp_SwedishLearningAppTests.framework in Frameworks */,
+				7E2535853A729B848F5E73B1 /* Pods_SwedishLearningApp_SwedishLearningAppTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -61,7 +61,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3A874FEF1C6C731AD74E5BE1 /* Pods_SwedishLearningApp.framework in Frameworks */,
+				386F7EDC7BCCF36D740EF764 /* Pods_SwedishLearningApp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,8 +103,8 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				EA60660DFE4C80C72586E8F2 /* Pods_SwedishLearningApp.framework */,
-				A045C88BA01CD5D5325E17CE /* Pods_SwedishLearningApp_SwedishLearningAppTests.framework */,
+				2A23DBDEFAE6365420C8A1C8 /* Pods_SwedishLearningApp.framework */,
+				0397E0AB2D10B9CAF2D349E0 /* Pods_SwedishLearningApp_SwedishLearningAppTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -143,10 +143,10 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				9702DFBCAF73038D1A225208 /* Pods-SwedishLearningApp.debug.xcconfig */,
-				A3B342EF10E9785E60524E9A /* Pods-SwedishLearningApp.release.xcconfig */,
-				64CF0637FD19074744FCA5B7 /* Pods-SwedishLearningApp-SwedishLearningAppTests.debug.xcconfig */,
-				116F0D226A9CFFCF416D7735 /* Pods-SwedishLearningApp-SwedishLearningAppTests.release.xcconfig */,
+				74FB44EA35C4A98902370D72 /* Pods-SwedishLearningApp.debug.xcconfig */,
+				A979CEA0693F73398D513ACA /* Pods-SwedishLearningApp.release.xcconfig */,
+				D2AD20D54B7DDE9932A0930F /* Pods-SwedishLearningApp-SwedishLearningAppTests.debug.xcconfig */,
+				CCA315A7499B45C7495FECE0 /* Pods-SwedishLearningApp-SwedishLearningAppTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -158,12 +158,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "SwedishLearningAppTests" */;
 			buildPhases = (
-				E9FB59366478222967853239 /* [CP] Check Pods Manifest.lock */,
+				FA537B4D146BB6B2643598E1 /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
-				F11704C5E8E16F72F4A054E6 /* [CP] Embed Pods Frameworks */,
-				E245C23C19C0DB87FAAE4048 /* [CP] Copy Pods Resources */,
+				C2E3597FF8147D1C9DD0D445 /* [CP] Embed Pods Frameworks */,
+				3A1F058A9F07F1C5EE2F1FB3 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -179,13 +179,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "SwedishLearningApp" */;
 			buildPhases = (
-				C1C2806E6A63796FC1D4B90D /* [CP] Check Pods Manifest.lock */,
+				E3359EA1867500A5141B011B /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				C5FF7BD463EA3D393513F618 /* [CP] Embed Pods Frameworks */,
-				C0B510CB278AE17EAE1B43DB /* [CP] Copy Pods Resources */,
+				9314E3EFA90DE5EA0C438EC9 /* [CP] Embed Pods Frameworks */,
+				8FEDEAA3178205B6A9DF1BD4 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -270,7 +270,24 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
-		C0B510CB278AE17EAE1B43DB /* [CP] Copy Pods Resources */ = {
+		3A1F058A9F07F1C5EE2F1FB3 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8FEDEAA3178205B6A9DF1BD4 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -287,7 +304,41 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp/Pods-SwedishLearningApp-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C1C2806E6A63796FC1D4B90D /* [CP] Check Pods Manifest.lock */ = {
+		9314E3EFA90DE5EA0C438EC9 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp/Pods-SwedishLearningApp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp/Pods-SwedishLearningApp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp/Pods-SwedishLearningApp-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C2E3597FF8147D1C9DD0D445 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E3359EA1867500A5141B011B /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -309,41 +360,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C5FF7BD463EA3D393513F618 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp/Pods-SwedishLearningApp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp/Pods-SwedishLearningApp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp/Pods-SwedishLearningApp-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E245C23C19C0DB87FAAE4048 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E9FB59366478222967853239 /* [CP] Check Pods Manifest.lock */ = {
+		FA537B4D146BB6B2643598E1 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -363,23 +380,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		F11704C5E8E16F72F4A054E6 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SwedishLearningApp-SwedishLearningAppTests/Pods-SwedishLearningApp-SwedishLearningAppTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -415,7 +415,7 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 64CF0637FD19074744FCA5B7 /* Pods-SwedishLearningApp-SwedishLearningAppTests.debug.xcconfig */;
+			baseConfigurationReference = D2AD20D54B7DDE9932A0930F /* Pods-SwedishLearningApp-SwedishLearningAppTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
@@ -444,7 +444,7 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 116F0D226A9CFFCF416D7735 /* Pods-SwedishLearningApp-SwedishLearningAppTests.release.xcconfig */;
+			baseConfigurationReference = CCA315A7499B45C7495FECE0 /* Pods-SwedishLearningApp-SwedishLearningAppTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
@@ -470,7 +470,7 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9702DFBCAF73038D1A225208 /* Pods-SwedishLearningApp.debug.xcconfig */;
+			baseConfigurationReference = 74FB44EA35C4A98902370D72 /* Pods-SwedishLearningApp.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
@@ -489,7 +489,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -507,7 +507,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A3B342EF10E9785E60524E9A /* Pods-SwedishLearningApp.release.xcconfig */;
+			baseConfigurationReference = A979CEA0693F73398D513ACA /* Pods-SwedishLearningApp.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
@@ -525,7 +525,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
