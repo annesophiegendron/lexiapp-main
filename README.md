@@ -79,4 +79,4 @@ To learn more about React Native, take a look at the following resources:
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
 =======
 # lexiapp
->>>>>>> d2eb9ac301be915752e238aca75f02b7cb5d2e3c
+test
