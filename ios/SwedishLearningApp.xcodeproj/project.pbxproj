@@ -309,7 +309,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nif [ -f \"${SRCROOT}/ios/Podfile\" ]; then\n  cd \"${SRCROOT}/ios\"\n  pod install\n  cd \"${SRCROOT}\"\nfi\n";
+			shellScript = "if [ -f \"${PODS_ROOT}/../Podfile\" ]; then\n  echo \"Running pod install...\"\n  cd \"${PODS_ROOT}/..\"\n  pod install            \nelse\n  echo \"No Podfile found!\"   \nfi                                \n";
 		};
 		67F58584744E6982D8CF0ADB /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
