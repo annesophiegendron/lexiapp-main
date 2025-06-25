@@ -27,7 +27,7 @@ export async function createCategory(name, label, color, userId){
     }
 
 }
-*/
+
 //fonction pour supprimer une catégorie
 export async function deleteCategory(id) {
   const {data: {user}, error: userError} = await supabase.auth.getUser();
@@ -54,31 +54,56 @@ export async function deleteCategory(id) {
     }
 
 }
+*/
 
+//fonction pour mettre à jour une catégorie
+export async function updateCategory(id, newName, newLabel, newColor ){
+    const {data: {user}, error: userError} = await supabase.auth.getUser();
 
-/*fonction pour mettre à jour une catégorie
-export async function updateCategory(categoryId, userId){
-    const {data, error} = await supabase
+    if (userError|| !user ) {
+        console.error("Erreur d'authentification:", userError?.message || "Utilisateur non connecté");
+        return;
+    }
+    const { data, error } = await supabase 
     .from('categories')
-    .update(updates)
-    .eq('user_id', userId)
-    .eq('id', categoryId)
+    .update({
+        name: newName,
+        label: newLabel,
+        color: newColor
+    })
+    .eq('id' , id)
+    .eq('user_id', user.id)
+    .select();
 
-    if (error) throw error;
-    return data;
-
+    if (error) {
+        console.error("Erreur Supabase:", error.message);
+    } else if (data && data.length > 0) {
+        console.log(`Catégorie mise à jour : ${data[0].name}`);
+    } else {
+        console.log("Aucune catégorie mise à jour (ID introuvable ou non autorisé).");
+    }
 }
 
 
+/*fonction pour lister ses catégories
+export async function listCategories() {
+    const { data:{user}, error: userError } = await supabase
 
-//fonction pour lister ses catégories
-export async function getUserCategories(userId) {
-    const { data, error } = await supabase
+    if (userError || !user){
+        console.error("Erreur d'authentification :", userError?.message || "Utilisateur non connecté");
+        return;
+    }
+
+    const {data, error} = await supabase
     .from('categories')
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false});
 
-    if (error) throw error;
-    return data;
+    if (error) {
+        console.error("Erreur Supabase:", error.message);
+    } else {
+        console.log("Catégories de l'utilisateur: ", data);
+        return data;
+    }
 }*/

@@ -16,6 +16,15 @@ console.log('Connecté avec user ID :', userId)
 
 /*await createCategory('Test catégorie12', 'hiiii', 'rgba(144, 21, 231, 0.4)', userId);*/
 
-import { deleteCategory } from './categories.js';
+/*import { deleteCategory } from './categories.js';
 
-await deleteCategory('137220fe-eac1-485e-9918-b78ec61072f5');
+await deleteCategory('137220fe-eac1-485e-9918-b78ec61072f5');*/
+
+import { updateCategory } from './categories.js'
+
+await updateCategory(
+  'b702a798-a6a6-4c41-b646-08b5c5459c81',
+  'nouveau test catégorie12',
+  'newwww',
+  'rgba(113, 100, 255, 0.4)'
+);
