@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,8 @@ import AddWordScreen from './AddWordScreen';
 import {designSystem} from '../design';
 import {categoryIcons, categoryColorsLight} from '../constants.js';
 
+import { useUser } from '../context/UserContext';
+
 const MainScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
@@ -32,6 +34,14 @@ const MainScreen = () => {
     textLight,
     textDark,
   } = designSystem.colors;
+
+  const { user } = userUser();
+  useEffect(() => {
+    if (user) {
+      console.log('ID de l`utilisateur connecté:', user.id);
+    }
+  }, [user]);
+  
 
   const handleClose = () => setModalVisible(false);
 
@@ -201,6 +211,8 @@ const MainScreen = () => {
       <AddWordScreen isVisible={modalVisible} onClose={handleClose} />
     </ScrollView>
   );
+
+
 };
 
 const styles = StyleSheet.create({
