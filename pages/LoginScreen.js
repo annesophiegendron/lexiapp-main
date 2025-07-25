@@ -1,6 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TextInput, Button, Text } from 'react-native';
 import { supabase } from '../supabase/supabaseClient';
+import { syncAll } from '../services/syncService';
+
+useEffect(() => {
+    if (session) {
+        syncAll();
+    }
+},[session]);
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');

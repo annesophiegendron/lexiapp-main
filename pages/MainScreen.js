@@ -35,13 +35,35 @@ const MainScreen = () => {
     textDark,
   } = designSystem.colors;
 
-  const { user } = userUser();
+  const { user, profile, loading, logout } = useUser();
   useEffect(() => {
     if (user) {
       console.log('ID de l`utilisateur connecté:', user.id);
     }
   }, [user]);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Text>Chargement du profil...</Text>
+      </View>
+    );
+  }
   
+  {profile && (
+    <View style={{ padding: 10}}>
+      <Text style={{ color: isDarkMode ? textLight : textDark }}>
+        Bienvenue ! {profile.username || user.email}
+      </Text>
+      <Text style={{ color: isDarkMode ? '#aaa' : '#555', fontSize: 12}}>
+        Langue préférée : {profile.preferred_language || 'non renseignée'}
+      </Text>
+    </View>
+  )}
+
+  <View style={{ padding: 20 }}>
+    <Button title="Se déconnecter" onPress={logout} />
+  </View>
 
   const handleClose = () => setModalVisible(false);
 

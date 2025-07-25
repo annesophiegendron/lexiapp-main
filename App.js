@@ -267,4 +267,10 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default function App() {
+  return (
+    <UserProvider>
+    <useNavigation />
+    </UserProvider>
+  );
+}

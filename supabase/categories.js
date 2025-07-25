@@ -87,7 +87,7 @@ export async function updateCategory(id, newName, newLabel, newColor ){
 
 /*fonction pour lister ses catégories
 export async function listCategories() {
-    const { data:{user}, error: userError } = await supabase
+    const { data:{user}, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user){
         console.error("Erreur d'authentification :", userError?.message || "Utilisateur non connecté");
@@ -97,7 +97,7 @@ export async function listCategories() {
     const {data, error} = await supabase
     .from('categories')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false});
 
     if (error) {
