@@ -10,6 +10,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useLexicon} from '../context/LexiconContext';
 import {useTheme} from '../context/ThemeContext';
 
+import { getTopCategories, getWordsByPeriod } from '../supabase/stats';
+import { supabase } from 'supabase/supabaseClient';
+
 const screenWidth = Dimensions.get('window').width;
 
 const DashboardScreen = () => {
@@ -28,6 +31,26 @@ const DashboardScreen = () => {
     today.setHours(0, 0, 0, 0);
     return wordDate >= today.setDate(today.getDate() - 6) && wordDate <= new Date();
   });
+
+  const [topCategories, setTopCategories] = React.useState([]);
+  const [weeklyStats, setWeeklyStats] = React.useState([]);
+  
+  React.useEffect(() => {
+    const fetchStats = async () => {
+      const user = await supabase.auth.getUser();
+      if (!user.data?.user) return;
+
+      const uid = user.data.user.id;
+      const top = await getTopCategories(uid);
+      const weekly = await getWordsByPeriod(uid, 'week');
+
+      setTopCategories(top);
+      setWeeklyStats(weekly);
+    };
+
+    fetchStats();
+  },[]);
+
 
   return (
     <ScrollView
@@ -65,6 +88,30 @@ const DashboardScreen = () => {
         bgColor={isDarkMode ? '#2a2a2a' : '#e3f2fd'}
         isDarkMode={isDarkMode}
       />
+
+       <DashboardCard
+        icon="pricetags"
+        title="Top catégories"
+        value={
+          topCategories.length === 0
+          ? 'Aucune donnée'
+          : topCategories.map(c => `${c.label} (${c.count})`).join(', ') 
+        }
+         bgColor={isDarkMode ? '#2a2a2a' : '#e3f2fd'}
+        isDarkMode={isDarkMode}
+    />
+
+    <DashboardCard
+      icon="calendar"
+      title="Ajouts par semaine"
+      value={
+        weeklyStats.length === 0
+        ?'Aucune donnée'
+        : weeklyStats.map(s => `${s.period}: ${s.count}`).join(', ')
+      }
+      bgColor={isDarkMode ? '#2a2a2a' : '#e3f2fd'}
+        isDarkMode={isDarkMode}
+    />
     </ScrollView>
   );
 };

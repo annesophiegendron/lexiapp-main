@@ -12,6 +12,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTheme, ThemeProvider } from './context/ThemeContext';
 import { LexiconProvider } from './context/LexiconContext';
 import { QuizProvider } from './context/QuizzContext';
+import { UserProvider } from './Context/UserContext';
 
 import SplashScreen from './pages/SplashScreen';
 import MainScreen from './pages/MainScreen';
@@ -22,6 +23,11 @@ import QuizzScreen from './pages/QuizzScreen';
 import ResultsScreen from './pages/ResultsScreen';
 import SettingsScreen from './pages/SettingsScreen';
 import DashboardScreen from './pages/DashboardScreen';
+
+import { supabase } from './supabase/supabaseClient';
+import { getCurrentUserProfile } from './supabase/user';
+import LoginScreen from './pages/LoginScreen';
+import SignupScreen from './pages/SignupScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -180,10 +186,51 @@ const BottomTabs = () => {
     </>
   );
 };
+//Integration de la recupération du profil utilisateur au demarrage de l'application
+useEffect(() => {
+  const fetchProfile = async () => {
+    const { data, error } = await getCurrentUserProfile();
+    if (error) {
+      console.error('Erreur profil utilisateur:, error.message');
+    } else {
+      console.log('Profil chargé avec succès :', data);
+    }
+  };
+  fetchProfile();
+},[]);
 
+//Verification de la session et redirection
 const App = () => {
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  },  []);
+
+  if (!session) {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Signup" compenent={SignupScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
+  
   return (
     <ThemeProvider>
+      <UserProvider>
       <LexiconProvider>
         <QuizProvider>
           <NavigationContainer>
@@ -198,6 +245,7 @@ const App = () => {
           </NavigationContainer>
         </QuizProvider>
       </LexiconProvider>
+      </UserProvider>
     </ThemeProvider>
   );
 };
@@ -219,4 +267,10 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default function App() {
+  return (
+    <UserProvider>
+    <useNavigation />
+    </UserProvider>
+  );
+}

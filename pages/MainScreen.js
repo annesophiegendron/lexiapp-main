@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,8 @@ import AddWordScreen from './AddWordScreen';
 import {designSystem} from '../design';
 import {categoryIcons, categoryColorsLight} from '../constants.js';
 
+import { useUser } from '../context/UserContext';
+
 const MainScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
@@ -32,6 +34,36 @@ const MainScreen = () => {
     textLight,
     textDark,
   } = designSystem.colors;
+
+  const { user, profile, loading, logout } = useUser();
+  useEffect(() => {
+    if (user) {
+      console.log('ID de l`utilisateur connecté:', user.id);
+    }
+  }, [user]);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Text>Chargement du profil...</Text>
+      </View>
+    );
+  }
+  
+  {profile && (
+    <View style={{ padding: 10}}>
+      <Text style={{ color: isDarkMode ? textLight : textDark }}>
+        Bienvenue ! {profile.username || user.email}
+      </Text>
+      <Text style={{ color: isDarkMode ? '#aaa' : '#555', fontSize: 12}}>
+        Langue préférée : {profile.preferred_language || 'non renseignée'}
+      </Text>
+    </View>
+  )}
+
+  <View style={{ padding: 20 }}>
+    <Button title="Se déconnecter" onPress={logout} />
+  </View>
 
   const handleClose = () => setModalVisible(false);
 
@@ -201,6 +233,8 @@ const MainScreen = () => {
       <AddWordScreen isVisible={modalVisible} onClose={handleClose} />
     </ScrollView>
   );
+
+
 };
 
 const styles = StyleSheet.create({
