@@ -60,6 +60,13 @@
             ReferencedContainer = "container:SwedishLearningApp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "PATH"
+            value = "/Users/annesophiegendron/.gem/ruby/3.3.0/bin:/Users/annesophiegendron/.gem/ruby/3.3.0/bin:/opt/homebrew/opt/ruby/bin:usr/local/bin:/usr/local/opt/ruby/bin:/usr/local/opt/mongodb-community/bin:/usr/local/opt/openjdk@17/bin:/Users/annesophiegendron/.nvm/versions/node/v20.11.0/bin:/Users/annesophiegendron/.docker/bin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin://Users/annesophiegendron/Library/Android/sdk/path/here/platform-tools:/Users/annesophiegendron/Library/Android/sdk/platform-tools:/Users/annesophiegendron/Library/Android/sdk/tools:/Users/annesophiegendron/.config/bin/:/Users/annesophiegendron/.gem/ruby/3.4.0/bin"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
