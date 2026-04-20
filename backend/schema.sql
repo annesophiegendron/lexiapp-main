@@ -7,5 +7,4 @@ CREATE TABLE captures (
     formalite VARCHAR(50),
     latitude FLOAT,
     longitude FLOAT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP );
-    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP);
