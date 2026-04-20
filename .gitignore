@@ -65,6 +65,16 @@ yarn-error.log
 # testing
 /coverage
 
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+backend/venv/
+backend/__pycache__/
+
 # Yarn
 .yarn/*
 !.yarn/patches

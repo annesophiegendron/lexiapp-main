@@ -1,9 +1,13 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from typing import Optional
+
 import uvicorn
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 
 
-app = FastAPI(title="Lexiapp partie back end phase num 1")
+app = FastAPI(
+    title="Lexiapp backend mock API",
+    description="Squelette FastAPI pour la phase de mock du backend Lexiapp.",
+)
 
 MOCK_CAPTURES = [
     {
@@ -14,8 +18,8 @@ MOCK_CAPTURES = [
         "contexte_tags": ["voyage", "situation-reelle"],
         "formalite": "standard",
         "geolocalisation": {
-            "latitude": 48.8566, # j'ai mis les coordonnées de Paris pour le mock
-            "longitude": 2.3522, # //
+            "latitude": 48.8566,  # Coordonnees de Paris pour le mock.
+            "longitude": 2.3522,
         },
     }
 ]
@@ -25,7 +29,7 @@ MOCK_CAPTURES = [
 def verification_sante():
     return {
         "status": "ok",
-        "message": "Le serveur est pret a recevoir des requetes",
+        "message": "Le serveur est pret a recevoir des requetes.",
         "version": 1,
     }
 
@@ -45,7 +49,7 @@ async def creer_captures(
     longitude: float = Form(...),
     langue: Optional[str] = Form("fr"),
 ):
-    """Reçoit une capture audio et renvoie une réponse mock de phase 1."""
+    """Recoit une capture audio et renvoie une reponse mock de phase 1."""
     if not audio.filename:
         raise HTTPException(status_code=400, detail="Le fichier audio doit avoir un nom valide")
 
@@ -77,5 +81,5 @@ async def creer_captures(
 
 
 if __name__ == "__main__":
-    print("Le serveur de Lexiapp est en train de demarrer...")
+    print("Le serveur mock de Lexiapp demarre sur http://0.0.0.0:8000")
     uvicorn.run(app, host="0.0.0.0", port=8000)
