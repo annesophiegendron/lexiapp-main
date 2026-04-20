@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Form
 from typing import Optional, List, Optional
 import uvicorn
 
+
 app = FastAPI(title="Lexiapp partie back end phase num 1")
 
 @app.get("/sante")
@@ -20,9 +21,9 @@ async def creer_captures(
     langue: Optional[str] = Form("fr")
 
 ):
-    """ fonction principale pour enregistrer une nouvelle hrase
-    pour aujourd'hui on va juste renvoyer un mock
-    et demain on s'attaquera a la partie transcription avec Whisper
+    """ fonction principale pour enregistrer une nouvelle phrase
+    pour aujourd'hui on va juste renvoyer un mock 
+    et demain on s'attaquera a la partie transcription avec Whisper etc
     """
     return {
         "id": "id unique",
