@@ -15,6 +15,7 @@ Le backend se trouve dans `backend/`.
 ### Fichiers utiles
 
 - `backend/main.py` : squelette de l'API
+- `backend/models.py` : modeles Pydantic du contrat d'API
 - `backend/schema.sql` : premier schema SQL
 - `backend/requirements.txt` : dependances Python
 
@@ -33,6 +34,14 @@ Puis ouvrir :
 
 - `http://127.0.0.1:8000/docs`
 - `http://127.0.0.1:8000/sante`
+
+### Lancer les tests backend
+
+Depuis `backend/` :
+
+```bash
+python -m unittest test_main.py
+```
 
 ## Frontend
 
