@@ -1,51 +1,79 @@
+from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Optional
+import uuid
 
 import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 
-from models import Capture, CapturesResponse, CreateCaptureResponse, HealthResponse
+from database import alimenter_donnees_demo, creer_capture, initialiser_base, lister_captures
+from models import (
+    CommandeCreationCapture,
+    ReponseCaptures,
+    ReponseCreationCapture,
+    ReponseSante,
+)
+
+CHEMIN_STOCKAGE_AUDIOS = Path(__file__).resolve().parent / "stockage" / "audios"
+
+
+@asynccontextmanager
+async def cycle_de_vie(_: FastAPI):
+    initialiser_base()
+    alimenter_donnees_demo()
+    yield
 
 
 app = FastAPI(
-    title="Lexiapp backend mock API",
-    description="Squelette FastAPI pour la phase de mock du backend Lexiapp.",
+    title="Lexiapp backend API",
+    description="Backend FastAPI avec persistence SQLite pour les captures.",
+    lifespan=cycle_de_vie,
 )
 
-MOCK_CAPTURES = [
-    Capture(
-        id="capture-001",
-        phrase_originale="texte transcrit par l'ia (pour l'instant c'est un mock)",
-        traduction="traduction de la phrase (pour l'instant c'est un mock)",
-        audio_url="/stockage/audios/exemple.wav",
-        contexte_tags=["voyage", "situation-reelle"],
-        formalite="standard",
-        geolocalisation={"latitude": 48.8566, "longitude": 2.3522},
-    )
-]
+
+@app.get("/")
+def accueil() -> dict:
+    return {
+        "message": "Bienvenue sur le backend Lexiapp.",
+        "documentation": "/docs",
+        "sante": "/sante",
+        "captures": "/captures",
+    }
 
 
-@app.get("/sante", response_model=HealthResponse)
-def verification_sante() -> HealthResponse:
-    return HealthResponse(
+@app.get("/sante", response_model=ReponseSante)
+def verification_sante() -> ReponseSante:
+    return ReponseSante(
         status="ok",
         message="Le serveur est pret a recevoir des requetes.",
-        version=1,
+        version=2,
     )
 
 
-@app.get("/captures", response_model=CapturesResponse)
-def lire_captures() -> CapturesResponse:
-    return CapturesResponse(total=len(MOCK_CAPTURES), captures=MOCK_CAPTURES)
+@app.get("/captures", response_model=ReponseCaptures)
+def lire_captures() -> ReponseCaptures:
+    captures = lister_captures()
+    return ReponseCaptures(total=len(captures), captures=captures)
 
 
-@app.post("/captures", response_model=CreateCaptureResponse)
+async def enregistrer_audio(audio: UploadFile) -> str:
+    CHEMIN_STOCKAGE_AUDIOS.mkdir(parents=True, exist_ok=True)
+    extension = Path(audio.filename).suffix if audio.filename else ""
+    nom_fichier = f"{uuid.uuid4().hex}{extension}"
+    chemin_fichier = CHEMIN_STOCKAGE_AUDIOS / nom_fichier
+    contenu = await audio.read()
+    chemin_fichier.write_bytes(contenu)
+    await audio.seek(0)
+    return f"/stockage/audios/{nom_fichier}"
+
+
+@app.post("/captures", response_model=ReponseCreationCapture)
 async def creer_captures(
     audio: UploadFile = File(...),
     latitude: float = Form(...),
     longitude: float = Form(...),
     langue: Optional[str] = Form("fr"),
-) -> CreateCaptureResponse:
-    """Recoit une capture audio et renvoie une reponse mock de phase 1."""
+) -> ReponseCreationCapture:
     if not audio.filename:
         raise HTTPException(status_code=400, detail="Le fichier audio doit avoir un nom valide")
 
@@ -55,24 +83,28 @@ async def creer_captures(
             detail="Le fichier envoye doit etre un audio valide.",
         )
 
-    capture = Capture(
-        id="capture-mock-002",
-        phrase_originale="texte transcrit par l'ia (pour l'instant c'est un mock)",
-        traduction="traduction de la phrase (pour l'instant c'est un mock)",
-        audio_url=f"/stockage/audios/{audio.filename}",
-        contexte_tags=["voyage", "situation-reelle"],
-        formalite="standard",
-        geolocalisation={"latitude": latitude, "longitude": longitude},
-        langue=langue,
+    url_audio = await enregistrer_audio(audio)
+
+    capture = creer_capture(
+        CommandeCreationCapture(
+            phrase_originale="texte transcrit par l'ia",
+            traduction="exemple de traduction",
+            audio_url=url_audio,
+            contexte_tags=["voyage", "situation-reelle"],
+            formalite="standard",
+            latitude=latitude,
+            longitude=longitude,
+            langue=langue,
+        )
     )
 
-    return CreateCaptureResponse(
+    return ReponseCreationCapture(
         status="success",
-        message="Le fichier audio recu est pret a etre traite.",
+        message="Le fichier audio recu a ete enregistre.",
         capture=capture,
     )
 
 
 if __name__ == "__main__":
-    print("Le serveur mock de Lexiapp demarre sur http://0.0.0.0:8000")
+    print("Le serveur Lexiapp demarre sur http://0.0.0.0:8000")
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,6 +1,6 @@
 # Lexiapp
 
-Projet mobile avec un frontend React  et un backend FastAPI encore en phase de mock.
+Projet mobile avec un frontend React et un backend FastAPI.
 
 ## Backend
 
@@ -9,14 +9,16 @@ Le backend se trouve dans `backend/`.
 ### Etat actuel
 
 - contrat d'API defini avec FastAPI
-- routes mock disponibles pour la sante et les captures
-- schema SQL initial pour la table `captures`
+- persistence SQLite pour les captures
+- routes disponibles pour la sante et les captures
+- schema SQL aligne avec la base locale
 
 ### Fichiers utiles
 
-- `backend/main.py` : squelette de l'API
+- `backend/main.py` : API FastAPI
+- `backend/database.py` : acces SQLite
 - `backend/models.py` : modeles Pydantic du contrat d'API
-- `backend/schema.sql` : premier schema SQL
+- `backend/schema.sql` : schema SQLite de reference
 - `backend/requirements.txt` : dependances Python
 
 ### Lancer le backend
@@ -29,6 +31,8 @@ venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
+
+Le fichier SQLite est cree automatiquement dans `backend/lexiapp.db`.
 
 Puis ouvrir :
 

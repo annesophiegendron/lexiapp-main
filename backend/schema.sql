@@ -1,10 +1,12 @@
-CREATE TABLE captures (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE IF NOT EXISTS captures (
+    id TEXT PRIMARY KEY,
     phrase_originale TEXT NOT NULL,
     traduction TEXT,
-    audio_url TEXT,
-    contexte_tags TEXT[],
-    formalite VARCHAR(50),
-    latitude FLOAT,
-    longitude FLOAT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP);
+    audio_url TEXT NOT NULL,
+    contexte_tags TEXT NOT NULL,
+    formalite TEXT NOT NULL,
+    latitude REAL NOT NULL,
+    longitude REAL NOT NULL,
+    langue TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

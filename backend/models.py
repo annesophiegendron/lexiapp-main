@@ -19,18 +19,29 @@ class Capture(BaseModel):
     langue: Optional[str] = None
 
 
-class HealthResponse(BaseModel):
+class ReponseSante(BaseModel):
     status: str
     message: str
     version: int
 
 
-class CapturesResponse(BaseModel):
+class ReponseCaptures(BaseModel):
     total: int
     captures: List[Capture]
 
 
-class CreateCaptureResponse(BaseModel):
+class ReponseCreationCapture(BaseModel):
     status: str
     message: str
     capture: Capture
+
+
+class CommandeCreationCapture(BaseModel):
+    phrase_originale: str
+    traduction: Optional[str] = None
+    audio_url: str
+    contexte_tags: List[str]
+    formalite: str
+    latitude: float
+    longitude: float
+    langue: Optional[str] = None
