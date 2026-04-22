@@ -13,7 +13,6 @@ from models import (
     ReponseCreationCapture,
     ReponseSante,
 )
-
 CHEMIN_STOCKAGE_AUDIOS = Path(__file__).resolve().parent / "stockage" / "audios"
 
 
