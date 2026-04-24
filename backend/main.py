@@ -13,6 +13,7 @@ from models import (
     ReponseCreationCapture,
     ReponseSante,
 )
+from transcription import transcrire_audio
 CHEMIN_STOCKAGE_AUDIOS = Path(__file__).resolve().parent / "stockage" / "audios"
 
 
@@ -66,6 +67,11 @@ async def enregistrer_audio(audio: UploadFile) -> str:
     return f"/stockage/audios/{nom_fichier}"
 
 
+def resoudre_chemin_audio(url_audio: str) -> Path:
+    chemin_relatif = Path(url_audio.lstrip("/"))
+    return Path(__file__).resolve().parent / chemin_relatif
+
+
 @app.post("/captures", response_model=ReponseCreationCapture)
 async def creer_captures(
     audio: UploadFile = File(...),
@@ -83,10 +89,19 @@ async def creer_captures(
         )
 
     url_audio = await enregistrer_audio(audio)
+    chemin_audio = resoudre_chemin_audio(url_audio)
+
+    try:
+        phrase_originale = transcrire_audio(chemin_audio, langue)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erreur lors de la transcription audio: {exc}",
+        ) from exc
 
     capture = creer_capture(
         CommandeCreationCapture(
-            phrase_originale="texte transcrit par l'ia",
+            phrase_originale=phrase_originale,
             traduction="exemple de traduction",
             audio_url=url_audio,
             contexte_tags=["voyage", "situation-reelle"],

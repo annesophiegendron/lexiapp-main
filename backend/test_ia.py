@@ -1,16 +1,7 @@
-import os
 import sys
 from pathlib import Path
-dossier_projet = Path(__file__).resolve().parent
 
-# chemin vers ffmpeg (oblig pr whisper)
-chemin_ffmpeg = dossier_projet / "tools" / "ffmpeg" / "ffmpeg-8.1-essentials_build" / "bin"
-
-# si ffmpeg existe on ajoute au PATH pour que whisper puisse le trouver
-if chemin_ffmpeg.exists():
-    os.environ["PATH"] = f"{chemin_ffmpeg}{os.pathsep}{os.environ.get('PATH', '')}"
-
-import whisper
+from transcription import transcrire_audio
 
 def main():
     # verif si arg present
@@ -24,13 +15,9 @@ def main():
         return 1
 
     try:
-        # chargement modele
-        print("chargement modele...")
-        modele = whisper.load_model("base")
-
         # lancement transcription
         print("transcription en cours...")
-        resultat = modele.transcribe(str(fichier_audio))
+        texte = transcrire_audio(fichier_audio)
 
     except Exception as e:
         print(f"erreur transcription {e}")
@@ -39,7 +26,7 @@ def main():
     # resultat
     print("\n--- resultat ---")
     print("fichier", fichier_audio)
-    print("texte", resultat["text"].strip())
+    print("texte", texte)
 
     return 0
 if __name__ == "__main__":

@@ -19,12 +19,14 @@ class MainApiTests(unittest.TestCase):
         cls.original_lister_captures = main.lister_captures
         cls.original_creer_capture = main.creer_capture
         cls.original_chemin_stockage_audios = main.CHEMIN_STOCKAGE_AUDIOS
+        cls.original_transcrire_audio = main.transcrire_audio
 
         main.initialiser_base = lambda: database.initialiser_base(cls.db_path)
         main.alimenter_donnees_demo = lambda: database.alimenter_donnees_demo(cls.db_path)
         main.lister_captures = lambda: database.lister_captures(cls.db_path)
         main.creer_capture = lambda commande: database.creer_capture(commande, cls.db_path)
         main.CHEMIN_STOCKAGE_AUDIOS = cls.stockage_test
+        main.transcrire_audio = lambda chemin_audio, langue=None: f"transcription test {langue or 'auto'}"
 
         database.initialiser_base(cls.db_path)
         cls.client = TestClient(main.app)
@@ -37,6 +39,7 @@ class MainApiTests(unittest.TestCase):
         main.lister_captures = cls.original_lister_captures
         main.creer_capture = cls.original_creer_capture
         main.CHEMIN_STOCKAGE_AUDIOS = cls.original_chemin_stockage_audios
+        main.transcrire_audio = cls.original_transcrire_audio
 
     def setUp(self):
         database.initialiser_base(self.__class__.db_path)
@@ -82,6 +85,7 @@ class MainApiTests(unittest.TestCase):
         self.assertTrue(payload["capture"]["audio_url"].startswith("/stockage/audios/"))
         self.assertTrue(payload["capture"]["audio_url"].endswith(".wav"))
         self.assertEqual(payload["capture"]["langue"], "fr")
+        self.assertEqual(payload["capture"]["phrase_originale"], "transcription test fr")
         nom_fichier = payload["capture"]["audio_url"].split("/")[-1]
         self.assertTrue((self.__class__.stockage_test / nom_fichier).exists())
 
@@ -91,6 +95,22 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(get_response.status_code, 200)
         self.assertEqual(get_payload["total"], 2)
         self.assertEqual(get_payload["captures"][0]["audio_url"], payload["capture"]["audio_url"])
+        self.assertEqual(get_payload["captures"][0]["phrase_originale"], "transcription test fr")
+
+    def test_post_captures_returns_500_when_transcription_fails(self):
+        main.transcrire_audio = lambda chemin_audio, langue=None: (_ for _ in ()).throw(RuntimeError("modele indisponible"))
+
+        try:
+            response = self.client.post(
+                "/captures",
+                files={"audio": ("test.wav", b"RIFF....WAVE", "audio/wav")},
+                data={"latitude": "48.8566", "longitude": "2.3522", "langue": "fr"},
+            )
+        finally:
+            main.transcrire_audio = lambda chemin_audio, langue=None: f"transcription test {langue or 'auto'}"
+
+        self.assertEqual(response.status_code, 500)
+        self.assertIn("Erreur lors de la transcription audio", response.json()["detail"])
 
     def test_post_captures_rejects_non_audio(self):
         response = self.client.post(
