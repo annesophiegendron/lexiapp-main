@@ -1,0 +1,20 @@
+INFO:     Started server process [17656]
+INFO:     Waiting for application startup.
+ERROR:    Traceback (most recent call last):
+  File "C:\Users\Admin\Documents\stage\lexiapp-main\backend\venv311\Lib\site-packages\starlette\routing.py", line 677, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+  File "C:\Users\Admin\Documents\stage\lexiapp-main\backend\python311\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Documents\stage\lexiapp-main\backend\main.py", line 28, in cycle_de_vie
+    alimenter_donnees_demo()
+  File "C:\Users\Admin\Documents\stage\lexiapp-main\backend\database.py", line 192, in alimenter_donnees_demo
+    connexion.execute(
+  File "C:\Users\Admin\Documents\stage\lexiapp-main\backend\venv311\Lib\site-packages\psycopg\connection.py", line 257, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.InvalidTextRepresentation: invalid input syntax for type json
+DETAIL:  Token "voyage" is invalid.
+CONTEXT:  JSON data, line 1: {voyage...
+unnamed portal parameter $5 = '...'
+
+ERROR:    Application startup failed. Exiting.

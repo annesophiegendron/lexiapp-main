@@ -6,6 +6,7 @@ import uuid
 import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 
+from config import AUDIO_STORAGE_DIR
 from database import alimenter_donnees_demo, creer_capture, initialiser_base, lister_captures
 from models import (
     CommandeCreationCapture,
@@ -13,12 +14,16 @@ from models import (
     ReponseCreationCapture,
     ReponseSante,
 )
+from ollama_client import analyser_phrase
 from transcription import transcrire_audio
-CHEMIN_STOCKAGE_AUDIOS = Path(__file__).resolve().parent / "stockage" / "audios"
+
+# Dossier de stockage local des fichiers audio televerses depuis le mobile.
+CHEMIN_STOCKAGE_AUDIOS = AUDIO_STORAGE_DIR
 
 
 @asynccontextmanager
 async def cycle_de_vie(_: FastAPI):
+    # Prepare la base au demarrage et ajoute une donnee de demo si besoin.
     initialiser_base()
     alimenter_donnees_demo()
     yield
@@ -26,7 +31,7 @@ async def cycle_de_vie(_: FastAPI):
 
 app = FastAPI(
     title="Lexiapp backend API",
-    description="Backend FastAPI avec persistence SQLite pour les captures.",
+    description="Backend FastAPI avec PostgreSQL, Whisper local et analyse Ollama pour les captures.",
     lifespan=cycle_de_vie,
 )
 
@@ -57,6 +62,7 @@ def lire_captures() -> ReponseCaptures:
 
 
 async def enregistrer_audio(audio: UploadFile) -> str:
+    # Sauvegarde l'audio brut localement avant transcription.
     CHEMIN_STOCKAGE_AUDIOS.mkdir(parents=True, exist_ok=True)
     extension = Path(audio.filename).suffix if audio.filename else ""
     nom_fichier = f"{uuid.uuid4().hex}{extension}"
@@ -68,6 +74,7 @@ async def enregistrer_audio(audio: UploadFile) -> str:
 
 
 def resoudre_chemin_audio(url_audio: str) -> Path:
+    # Convertit l'URL logique de stockage en chemin disque exploitable par Whisper.
     chemin_relatif = Path(url_audio.lstrip("/"))
     return Path(__file__).resolve().parent / chemin_relatif
 
@@ -79,6 +86,7 @@ async def creer_captures(
     longitude: float = Form(...),
     langue: Optional[str] = Form("fr"),
 ) -> ReponseCreationCapture:
+    # Pipeline principal: validation du fichier, transcription, analyse semantique, persistence.
     if not audio.filename:
         raise HTTPException(status_code=400, detail="Le fichier audio doit avoir un nom valide")
 
@@ -99,13 +107,23 @@ async def creer_captures(
             detail=f"Erreur lors de la transcription audio: {exc}",
         ) from exc
 
+    try:
+        analyse = analyser_phrase(phrase_originale, langue)
+    except Exception:
+        # La capture reste enregistrable meme si Ollama est indisponible.
+        analyse = {
+            "traduction": None,
+            "tags": [],
+            "formalite": "standard",
+        }
+
     capture = creer_capture(
         CommandeCreationCapture(
             phrase_originale=phrase_originale,
-            traduction="exemple de traduction",
+            traduction=analyse["traduction"],
             audio_url=url_audio,
-            contexte_tags=["voyage", "situation-reelle"],
-            formalite="standard",
+            contexte_tags=analyse["tags"],
+            formalite=analyse["formalite"],
             latitude=latitude,
             longitude=longitude,
             langue=langue,

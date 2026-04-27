@@ -1,6 +1,6 @@
+import shutil
 import unittest
 from pathlib import Path
-import shutil
 
 from fastapi.testclient import TestClient
 
@@ -11,7 +11,7 @@ import main
 class MainApiTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.db_path = Path(__file__).resolve().parent / "test_suite.db"
+        cls.database_url = f"sqlite:///{(Path(__file__).resolve().parent / 'test_suite.db').as_posix()}"
         cls.stockage_test = Path(__file__).resolve().parent / "test_stockage_audios"
 
         cls.original_initialiser_base = main.initialiser_base
@@ -20,15 +20,21 @@ class MainApiTests(unittest.TestCase):
         cls.original_creer_capture = main.creer_capture
         cls.original_chemin_stockage_audios = main.CHEMIN_STOCKAGE_AUDIOS
         cls.original_transcrire_audio = main.transcrire_audio
+        cls.original_analyser_phrase = main.analyser_phrase
 
-        main.initialiser_base = lambda: database.initialiser_base(cls.db_path)
-        main.alimenter_donnees_demo = lambda: database.alimenter_donnees_demo(cls.db_path)
-        main.lister_captures = lambda: database.lister_captures(cls.db_path)
-        main.creer_capture = lambda commande: database.creer_capture(commande, cls.db_path)
+        main.initialiser_base = lambda: database.initialiser_base(cls.database_url)
+        main.alimenter_donnees_demo = lambda: database.alimenter_donnees_demo(cls.database_url)
+        main.lister_captures = lambda: database.lister_captures(cls.database_url)
+        main.creer_capture = lambda commande: database.creer_capture(commande, cls.database_url)
         main.CHEMIN_STOCKAGE_AUDIOS = cls.stockage_test
         main.transcrire_audio = lambda chemin_audio, langue=None: f"transcription test {langue or 'auto'}"
+        main.analyser_phrase = lambda texte, langue=None: {
+            "traduction": f"traduction de {texte}",
+            "tags": ["test", "pipeline"],
+            "formalite": "standard",
+        }
 
-        database.initialiser_base(cls.db_path)
+        database.initialiser_base(cls.database_url)
         cls.client = TestClient(main.app)
 
     @classmethod
@@ -40,13 +46,21 @@ class MainApiTests(unittest.TestCase):
         main.creer_capture = cls.original_creer_capture
         main.CHEMIN_STOCKAGE_AUDIOS = cls.original_chemin_stockage_audios
         main.transcrire_audio = cls.original_transcrire_audio
+        main.analyser_phrase = cls.original_analyser_phrase
+
+        test_db = Path(cls.database_url.replace("sqlite:///", "", 1))
+        if test_db.exists():
+            try:
+                test_db.unlink()
+            except PermissionError:
+                pass
 
     def setUp(self):
-        database.initialiser_base(self.__class__.db_path)
-        with database.connecter_base(self.__class__.db_path) as connexion:
+        database.initialiser_base(self.__class__.database_url)
+        with database.connecter_base(self.__class__.database_url) as connexion:
             connexion.execute("DELETE FROM captures")
             connexion.commit()
-        database.alimenter_donnees_demo(self.__class__.db_path)
+        database.alimenter_donnees_demo(self.__class__.database_url)
         if self.__class__.stockage_test.exists():
             shutil.rmtree(self.__class__.stockage_test)
 
@@ -70,7 +84,7 @@ class MainApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(payload["total"], 1)
-        self.assertEqual(payload["captures"][0]["id"], "capture-001")
+        self.assertEqual(payload["captures"][0]["id"], "00000000-0000-0000-0000-000000000001")
 
     def test_post_captures_accepts_audio(self):
         response = self.client.post(
@@ -86,6 +100,8 @@ class MainApiTests(unittest.TestCase):
         self.assertTrue(payload["capture"]["audio_url"].endswith(".wav"))
         self.assertEqual(payload["capture"]["langue"], "fr")
         self.assertEqual(payload["capture"]["phrase_originale"], "transcription test fr")
+        self.assertEqual(payload["capture"]["traduction"], "traduction de transcription test fr")
+        self.assertEqual(payload["capture"]["contexte_tags"], ["test", "pipeline"])
         nom_fichier = payload["capture"]["audio_url"].split("/")[-1]
         self.assertTrue((self.__class__.stockage_test / nom_fichier).exists())
 
@@ -111,6 +127,28 @@ class MainApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 500)
         self.assertIn("Erreur lors de la transcription audio", response.json()["detail"])
+
+    def test_post_captures_falls_back_when_ollama_fails(self):
+        main.analyser_phrase = lambda texte, langue=None: (_ for _ in ()).throw(RuntimeError("ollama indisponible"))
+
+        try:
+            response = self.client.post(
+                "/captures",
+                files={"audio": ("test.wav", b"RIFF....WAVE", "audio/wav")},
+                data={"latitude": "48.8566", "longitude": "2.3522", "langue": "fr"},
+            )
+        finally:
+            main.analyser_phrase = lambda texte, langue=None: {
+                "traduction": f"traduction de {texte}",
+                "tags": ["test", "pipeline"],
+                "formalite": "standard",
+            }
+
+        payload = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(payload["capture"]["traduction"])
+        self.assertEqual(payload["capture"]["contexte_tags"], [])
+        self.assertEqual(payload["capture"]["formalite"], "standard")
 
     def test_post_captures_rejects_non_audio(self):
         response = self.client.post(
@@ -141,7 +179,7 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 422)
 
     def test_get_captures_route_when_database_is_empty(self):
-        with database.connecter_base(self.__class__.db_path) as connexion:
+        with database.connecter_base(self.__class__.database_url) as connexion:
             connexion.execute("DELETE FROM captures")
             connexion.commit()
 

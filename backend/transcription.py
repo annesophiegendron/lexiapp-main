@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Optional
 
 
+# Prepare le chemin local de ffmpeg si l'outil est fourni dans backend/tools.
 DOSSIER_BACKEND = Path(__file__).resolve().parent
 CHEMIN_FFMPEG = DOSSIER_BACKEND / "tools" / "ffmpeg" / "ffmpeg-8.1-essentials_build" / "bin"
 
@@ -15,6 +16,7 @@ def configurer_ffmpeg() -> None:
 
 
 def charger_modele(nom_modele: str = "base"):
+    # Charge Whisper une seule fois pour eviter de reinitialiser le modele a chaque requete.
     global _modele_cache
 
     if _modele_cache is None:
@@ -27,6 +29,7 @@ def charger_modele(nom_modele: str = "base"):
 
 
 def transcrire_audio(chemin_audio: Path, langue: Optional[str] = None) -> str:
+    # Retourne uniquement le texte final nettoye pour le pipeline backend.
     modele = charger_modele()
 
     options = {}

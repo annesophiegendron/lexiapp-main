@@ -1,0 +1,24 @@
+INFO:     Started server process [9484]
+INFO:     Waiting for application startup.
+ERROR:    Traceback (most recent call last):
+  File "C:\Users\Admin\Documents\stage\lexiapp-main\backend\venv311\Lib\site-packages\starlette\routing.py", line 677, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+  File "C:\Users\Admin\Documents\stage\lexiapp-main\backend\python311\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Documents\stage\lexiapp-main\backend\main.py", line 27, in cycle_de_vie
+    initialiser_base()
+  File "C:\Users\Admin\Documents\stage\lexiapp-main\backend\database.py", line 71, in initialiser_base
+    with connecter_base(url) as connexion:
+         ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Documents\stage\lexiapp-main\backend\database.py", line 57, in connecter_base
+    return psycopg.connect(url, row_factory=psycopg.rows.dict_row)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Admin\Documents\stage\lexiapp-main\backend\venv311\Lib\site-packages\psycopg\connection.py", line 125, in connect
+    raise type(last_ex)("\n".join(lines)).with_traceback(None)
+psycopg.errors.ConnectionTimeout: connection timeout expired
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: '5432', hostaddr: '::1': connection timeout expired
+- host: 'localhost', port: '5432', hostaddr: '127.0.0.1': connection timeout expired
+
+ERROR:    Application startup failed. Exiting.

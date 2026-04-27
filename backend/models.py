@@ -17,6 +17,7 @@ class Capture(BaseModel):
     formalite: str
     geolocalisation: Geolocalisation
     langue: Optional[str] = None
+    timestamp: Optional[str] = None
 
 
 class ReponseSante(BaseModel):
