@@ -242,6 +242,48 @@ def ligne_vers_capture(ligne: Any) -> Capture:
     )
 
 
+def lire_capture_par_id(identifiant: str, database_url: Optional[str] = None) -> Optional[Capture]:
+    # Lit une capture specifique par son UUID.
+    url = database_url or DATABASE_URL
+    requete = adapter_requete(
+        """
+        SELECT
+            id,
+            phrase_originale,
+            traduction,
+            audio_url,
+            contexte_tags,
+            formalite,
+            latitude,
+            longitude,
+            langue,
+            created_at
+        FROM captures
+        WHERE id = ?
+        """,
+        url,
+    )
+
+    with connecter_base(url) as connexion:
+        ligne = connexion.execute(requete, [identifiant]).fetchone()
+
+    if not ligne:
+        return None
+
+    return ligne_vers_capture(ligne)
+
+
+def verifier_sante_base(database_url: Optional[str] = None) -> bool:
+    # Verifie que la base de donnees est accessible et fonctionnelle.
+    try:
+        url = database_url or DATABASE_URL
+        with connecter_base(url) as connexion:
+            connexion.execute("SELECT 1")
+        return True
+    except Exception:
+        return False
+
+
 def lire_premiere_valeur(ligne: Any):
     # Recupere la premiere valeur d'une ligne quel que soit le driver SQL utilise.
     if isinstance(ligne, dict):
