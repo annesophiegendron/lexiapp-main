@@ -4,29 +4,49 @@ from typing import Optional
 import logging
 import uuid
 
+import httpx
 import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-import httpx
 
-from config import AUDIO_STORAGE_DIR, OLLAMA_URL
-from database import (
-    alimenter_donnees_demo,
-    creer_capture,
-    initialiser_base,
-    lire_capture_par_id,
-    lister_captures,
-    verifier_sante_base,
-)
-from models import (
-    Capture,
-    CommandeCreationCapture,
-    ReponseCaptures,
-    ReponseCreationCapture,
-    ReponseSante,
-)
-from ollama_client import analyser_phrase
-from transcription import transcrire_audio
+try:
+    from backend.config import AUDIO_STORAGE_DIR, OLLAMA_URL
+    from backend.database import (
+        alimenter_donnees_demo,
+        creer_capture,
+        initialiser_base,
+        lire_capture_par_id,
+        lister_captures,
+        verifier_sante_base,
+    )
+    from backend.models import (
+        Capture,
+        CommandeCreationCapture,
+        ReponseCaptures,
+        ReponseCreationCapture,
+        ReponseSante,
+    )
+    from backend.ollama_client import analyser_phrase
+    from backend.transcription import transcrire_audio
+except ModuleNotFoundError:
+    from config import AUDIO_STORAGE_DIR, OLLAMA_URL
+    from database import (
+        alimenter_donnees_demo,
+        creer_capture,
+        initialiser_base,
+        lire_capture_par_id,
+        lister_captures,
+        verifier_sante_base,
+    )
+    from models import (
+        Capture,
+        CommandeCreationCapture,
+        ReponseCaptures,
+        ReponseCreationCapture,
+        ReponseSante,
+    )
+    from ollama_client import analyser_phrase
+    from transcription import transcrire_audio
 
 # Configuration du logging
 logger = logging.getLogger(__name__)

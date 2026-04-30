@@ -4,8 +4,11 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from backend import database
-import main
+try:
+    from backend import database, main
+except ModuleNotFoundError:
+    import database
+    import main
 
 
 class MainApiTests(unittest.TestCase):
@@ -21,6 +24,8 @@ class MainApiTests(unittest.TestCase):
         cls.original_chemin_stockage_audios = main.CHEMIN_STOCKAGE_AUDIOS
         cls.original_transcrire_audio = main.transcrire_audio
         cls.original_analyser_phrase = main.analyser_phrase
+        cls.original_verifier_sante_base = main.verifier_sante_base
+        cls.original_httpx_client = main.httpx.Client
 
         main.initialiser_base = lambda: database.initialiser_base(cls.database_url)
         main.alimenter_donnees_demo = lambda: database.alimenter_donnees_demo(cls.database_url)
@@ -33,6 +38,25 @@ class MainApiTests(unittest.TestCase):
             "tags": ["test", "pipeline"],
             "formalite": "standard",
         }
+        main.verifier_sante_base = lambda: True
+
+        class FauxClientHttpx:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def get(self, url):
+                class Reponse:
+                    status_code = 200
+
+                return Reponse()
+
+        main.httpx.Client = FauxClientHttpx
 
         database.initialiser_base(cls.database_url)
         cls.client = TestClient(main.app)
@@ -47,6 +71,8 @@ class MainApiTests(unittest.TestCase):
         main.CHEMIN_STOCKAGE_AUDIOS = cls.original_chemin_stockage_audios
         main.transcrire_audio = cls.original_transcrire_audio
         main.analyser_phrase = cls.original_analyser_phrase
+        main.verifier_sante_base = cls.original_verifier_sante_base
+        main.httpx.Client = cls.original_httpx_client
 
         test_db = Path(cls.database_url.replace("sqlite:///", "", 1))
         if test_db.exists():

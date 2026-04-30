@@ -1,8 +1,12 @@
 import sys
 from pathlib import Path
 
-from ollama_client import analyser_phrase
-from transcription import transcrire_audio
+try:
+    from backend.ollama_client import analyser_phrase
+    from backend.transcription import transcrire_audio
+except ModuleNotFoundError:
+    from ollama_client import analyser_phrase
+    from transcription import transcrire_audio
 
 
 def main():

@@ -3,8 +3,12 @@ import uuid
 from pathlib import Path
 from typing import Any, List, Optional
 
-from backend.config import DATABASE_URL
-from backend.models import Capture, CommandeCreationCapture, Geolocalisation
+try:
+    from backend.config import DATABASE_URL
+    from backend.models import Capture, CommandeCreationCapture, Geolocalisation
+except ModuleNotFoundError:
+    from config import DATABASE_URL
+    from models import Capture, CommandeCreationCapture, Geolocalisation
 
 
 # Schema PostgreSQL cible pour l'environnement local de stage.

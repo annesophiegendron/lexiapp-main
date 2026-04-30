@@ -3,7 +3,10 @@ from typing import Any, Dict, Optional
 
 import httpx
 
-from config import OLLAMA_MODEL, OLLAMA_URL
+try:
+    from backend.config import OLLAMA_MODEL, OLLAMA_URL
+except ModuleNotFoundError:
+    from config import OLLAMA_MODEL, OLLAMA_URL
 
 PROMPT_SYSTEME = (
     "Tu es un assistant linguistique. "
