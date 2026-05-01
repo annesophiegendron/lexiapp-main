@@ -56,6 +56,7 @@ class MainApiTests(unittest.TestCase):
 
                 return Reponse()
 
+        cls.faux_httpx_client = FauxClientHttpx
         main.httpx.Client = FauxClientHttpx
 
         database.initialiser_base(cls.database_url)
@@ -95,6 +96,30 @@ class MainApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["status"], "ok")
+
+    def test_health_route_returns_degraded_when_ollama_is_down(self):
+        class FauxClientHttpxEnEchec:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def get(self, url):
+                raise RuntimeError("ollama coupe")
+
+        main.httpx.Client = FauxClientHttpxEnEchec
+        try:
+            response = self.client.get("/sante")
+        finally:
+            main.httpx.Client = self.__class__.faux_httpx_client
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["status"], "degraded")
+        self.assertIn("Ollama indisponible", response.json()["message"])
 
     def test_root_route(self):
         response = self.client.get("/")
@@ -153,6 +178,7 @@ class MainApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 500)
         self.assertIn("Erreur lors de la transcription audio", response.json()["detail"])
+        self.assertEqual(list(self.__class__.stockage_test.glob("*")), [])
 
     def test_post_captures_falls_back_when_ollama_fails(self):
         main.analyser_phrase = lambda texte, langue=None: (_ for _ in ()).throw(RuntimeError("ollama indisponible"))
@@ -215,6 +241,10 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(payload["total"], 0)
         self.assertEqual(payload["captures"], [])
+
+    def test_resoudre_chemin_audio_uses_configured_storage_directory(self):
+        chemin = main.resoudre_chemin_audio("/stockage/audios/test.wav")
+        self.assertEqual(chemin, self.__class__.stockage_test / "test.wav")
 
 
 if __name__ == "__main__":
