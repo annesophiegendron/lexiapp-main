@@ -11,7 +11,7 @@ except ModuleNotFoundError:
     from models import Capture, CommandeCreationCapture, Geolocalisation
 
 
-# Schema PostgreSQL cible pour l'environnement local de stage.
+# Schema PostgreSQL 
 SCHEMA_POSTGRES = """
 CREATE TABLE IF NOT EXISTS captures (
     id UUID PRIMARY KEY,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS captures (
 )
 """
 
-# Schema SQLite conserve pour les tests rapides sans service externe.
+# Schema SQLite pour les tests
 SCHEMA_SQLITE = """
 CREATE TABLE IF NOT EXISTS captures (
     id TEXT PRIMARY KEY,
@@ -86,7 +86,6 @@ def initialiser_base(database_url: Optional[str] = None) -> None:
         connexion.execute(schema)
         connexion.commit()
 
-
 def lister_captures(database_url: Optional[str] = None) -> List[Capture]:
     # Lit les captures les plus recentes pour alimenter l'app mobile.
     url = database_url or DATABASE_URL
@@ -116,7 +115,7 @@ def lister_captures(database_url: Optional[str] = None) -> List[Capture]:
 
 
 def creer_capture(commande: CommandeCreationCapture, database_url: Optional[str] = None) -> Capture:
-    # Enregistre une capture complete, puis relit la ligne pour renvoyer le format API final.
+    # Enregistre une capture complete pour la renvoyer dans l'api
     url = database_url or DATABASE_URL
     identifiant = str(uuid.uuid4())
     tags = preparer_tags_pour_stockage(commande.contexte_tags, url)
