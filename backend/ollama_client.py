@@ -22,7 +22,7 @@ def analyser_phrase(texte: str, langue: Optional[str] = None) -> Dict[str, Any]:
         f"{PROMPT_SYSTEME}\n"
         f"Phrase a analyser: {texte}\n"
         f"Langue source si elle est connue: {langue or 'auto'}\n"
-        "Retourne seulement le JSON final, sans markdown."
+        "Retourne seulement le JSON final et sans markdown."
     )
 
     with httpx.Client(timeout=60.0) as client:
