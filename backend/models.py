@@ -31,10 +31,21 @@ class ReponseCaptures(BaseModel):
     captures: List[Capture]
 
 
+class StatutEtapeIA(BaseModel):
+    statut: str
+    modele: Optional[str] = None
+
+
+class PipelineIA(BaseModel):
+    transcription: StatutEtapeIA
+    analyse: StatutEtapeIA
+
+
 class ReponseCreationCapture(BaseModel):
     status: str
     message: str
     capture: Capture
+    pipeline_ia: PipelineIA
 
 
 class CommandeCreationCapture(BaseModel):

@@ -102,10 +102,48 @@ python -m unittest test_main.py
 
 ## Base prete pour la phase 2
 
+- Objectif retenu: rendre visible l'etat du pipeline IA pour que le frontend sache si l'analyse locale a vraiment reussi ou si un fallback a ete applique
 - Transcription locale Whisper configurable par `WHISPER_MODEL`
 - Analyse locale Ollama avec degradation propre si indisponible
 - Champ `formalite` et tags persistants dans PostgreSQL
 - Stockage audio reutilisable pour le pipeline IA
+
+## Reponse `POST /captures`
+
+La reponse contient maintenant un bloc `pipeline_ia` :
+
+```json
+{
+  "status": "success",
+  "message": "Le fichier audio recu a ete enregistre.",
+  "capture": {
+    "id": "uuid",
+    "phrase_originale": "Bonjour",
+    "traduction": "Hello",
+    "audio_url": "/stockage/audios/fichier.wav",
+    "contexte_tags": ["salutation"],
+    "formalite": "standard",
+    "geolocalisation": {
+      "latitude": 48.8566,
+      "longitude": 2.3522
+    },
+    "langue": "fr",
+    "timestamp": "2026-05-04T12:00:00+00:00"
+  },
+  "pipeline_ia": {
+    "transcription": {
+      "statut": "ok",
+      "modele": "base"
+    },
+    "analyse": {
+      "statut": "ok",
+      "modele": "llama3"
+    }
+  }
+}
+```
+
+Si Ollama est indisponible, `pipeline_ia.analyse.statut` vaut `fallback`.
 
 ## Limites connues
 

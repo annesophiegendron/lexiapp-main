@@ -170,6 +170,10 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["capture"]["phrase_originale"], "transcription test fr")
         self.assertEqual(payload["capture"]["traduction"], "traduction de transcription test fr")
         self.assertEqual(payload["capture"]["contexte_tags"], ["test", "pipeline"])
+        self.assertEqual(payload["pipeline_ia"]["transcription"]["statut"], "ok")
+        self.assertEqual(payload["pipeline_ia"]["transcription"]["modele"], "base")
+        self.assertEqual(payload["pipeline_ia"]["analyse"]["statut"], "ok")
+        self.assertEqual(payload["pipeline_ia"]["analyse"]["modele"], "llama3")
         nom_fichier = payload["capture"]["audio_url"].split("/")[-1]
         self.assertTrue((self.__class__.stockage_test / nom_fichier).exists())
 
@@ -222,6 +226,9 @@ class MainApiTests(unittest.TestCase):
         self.assertIsNone(payload["capture"]["traduction"])
         self.assertEqual(payload["capture"]["contexte_tags"], [])
         self.assertEqual(payload["capture"]["formalite"], "standard")
+        self.assertEqual(payload["pipeline_ia"]["transcription"]["statut"], "ok")
+        self.assertEqual(payload["pipeline_ia"]["analyse"]["statut"], "fallback")
+        self.assertEqual(payload["pipeline_ia"]["analyse"]["modele"], "llama3")
 
     def test_post_captures_rejects_non_audio(self):
         response = self.client.post(

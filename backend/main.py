@@ -12,6 +12,7 @@ from fastapi.responses import FileResponse
 
 try:
     from backend.config import AUDIO_STORAGE_DIR, OLLAMA_URL, SEED_DEMO_DATA
+    from backend.config import OLLAMA_MODEL, WHISPER_MODEL
     from backend.database import (
         alimenter_donnees_demo,
         creer_capture,
@@ -23,14 +24,17 @@ try:
     from backend.models import (
         Capture,
         CommandeCreationCapture,
+        PipelineIA,
         ReponseCaptures,
         ReponseCreationCapture,
         ReponseSante,
+        StatutEtapeIA,
     )
     from backend.ollama_client import analyser_phrase
     from backend.transcription import transcrire_audio
 except ModuleNotFoundError:
     from config import AUDIO_STORAGE_DIR, OLLAMA_URL, SEED_DEMO_DATA
+    from config import OLLAMA_MODEL, WHISPER_MODEL
     from database import (
         alimenter_donnees_demo,
         creer_capture,
@@ -42,9 +46,11 @@ except ModuleNotFoundError:
     from models import (
         Capture,
         CommandeCreationCapture,
+        PipelineIA,
         ReponseCaptures,
         ReponseCreationCapture,
         ReponseSante,
+        StatutEtapeIA,
     )
     from ollama_client import analyser_phrase
     from transcription import transcrire_audio
@@ -206,6 +212,7 @@ async def creer_captures(
     try:
         logger.info(f"Transcription en cours pour {chemin_audio}")
         phrase_originale = transcrire_audio(chemin_audio, langue)
+        statut_transcription = StatutEtapeIA(statut="ok", modele=WHISPER_MODEL)
         logger.info(f"Transcription reussie: {phrase_originale[:50]}...")
     except Exception as exc:
         supprimer_audio_si_present(url_audio)
@@ -218,6 +225,7 @@ async def creer_captures(
     try:
         logger.info(f"Analyse Ollama en cours pour: {phrase_originale[:50]}...")
         analyse = analyser_phrase(phrase_originale, langue)
+        statut_analyse = StatutEtapeIA(statut="ok", modele=OLLAMA_MODEL)
         logger.info(f"Analyse reussie - tags: {analyse.get('tags')}")
     except Exception as exc:
         logger.warning(f"Ollama indisponible, fallback: {exc}")
@@ -226,6 +234,7 @@ async def creer_captures(
             "tags": [],
             "formalite": "standard",
         }
+        statut_analyse = StatutEtapeIA(statut="fallback", modele=OLLAMA_MODEL)
 
     capture = creer_capture(
         CommandeCreationCapture(
@@ -246,6 +255,10 @@ async def creer_captures(
         status="success",
         message="Le fichier audio recu a ete enregistre.",
         capture=capture,
+        pipeline_ia=PipelineIA(
+            transcription=statut_transcription,
+            analyse=statut_analyse,
+        ),
     )
 
 
