@@ -1,4 +1,4 @@
-# Phase 1 Backend
+# Backend Lexiapp
 
 Backend FastAPI pour capturer, transcrire et analyser des phrases apprises en situation reelle avec IA locale.
 
@@ -43,13 +43,14 @@ python main.py
 
 API disponible sur `http://localhost:8000`
 
-## Endpoints phase 1
+## Endpoints disponibles
 
 - `GET /` : points d'entree utiles
 - `GET /sante` : sante backend, base de donnees et Ollama
 - `GET /captures` : liste des captures
 - `GET /captures/{capture_id}` : detail d'une capture
 - `POST /captures` : upload audio + geolocalisation + langue
+- `GET /stockage/audios/{nom_fichier}` : acces aux audios stockes localement
 
 Documentation interactive :
 
@@ -72,6 +73,8 @@ curl -X POST http://localhost:8000/captures ^
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/lexiapp
 OLLAMA_URL=http://localhost:11434
 OLLAMA_MODEL=llama3
+WHISPER_MODEL=base
+SEED_DEMO_DATA=false
 AUDIO_STORAGE_DIR=backend/stockage/audios
 ```
 
@@ -87,18 +90,25 @@ DATABASE_URL=sqlite:///backend/test.db
 python -m unittest test_main.py
 ```
 
-## Ce qui est livre en phase 1
+## Phase 1 finalisee
 
 - API FastAPI documentee
 - Persistence PostgreSQL avec fallback SQLite pour les tests
-- Transcription locale Whisper
-- Analyse locale Ollama avec degradation propre si indisponible
+- Routes `GET /captures` et `POST /captures`
+- Acces HTTP aux audios stockes localement
 - Validation geolocalisation et type de fichier
 - Stockage audio local
 - Tests backend de base
 
+## Base prete pour la phase 2
+
+- Transcription locale Whisper configurable par `WHISPER_MODEL`
+- Analyse locale Ollama avec degradation propre si indisponible
+- Champ `formalite` et tags persistants dans PostgreSQL
+- Stockage audio reutilisable pour le pipeline IA
+
 ## Limites connues
 
 - Pas encore de routes `PUT` ou `DELETE`
-- Pas encore d'algorithme SRS
-- Pas encore d'integration mobile temps reel avec ce backend
+- Pas encore de flux mobile d'enregistrement audio branche au backend
+- Pas encore de file de traitement asynchrone pour les traitements IA lourds

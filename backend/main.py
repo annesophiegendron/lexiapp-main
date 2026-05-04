@@ -8,9 +8,10 @@ import httpx
 import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 try:
-    from backend.config import AUDIO_STORAGE_DIR, OLLAMA_URL
+    from backend.config import AUDIO_STORAGE_DIR, OLLAMA_URL, SEED_DEMO_DATA
     from backend.database import (
         alimenter_donnees_demo,
         creer_capture,
@@ -29,7 +30,7 @@ try:
     from backend.ollama_client import analyser_phrase
     from backend.transcription import transcrire_audio
 except ModuleNotFoundError:
-    from config import AUDIO_STORAGE_DIR, OLLAMA_URL
+    from config import AUDIO_STORAGE_DIR, OLLAMA_URL, SEED_DEMO_DATA
     from database import (
         alimenter_donnees_demo,
         creer_capture,
@@ -61,7 +62,8 @@ CHEMIN_STOCKAGE_AUDIOS = AUDIO_STORAGE_DIR
 async def cycle_de_vie(_: FastAPI):
     logger.info("Initialisation du backend Lexiapp...")
     initialiser_base()
-    alimenter_donnees_demo()
+    if SEED_DEMO_DATA:
+        alimenter_donnees_demo()
     logger.info("Backend Lexiapp initialise avec succes")
     yield
     logger.info("Arret du backend Lexiapp")
@@ -80,7 +82,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.get("/", tags=["Info"])
 def accueil() -> dict:
@@ -156,6 +157,14 @@ def supprimer_audio_si_present(url_audio: str) -> None:
     chemin_audio = resoudre_chemin_audio(url_audio)
     if chemin_audio.exists():
         chemin_audio.unlink()
+
+
+@app.get("/stockage/audios/{nom_fichier}", tags=["Stockage"])
+def lire_audio_stocke(nom_fichier: str):
+    chemin_audio = CHEMIN_STOCKAGE_AUDIOS / nom_fichier
+    if not chemin_audio.exists():
+        raise HTTPException(status_code=404, detail=f"Audio {nom_fichier} introuvable")
+    return FileResponse(chemin_audio)
 
 
 @app.post("/captures", response_model=ReponseCreationCapture, tags=["Captures"])

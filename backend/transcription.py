@@ -2,6 +2,11 @@ import os
 from pathlib import Path
 from typing import Optional
 
+try:
+    from backend.config import WHISPER_MODEL
+except ModuleNotFoundError:
+    from config import WHISPER_MODEL
+
 
 # Prepare le chemin local de ffmpeg si l'outil est fourni dans backend/tools.
 DOSSIER_BACKEND = Path(__file__).resolve().parent
@@ -15,7 +20,7 @@ def configurer_ffmpeg() -> None:
         os.environ["PATH"] = f"{CHEMIN_FFMPEG}{os.pathsep}{os.environ.get('PATH', '')}"
 
 
-def charger_modele(nom_modele: str = "base"):
+def charger_modele(nom_modele: Optional[str] = None):
     # Charge Whisper une seule fois pour eviter de reinitialiser le modele a chaque requete.
     global _modele_cache
 
@@ -23,7 +28,7 @@ def charger_modele(nom_modele: str = "base"):
         import whisper
 
         configurer_ffmpeg()
-        _modele_cache = whisper.load_model(nom_modele)
+        _modele_cache = whisper.load_model(nom_modele or WHISPER_MODEL)
 
     return _modele_cache
 

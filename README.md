@@ -8,10 +8,10 @@ Le backend se trouve dans `backend/`.
 
 ### Etat actuel
 
-- contrat d'API defini avec FastAPI
+- phase 1 backend finalisee sur FastAPI
 - persistence PostgreSQL pour les captures
-- routes disponibles pour la sante et les captures
-- pipeline local Whisper + Ollama pour enrichir les captures
+- routes disponibles pour la sante, les captures et les fichiers audio locaux
+- base technique en place pour le pipeline local Whisper + Ollama
 
 ### Fichiers utiles
 
@@ -21,6 +21,8 @@ Le backend se trouve dans `backend/`.
 - `backend/schema.sql` : schema PostgreSQL de reference
 - `backend/docker-compose.yml` : PostgreSQL local via Docker
 - `backend/requirements.txt` : dependances Python
+- `backend/transcription.py` : integration Whisper locale
+- `backend/ollama_client.py` : integration Ollama locale
 
 ### Lancer le backend
 
@@ -32,7 +34,7 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Puis creer `backend/.env` a partir de `backend/.env.example`, demarrer PostgreSQL local et lancer `ollama run llama3`.
+Puis creer `backend/.env` a partir de `backend/.env.example`, demarrer PostgreSQL local et lancer `ollama run llama3` si la phase 2 est activee.
 
 ### Demarrer PostgreSQL local
 

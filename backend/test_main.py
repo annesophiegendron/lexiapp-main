@@ -21,6 +21,7 @@ class MainApiTests(unittest.TestCase):
         cls.original_alimenter_donnees_demo = main.alimenter_donnees_demo
         cls.original_lister_captures = main.lister_captures
         cls.original_creer_capture = main.creer_capture
+        cls.original_lire_capture_par_id = main.lire_capture_par_id
         cls.original_chemin_stockage_audios = main.CHEMIN_STOCKAGE_AUDIOS
         cls.original_transcrire_audio = main.transcrire_audio
         cls.original_analyser_phrase = main.analyser_phrase
@@ -31,6 +32,7 @@ class MainApiTests(unittest.TestCase):
         main.alimenter_donnees_demo = lambda: database.alimenter_donnees_demo(cls.database_url)
         main.lister_captures = lambda: database.lister_captures(cls.database_url)
         main.creer_capture = lambda commande: database.creer_capture(commande, cls.database_url)
+        main.lire_capture_par_id = lambda capture_id: database.lire_capture_par_id(capture_id, cls.database_url)
         main.CHEMIN_STOCKAGE_AUDIOS = cls.stockage_test
         main.transcrire_audio = lambda chemin_audio, langue=None: f"transcription test {langue or 'auto'}"
         main.analyser_phrase = lambda texte, langue=None: {
@@ -69,6 +71,7 @@ class MainApiTests(unittest.TestCase):
         main.alimenter_donnees_demo = cls.original_alimenter_donnees_demo
         main.lister_captures = cls.original_lister_captures
         main.creer_capture = cls.original_creer_capture
+        main.lire_capture_par_id = cls.original_lire_capture_par_id
         main.CHEMIN_STOCKAGE_AUDIOS = cls.original_chemin_stockage_audios
         main.transcrire_audio = cls.original_transcrire_audio
         main.analyser_phrase = cls.original_analyser_phrase
@@ -137,6 +140,20 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["total"], 1)
         self.assertEqual(payload["captures"][0]["id"], "00000000-0000-0000-0000-000000000001")
 
+    def test_get_capture_by_id_route(self):
+        response = self.client.get("/captures/00000000-0000-0000-0000-000000000001")
+        payload = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload["id"], "00000000-0000-0000-0000-000000000001")
+        self.assertEqual(payload["phrase_originale"], "texte transcrit par l'ia")
+
+    def test_get_capture_by_id_route_returns_404(self):
+        response = self.client.get("/captures/00000000-0000-0000-0000-000000000099")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("non trouvee", response.json()["detail"])
+
     def test_post_captures_accepts_audio(self):
         response = self.client.post(
             "/captures",
@@ -163,6 +180,10 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(get_payload["total"], 2)
         self.assertEqual(get_payload["captures"][0]["audio_url"], payload["capture"]["audio_url"])
         self.assertEqual(get_payload["captures"][0]["phrase_originale"], "transcription test fr")
+
+        audio_response = self.client.get(payload["capture"]["audio_url"])
+        self.assertEqual(audio_response.status_code, 200)
+        self.assertEqual(audio_response.content, b"RIFF....WAVE")
 
     def test_post_captures_returns_500_when_transcription_fails(self):
         main.transcrire_audio = lambda chemin_audio, langue=None: (_ for _ in ()).throw(RuntimeError("modele indisponible"))
