@@ -13,16 +13,20 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import QuizImage from '../assets/images/brazuca.png';
 import {useLexicon} from '../context/LexiconContext';
 import {useTheme} from '../context/ThemeContext';
+import {useCaptures} from '../context/CaptureContext';
 import AddWordScreen from './AddWordScreen';
+import CaptureMomentScreen from './CaptureMomentScreen';
 
 import {designSystem} from '../design';
 import {categoryIcons, categoryColorsLight} from '../constants.js';
 
 const MainScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [captureModalVisible, setCaptureModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const navigation = useNavigation();
   const {lexicon} = useLexicon();
+  const {captures, isLoading, refreshCaptures} = useCaptures();
   const {isDarkMode} = useTheme();
   const {
     backgroundLight,
@@ -34,6 +38,7 @@ const MainScreen = () => {
   } = designSystem.colors;
 
   const handleClose = () => setModalVisible(false);
+  const closeCaptureModal = () => setCaptureModalVisible(false);
 
   const filteredItems = lexicon.filter(item => {
     const matchesSearch =
@@ -50,6 +55,8 @@ const MainScreen = () => {
   const navigateToQuizScreen = () => {
     navigation.navigate('QuizzScreen');
   };
+
+  const latestCapture = captures[0];
 
   return (
     <ScrollView
@@ -133,6 +140,62 @@ const MainScreen = () => {
       {/* Quiz Section */}
       <TouchableOpacity
         style={[
+          styles.captureCard,
+          {backgroundColor: isDarkMode ? '#1f2520' : '#edf5ea'},
+        ]}
+        onPress={() => setCaptureModalVisible(true)}>
+        <View style={styles.captureCardHeader}>
+          <View>
+            <Text
+              style={[
+                styles.captureCardTitle,
+                {color: isDarkMode ? textLight : '#172217'},
+              ]}>
+              Voice Capture Pipeline
+            </Text>
+            <Text
+              style={[
+                styles.captureCardSubtitle,
+                {color: isDarkMode ? '#b9c7b7' : '#466046'},
+              ]}>
+              Record, upload, transcribe and classify a phrase locally.
+            </Text>
+          </View>
+          <Ionicons
+            name="mic-circle-outline"
+            size={34}
+            color={isDarkMode ? '#d7f5d3' : '#234223'}
+          />
+        </View>
+
+        <View style={styles.captureMetaRow}>
+          <Text style={[styles.captureMetaText, {color: isDarkMode ? '#fff' : '#172217'}]}>
+            {isLoading ? 'Loading backend captures...' : `${captures.length} capture(s) synced`}
+          </Text>
+          <TouchableOpacity onPress={refreshCaptures}>
+            <Text style={[styles.captureRefreshText, {color: isDarkMode ? '#d7f5d3' : '#234223'}]}>
+              Refresh
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {latestCapture ? (
+          <View style={styles.latestCaptureCard}>
+            <Text style={[styles.latestCaptureTitle, {color: isDarkMode ? textLight : textDark}]}>
+              Latest result
+            </Text>
+            <Text style={[styles.latestCaptureText, {color: isDarkMode ? '#d8d8d8' : '#2e2e2e'}]}>
+              {latestCapture.original}
+            </Text>
+            <Text style={[styles.latestCaptureMeta, {color: isDarkMode ? '#aab7aa' : '#4d5e4d'}]}>
+              {latestCapture.translation || 'No translation yet'} • {latestCapture.formality}
+            </Text>
+          </View>
+        ) : null}
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[
           styles.quizCard,
           {backgroundColor: isDarkMode ? '#2a2a2a' : '#f4f4f4'},
         ]}
@@ -199,6 +262,10 @@ const MainScreen = () => {
 
       {/* Add Word Modal */}
       <AddWordScreen isVisible={modalVisible} onClose={handleClose} />
+      <CaptureMomentScreen
+        isVisible={captureModalVisible}
+        onClose={closeCaptureModal}
+      />
     </ScrollView>
   );
 };
@@ -258,6 +325,60 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 10,
+  },
+  captureCard: {
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    gap: 14,
+  },
+  captureCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  captureCardTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  captureCardSubtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    maxWidth: 250,
+  },
+  captureMetaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  captureMetaText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  captureRefreshText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  latestCaptureCard: {
+    backgroundColor: 'rgba(255,255,255,0.45)',
+    borderRadius: 16,
+    padding: 14,
+  },
+  latestCaptureTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  latestCaptureText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  latestCaptureMeta: {
+    fontSize: 13,
   },
   categoriesContainer: {
     flexDirection: 'row',

@@ -12,6 +12,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTheme, ThemeProvider } from './context/ThemeContext';
 import { LexiconProvider } from './context/LexiconContext';
 import { QuizProvider } from './context/QuizzContext';
+import { CaptureProvider } from './context/CaptureContext';
 
 import SplashScreen from './pages/SplashScreen';
 import MainScreen from './pages/MainScreen';
@@ -184,20 +185,22 @@ const BottomTabs = () => {
 const App = () => {
   return (
     <ThemeProvider>
-      <LexiconProvider>
-        <QuizProvider>
-          <NavigationContainer>
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="Splash" component={SplashScreen} />
-              <Stack.Screen name="HomeTabs" component={BottomTabs} />
-              <Stack.Screen name="CategoryWords" component={CategoryWordsScreen} />
-              <Stack.Screen name="ResultsScreen" component={ResultsScreen} />
-              <Stack.Screen name="MainScreen" component={MainScreen} />
-              <Stack.Screen name="Settings" component={SettingsScreen} />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </QuizProvider>
-      </LexiconProvider>
+      <CaptureProvider>
+        <LexiconProvider>
+          <QuizProvider>
+            <NavigationContainer>
+              <Stack.Navigator screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="Splash" component={SplashScreen} />
+                <Stack.Screen name="HomeTabs" component={BottomTabs} />
+                <Stack.Screen name="CategoryWords" component={CategoryWordsScreen} />
+                <Stack.Screen name="ResultsScreen" component={ResultsScreen} />
+                <Stack.Screen name="MainScreen" component={MainScreen} />
+                <Stack.Screen name="Settings" component={SettingsScreen} />
+              </Stack.Navigator>
+            </NavigationContainer>
+          </QuizProvider>
+        </LexiconProvider>
+      </CaptureProvider>
     </ThemeProvider>
   );
 };
