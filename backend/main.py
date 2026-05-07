@@ -246,6 +246,10 @@ async def creer_captures(
             latitude=latitude,
             longitude=longitude,
             langue=langue,
+            pipeline_ia=PipelineIA(
+                transcription=statut_transcription,
+                analyse=statut_analyse,
+            ),
         )
     )
 
@@ -255,10 +259,7 @@ async def creer_captures(
         status="success",
         message="Le fichier audio recu a ete enregistre.",
         capture=capture,
-        pipeline_ia=PipelineIA(
-            transcription=statut_transcription,
-            analyse=statut_analyse,
-        ),
+        pipeline_ia=capture.pipeline_ia,
     )
 
 
