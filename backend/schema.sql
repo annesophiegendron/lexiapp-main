@@ -8,5 +8,9 @@ CREATE TABLE IF NOT EXISTS captures (
     latitude DOUBLE PRECISION NOT NULL,
     longitude DOUBLE PRECISION NOT NULL,
     langue VARCHAR(10),
+    transcription_statut TEXT NOT NULL DEFAULT 'ok',
+    transcription_modele TEXT,
+    analyse_statut TEXT NOT NULL DEFAULT 'ok',
+    analyse_modele TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
