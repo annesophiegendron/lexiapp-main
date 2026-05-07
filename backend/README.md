@@ -108,9 +108,9 @@ python -m unittest test_main.py
 - Champ `formalite` et tags persistants dans PostgreSQL
 - Stockage audio reutilisable pour le pipeline IA
 
-## Reponse `POST /captures`
+## Reponses des captures
 
-La reponse contient maintenant un bloc `pipeline_ia` :
+Les reponses `POST /captures`, `GET /captures` et `GET /captures/{capture_id}` exposent maintenant un bloc `pipeline_ia` pour que le frontend sache si l'analyse locale a reussi ou si un fallback a ete applique :
 
 ```json
 {
@@ -128,7 +128,17 @@ La reponse contient maintenant un bloc `pipeline_ia` :
       "longitude": 2.3522
     },
     "langue": "fr",
-    "timestamp": "2026-05-04T12:00:00+00:00"
+    "timestamp": "2026-05-04T12:00:00+00:00",
+    "pipeline_ia": {
+      "transcription": {
+        "statut": "ok",
+        "modele": "base"
+      },
+      "analyse": {
+        "statut": "ok",
+        "modele": "llama3"
+      }
+    }
   },
   "pipeline_ia": {
     "transcription": {

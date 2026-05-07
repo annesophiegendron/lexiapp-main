@@ -20,6 +20,30 @@ import CaptureMomentScreen from './CaptureMomentScreen';
 import {designSystem} from '../design';
 import {categoryIcons, categoryColorsLight} from '../constants.js';
 
+const lireResumeEtapeIa = etapeIa => {
+  if (!etapeIa) {
+    return 'etat inconnu';
+  }
+
+  if (etapeIa.statut === 'fallback') {
+    return `fallback${etapeIa.modele ? ` via ${etapeIa.modele}` : ''}`;
+  }
+
+  return `${etapeIa.statut}${etapeIa.modele ? ` via ${etapeIa.modele}` : ''}`;
+};
+
+const lireCouleurAnalyse = (isDarkMode, statutAnalyse) => {
+  if (statutAnalyse === 'fallback') {
+    return isDarkMode ? '#f7c97a' : '#8a5400';
+  }
+
+  if (statutAnalyse === 'ok') {
+    return isDarkMode ? '#c7f0c2' : '#1d5f2f';
+  }
+
+  return isDarkMode ? '#d8d8d8' : '#4d5e4d';
+};
+
 const MainScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [captureModalVisible, setCaptureModalVisible] = useState(false);
@@ -37,8 +61,8 @@ const MainScreen = () => {
     textDark,
   } = designSystem.colors;
 
-  const handleClose = () => setModalVisible(false);
-  const closeCaptureModal = () => setCaptureModalVisible(false);
+  const fermerModal = () => setModalVisible(false);
+  const fermerModalCapture = () => setCaptureModalVisible(false);
 
   const filteredItems = lexicon.filter(item => {
     const matchesSearch =
@@ -47,16 +71,18 @@ const MainScreen = () => {
     return matchesSearch;
   });
 
-  const navigateToCategoryWords = category => {
+  const allerVersMotsCategorie = category => {
     const filteredWords = lexicon.filter(word => word.category === category);
     navigation.navigate('CategoryWords', {category, words: filteredWords});
   };
 
-  const navigateToQuizScreen = () => {
+  const allerVersQuiz = () => {
     navigation.navigate('QuizzScreen');
   };
 
   const latestCapture = captures[0];
+  const statutAnalyse = latestCapture?.pipelineIa?.analyse?.statut;
+  const couleurAnalyse = lireCouleurAnalyse(isDarkMode, statutAnalyse);
 
   return (
     <ScrollView
@@ -124,7 +150,7 @@ const MainScreen = () => {
                     navigation.navigate('WordDetail', {word: item})
                   }>
                   <Text style={{color: isDarkMode ? textLight : textDark}}>
-                    {item.original} → {item.translation}
+                    {item.original} -> {item.translation}
                   </Text>
                 </TouchableOpacity>
               ))
@@ -188,8 +214,20 @@ const MainScreen = () => {
               {latestCapture.original}
             </Text>
             <Text style={[styles.latestCaptureMeta, {color: isDarkMode ? '#aab7aa' : '#4d5e4d'}]}>
-              {latestCapture.translation || 'No translation yet'} • {latestCapture.formality}
+              {latestCapture.translation || 'No translation yet'} - {latestCapture.formality}
             </Text>
+            <View style={styles.pipelineRow}>
+              <View style={[styles.pipelineBadge, {borderColor: couleurAnalyse}]}>
+                <Text style={[styles.pipelineBadgeText, {color: couleurAnalyse}]}>
+                  Analyse: {lireResumeEtapeIa(latestCapture.pipelineIa?.analyse)}
+                </Text>
+              </View>
+              <View style={styles.pipelineBadgeSecondary}>
+                <Text style={styles.pipelineBadgeSecondaryText}>
+                  Transcription: {lireResumeEtapeIa(latestCapture.pipelineIa?.transcription)}
+                </Text>
+              </View>
+            </View>
           </View>
         ) : null}
       </TouchableOpacity>
@@ -199,7 +237,7 @@ const MainScreen = () => {
           styles.quizCard,
           {backgroundColor: isDarkMode ? '#2a2a2a' : '#f4f4f4'},
         ]}
-        onPress={navigateToQuizScreen}>
+        onPress={allerVersQuiz}>
         <Image
           source={QuizImage}
           style={styles.quizImage}
@@ -243,7 +281,7 @@ const MainScreen = () => {
                   (isDarkMode ? cardBackgroundDark : cardBackgroundLight),
               },
             ]}
-            onPress={() => navigateToCategoryWords(category)}>
+            onPress={() => allerVersMotsCategorie(category)}>
             <Ionicons
               name={categoryIcons[category]}
               size={34}
@@ -261,10 +299,10 @@ const MainScreen = () => {
       </View>
 
       {/* Add Word Modal */}
-      <AddWordScreen isVisible={modalVisible} onClose={handleClose} />
+      <AddWordScreen isVisible={modalVisible} onClose={fermerModal} />
       <CaptureMomentScreen
         isVisible={captureModalVisible}
-        onClose={closeCaptureModal}
+        onClose={fermerModalCapture}
       />
     </ScrollView>
   );
@@ -379,6 +417,36 @@ const styles = StyleSheet.create({
   },
   latestCaptureMeta: {
     fontSize: 13,
+  },
+  pipelineRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 10,
+  },
+  pipelineBadge: {
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: 'rgba(255,255,255,0.35)',
+  },
+  pipelineBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  pipelineBadgeSecondary: {
+    borderWidth: 1,
+    borderColor: 'rgba(23,34,23,0.16)',
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: 'rgba(255,255,255,0.28)',
+  },
+  pipelineBadgeSecondaryText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#334133',
   },
   categoriesContainer: {
     flexDirection: 'row',

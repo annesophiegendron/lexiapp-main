@@ -29,7 +29,19 @@ const RECORDING_OPTIONS = {
   AVNumberOfChannelsKeyIOS: 1,
 };
 
-const buildFileName = () => `capture-${Date.now()}.m4a`;
+const construireNomFichier = () => `capture-${Date.now()}.m4a`;
+
+const formaterStatutIa = etapeIa => {
+  if (!etapeIa) {
+    return 'etat inconnu';
+  }
+
+  if (etapeIa.statut === 'fallback') {
+    return `fallback${etapeIa.modele ? ` (${etapeIa.modele})` : ''}`;
+  }
+
+  return `${etapeIa.statut}${etapeIa.modele ? ` (${etapeIa.modele})` : ''}`;
+};
 
 const CaptureMomentScreen = ({isVisible, onClose}) => {
   const [isRecording, setIsRecording] = useState(false);
@@ -59,7 +71,7 @@ const CaptureMomentScreen = ({isVisible, onClose}) => {
     };
   }, []);
 
-  const resetState = () => {
+  const reinitialiserEtat = () => {
     setIsRecording(false);
     setRecordTime('00:00');
     setAudioUri('');
@@ -67,16 +79,16 @@ const CaptureMomentScreen = ({isVisible, onClose}) => {
     recorderPathRef.current = '';
   };
 
-  const closeModal = () => {
+  const fermerModal = () => {
     if (isRecording) {
       Alert.alert('Recording in progress', 'Stop the recording before closing this screen.');
       return;
     }
-    resetState();
+    reinitialiserEtat();
     onClose();
   };
 
-  const requestMicrophonePermission = async () => {
+  const demanderPermissionMicro = async () => {
     if (Platform.OS !== 'android') {
       return true;
     }
@@ -94,8 +106,8 @@ const CaptureMomentScreen = ({isVisible, onClose}) => {
     return granted === PermissionsAndroid.RESULTS.GRANTED;
   };
 
-  const startRecording = async () => {
-    const granted = await requestMicrophonePermission();
+  const demarrerEnregistrement = async () => {
+    const granted = await demanderPermissionMicro();
     if (!granted) {
       Alert.alert('Permission denied', 'Microphone permission is required to record audio.');
       return;
@@ -119,7 +131,7 @@ const CaptureMomentScreen = ({isVisible, onClose}) => {
     }
   };
 
-  const stopRecording = async () => {
+  const arreterEnregistrement = async () => {
     try {
       const result = await audioRecorderPlayer.stopRecorder();
       audioRecorderPlayer.removeRecordBackListener();
@@ -130,7 +142,7 @@ const CaptureMomentScreen = ({isVisible, onClose}) => {
     }
   };
 
-  const submitCapture = async () => {
+  const envoyerCapture = async () => {
     const parsedLatitude = Number(latitude);
     const parsedLongitude = Number(longitude);
 
@@ -142,7 +154,7 @@ const CaptureMomentScreen = ({isVisible, onClose}) => {
     try {
       const createdCapture = await uploadCapture({
         audioUri,
-        fileName: buildFileName(),
+        fileName: construireNomFichier(),
         mimeType: 'audio/m4a',
         latitude: parsedLatitude,
         longitude: parsedLongitude,
@@ -160,12 +172,12 @@ const CaptureMomentScreen = ({isVisible, onClose}) => {
       animationType="slide"
       transparent
       visible={isVisible}
-      onRequestClose={closeModal}>
+      onRequestClose={fermerModal}>
       <View style={styles.overlay}>
         <View style={styles.sheet}>
           <View style={styles.header}>
             <Text style={styles.title}>Voice Capture</Text>
-            <TouchableOpacity onPress={closeModal}>
+            <TouchableOpacity onPress={fermerModal}>
               <Ionicons name="close" size={24} color="#111" />
             </TouchableOpacity>
           </View>
@@ -189,7 +201,7 @@ const CaptureMomentScreen = ({isVisible, onClose}) => {
           <View style={styles.actionsRow}>
             <TouchableOpacity
               style={[styles.primaryButton, isRecording && styles.primaryButtonActive]}
-              onPress={isRecording ? stopRecording : startRecording}>
+              onPress={isRecording ? arreterEnregistrement : demarrerEnregistrement}>
               <Text style={styles.primaryButtonText}>
                 {isRecording ? 'Stop recording' : 'Start recording'}
               </Text>
@@ -197,7 +209,7 @@ const CaptureMomentScreen = ({isVisible, onClose}) => {
 
             <TouchableOpacity
               style={[styles.secondaryButton, isUploadDisabled && styles.buttonDisabled]}
-              onPress={submitCapture}
+              onPress={envoyerCapture}
               disabled={isUploadDisabled}>
               <Text style={styles.secondaryButtonText}>
                 {isSubmitting ? 'Sending...' : 'Send to backend'}
@@ -249,6 +261,12 @@ const CaptureMomentScreen = ({isVisible, onClose}) => {
                 Translation: {lastCapture.translation || 'No translation returned'}
               </Text>
               <Text style={styles.resultLine}>Formality: {lastCapture.formality}</Text>
+              <Text style={styles.resultLine}>
+                Transcription IA: {formaterStatutIa(lastCapture.pipelineIa?.transcription)}
+              </Text>
+              <Text style={styles.resultLine}>
+                Analyse IA: {formaterStatutIa(lastCapture.pipelineIa?.analyse)}
+              </Text>
               <Text style={styles.resultLine}>
                 Tags: {lastCapture.tags.length > 0 ? lastCapture.tags.join(', ') : 'None'}
               </Text>

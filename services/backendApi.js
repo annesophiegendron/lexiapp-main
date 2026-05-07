@@ -6,6 +6,16 @@ const BACKEND_BASE_URL = Platform.select({
   default: 'http://127.0.0.1:8000',
 });
 
+const lireStatutEtape = etape => ({
+  statut: etape?.statut || 'inconnu',
+  modele: etape?.modele || '',
+});
+
+const normaliserPipelineIa = pipelineIa => ({
+  transcription: lireStatutEtape(pipelineIa?.transcription),
+  analyse: lireStatutEtape(pipelineIa?.analyse),
+});
+
 const normaliserCapture = capture => ({
   id: capture.id,
   original: capture.phrase_originale,
@@ -18,6 +28,7 @@ const normaliserCapture = capture => ({
   longitude: capture.geolocalisation?.longitude,
   language: capture.langue || 'auto',
   addedDate: capture.timestamp || new Date().toISOString(),
+  pipelineIa: normaliserPipelineIa(capture.pipeline_ia),
 });
 
 export const fetchCaptures = async () => {
