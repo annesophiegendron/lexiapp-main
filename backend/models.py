@@ -8,27 +8,10 @@ class Geolocalisation(BaseModel):
     longitude: float
 
 
-class Capture(BaseModel):
-    id: str
-    phrase_originale: str
-    traduction: Optional[str] = None
-    audio_url: str
-    contexte_tags: List[str]
-    formalite: str
-    geolocalisation: Geolocalisation
-    langue: Optional[str] = None
-    timestamp: Optional[str] = None
-
-
 class ReponseSante(BaseModel):
     status: str
     message: str
     version: int
-
-
-class ReponseCaptures(BaseModel):
-    total: int
-    captures: List[Capture]
 
 
 class StatutEtapeIA(BaseModel):
@@ -39,6 +22,24 @@ class StatutEtapeIA(BaseModel):
 class PipelineIA(BaseModel):
     transcription: StatutEtapeIA
     analyse: StatutEtapeIA
+
+
+class Capture(BaseModel):
+    id: str
+    phrase_originale: str
+    traduction: Optional[str] = None
+    audio_url: str
+    contexte_tags: List[str]
+    formalite: str
+    geolocalisation: Geolocalisation
+    langue: Optional[str] = None
+    timestamp: Optional[str] = None
+    pipeline_ia: Optional[PipelineIA] = None
+
+
+class ReponseCaptures(BaseModel):
+    total: int
+    captures: List[Capture]
 
 
 class ReponseCreationCapture(BaseModel):
@@ -57,3 +58,4 @@ class CommandeCreationCapture(BaseModel):
     latitude: float
     longitude: float
     langue: Optional[str] = None
+    pipeline_ia: Optional[PipelineIA] = None
