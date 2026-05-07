@@ -153,11 +153,11 @@ Les reponses `POST /captures`, `GET /captures` et `GET /captures/{capture_id}` e
 }
 ```
 
-Si Ollama est indisponible, `pipeline_ia.analyse.statut` vaut `fallback`.
+Si Ollama est indisponible, pipeline_ia.analyse.statut vaut fallback.
 
 ## Limites connues
 
-- Pas encore de routes `PUT` ou `DELETE`
+- Pas encore de routes PUT ou delete
 - Pas encore de flux mobile d'enregistrement audio branche au backend
 - Pas encore de file de traitement asynchrone pour les traitements IA lourds
 ## ce fichier est une sorte de repere
