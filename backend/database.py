@@ -5,10 +5,10 @@ from typing import Any, List, Optional
 
 try:
     from backend.config import DATABASE_URL
-    from backend.models import Capture, CommandeCreationCapture, Geolocalisation
+    from backend.models import Capture, CommandeCreationCapture, Geolocalisation, PipelineIA, StatutEtapeIA
 except ModuleNotFoundError:
     from config import DATABASE_URL
-    from models import Capture, CommandeCreationCapture, Geolocalisation
+    from models import Capture, CommandeCreationCapture, Geolocalisation, PipelineIA, StatutEtapeIA
 
 
 # Schema PostgreSQL 
@@ -23,6 +23,10 @@ CREATE TABLE IF NOT EXISTS captures (
     latitude DOUBLE PRECISION NOT NULL,
     longitude DOUBLE PRECISION NOT NULL,
     langue VARCHAR(10),
+    transcription_statut TEXT NOT NULL DEFAULT 'ok',
+    transcription_modele TEXT,
+    analyse_statut TEXT NOT NULL DEFAULT 'ok',
+    analyse_modele TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 )
 """
@@ -39,6 +43,10 @@ CREATE TABLE IF NOT EXISTS captures (
     latitude REAL NOT NULL,
     longitude REAL NOT NULL,
     langue TEXT,
+    transcription_statut TEXT NOT NULL DEFAULT 'ok',
+    transcription_modele TEXT,
+    analyse_statut TEXT NOT NULL DEFAULT 'ok',
+    analyse_modele TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
 """
@@ -84,7 +92,30 @@ def initialiser_base(database_url: Optional[str] = None) -> None:
     schema = SCHEMA_SQLITE if url.startswith("sqlite:///") else SCHEMA_POSTGRES
     with connecter_base(url) as connexion:
         connexion.execute(schema)
+        garantir_colonnes_pipeline_ia(connexion, url)
         connexion.commit()
+
+
+def garantir_colonnes_pipeline_ia(connexion, database_url: str) -> None:
+    colonnes = [
+        ("transcription_statut", "TEXT NOT NULL DEFAULT 'ok'"),
+        ("transcription_modele", "TEXT"),
+        ("analyse_statut", "TEXT NOT NULL DEFAULT 'ok'"),
+        ("analyse_modele", "TEXT"),
+    ]
+
+    if database_url.startswith("sqlite:///"):
+        colonnes_existantes = {
+            ligne["name"]
+            for ligne in connexion.execute("PRAGMA table_info(captures)").fetchall()
+        }
+        for nom, definition in colonnes:
+            if nom not in colonnes_existantes:
+                connexion.execute(f"ALTER TABLE captures ADD COLUMN {nom} {definition}")
+        return
+
+    for nom, definition in colonnes:
+        connexion.execute(f"ALTER TABLE captures ADD COLUMN IF NOT EXISTS {nom} {definition}")
 
 def lister_captures(database_url: Optional[str] = None) -> List[Capture]:
     # Lit les captures les plus recentes pour alimenter l'app mobile.
@@ -101,6 +132,10 @@ def lister_captures(database_url: Optional[str] = None) -> List[Capture]:
             latitude,
             longitude,
             langue,
+            transcription_statut,
+            transcription_modele,
+            analyse_statut,
+            analyse_modele,
             created_at
         FROM captures
         ORDER BY created_at DESC, id DESC
@@ -131,8 +166,12 @@ def creer_capture(commande: CommandeCreationCapture, database_url: Optional[str]
             formalite,
             latitude,
             longitude,
-            langue
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            langue,
+            transcription_statut,
+            transcription_modele,
+            analyse_statut,
+            analyse_modele
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         url,
     )
@@ -148,6 +187,10 @@ def creer_capture(commande: CommandeCreationCapture, database_url: Optional[str]
             latitude,
             longitude,
             langue,
+            transcription_statut,
+            transcription_modele,
+            analyse_statut,
+            analyse_modele,
             created_at
         FROM captures
         WHERE id = ?
@@ -165,6 +208,10 @@ def creer_capture(commande: CommandeCreationCapture, database_url: Optional[str]
         commande.latitude,
         commande.longitude,
         commande.langue,
+        commande.pipeline_ia.transcription.statut if commande.pipeline_ia else "ok",
+        commande.pipeline_ia.transcription.modele if commande.pipeline_ia else None,
+        commande.pipeline_ia.analyse.statut if commande.pipeline_ia else "ok",
+        commande.pipeline_ia.analyse.modele if commande.pipeline_ia else None,
     ]
 
     with connecter_base(url) as connexion:
@@ -190,8 +237,12 @@ def alimenter_donnees_demo(database_url: Optional[str] = None) -> None:
             formalite,
             latitude,
             longitude,
-            langue
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            langue,
+            transcription_statut,
+            transcription_modele,
+            analyse_statut,
+            analyse_modele
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         url,
     )
@@ -214,6 +265,10 @@ def alimenter_donnees_demo(database_url: Optional[str] = None) -> None:
                 48.8566,
                 2.3522,
                 "fr",
+                "ok",
+                "base",
+                "ok",
+                "llama3",
             ],
         )
         connexion.commit()
@@ -242,6 +297,16 @@ def ligne_vers_capture(ligne: Any) -> Capture:
         ),
         langue=ligne["langue"],
         timestamp=timestamp,
+        pipeline_ia=PipelineIA(
+            transcription=StatutEtapeIA(
+                statut=ligne["transcription_statut"],
+                modele=ligne["transcription_modele"],
+            ),
+            analyse=StatutEtapeIA(
+                statut=ligne["analyse_statut"],
+                modele=ligne["analyse_modele"],
+            ),
+        ),
     )
 
 
@@ -260,6 +325,10 @@ def lire_capture_par_id(identifiant: str, database_url: Optional[str] = None) ->
             latitude,
             longitude,
             langue,
+            transcription_statut,
+            transcription_modele,
+            analyse_statut,
+            analyse_modele,
             created_at
         FROM captures
         WHERE id = ?
