@@ -47,6 +47,7 @@ API disponible sur `http://localhost:8000`
 
 - `GET /` : points d'entree utiles
 - `GET /sante` : sante backend, base de donnees et Ollama
+- `GET /preflight` : verification detaillee des prerequis phase 2
 - `GET /captures` : liste des captures
 - `GET /captures/{capture_id}` : detail d'une capture
 - `POST /captures` : upload audio + geolocalisation + langue

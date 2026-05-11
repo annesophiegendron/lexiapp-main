@@ -27,6 +27,8 @@ class MainApiTests(unittest.TestCase):
         cls.original_analyser_phrase = main.analyser_phrase
         cls.original_verifier_sante_base = main.verifier_sante_base
         cls.original_httpx_client = main.httpx.Client
+        cls.original_collecter_preflight = main.collecter_preflight
+        cls.original_resumer_preflight = main.resumer_preflight
 
         main.initialiser_base = lambda: database.initialiser_base(cls.database_url)
         main.alimenter_donnees_demo = lambda: database.alimenter_donnees_demo(cls.database_url)
@@ -41,6 +43,14 @@ class MainApiTests(unittest.TestCase):
             "formalite": "standard",
         }
         main.verifier_sante_base = lambda: True
+        main.collecter_preflight = lambda: [
+            {"statut": "OK", "sujet": "ollama API", "detail": "Endpoint http://localhost:11434/api/version"},
+            {"statut": "OK", "sujet": "modele ollama", "detail": "Modele configure: llama3"},
+        ]
+        main.resumer_preflight = lambda checks: {
+            "status": "ok",
+            "message": "Environnement coherent pour continuer la phase 2.",
+        }
 
         class FauxClientHttpx:
             def __init__(self, *args, **kwargs):
@@ -77,6 +87,8 @@ class MainApiTests(unittest.TestCase):
         main.analyser_phrase = cls.original_analyser_phrase
         main.verifier_sante_base = cls.original_verifier_sante_base
         main.httpx.Client = cls.original_httpx_client
+        main.collecter_preflight = cls.original_collecter_preflight
+        main.resumer_preflight = cls.original_resumer_preflight
 
         test_db = Path(cls.database_url.replace("sqlite:///", "", 1))
         if test_db.exists():
@@ -124,6 +136,43 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(response.json()["status"], "degraded")
         self.assertIn("Ollama indisponible", response.json()["message"])
 
+    def test_preflight_route(self):
+        response = self.client.get("/preflight")
+        payload = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["message"], "Environnement coherent pour continuer la phase 2.")
+        self.assertEqual(len(payload["checks"]), 2)
+        self.assertEqual(payload["checks"][0]["statut"], "OK")
+        self.assertEqual(payload["checks"][1]["sujet"], "modele ollama")
+
+    def test_preflight_route_returns_degraded_summary(self):
+        main.collecter_preflight = lambda: [
+            {"statut": "FAIL", "sujet": "postgresql TCP", "detail": "localhost:5432"},
+        ]
+        main.resumer_preflight = lambda checks: {
+            "status": "degraded",
+            "message": "Environnement incomplet pour la phase 2.",
+        }
+
+        try:
+            response = self.client.get("/preflight")
+        finally:
+            main.collecter_preflight = lambda: [
+                {"statut": "OK", "sujet": "ollama API", "detail": "Endpoint http://localhost:11434/api/version"},
+                {"statut": "OK", "sujet": "modele ollama", "detail": "Modele configure: llama3"},
+            ]
+            main.resumer_preflight = lambda checks: {
+                "status": "ok",
+                "message": "Environnement coherent pour continuer la phase 2.",
+            }
+
+        payload = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload["status"], "degraded")
+        self.assertEqual(payload["checks"][0]["sujet"], "postgresql TCP")
+
     def test_root_route(self):
         response = self.client.get("/")
         payload = response.json()
@@ -131,6 +180,8 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(payload["documentation"], "/docs")
         self.assertEqual(payload["sante"], "/sante")
+        self.assertEqual(payload["preflight"], "/preflight")
+        self.assertEqual(payload["captures"], "/captures")
 
     def test_get_captures_route(self):
         response = self.client.get("/captures")
