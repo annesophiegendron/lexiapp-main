@@ -27,10 +27,12 @@ try:
         PipelineIA,
         ReponseCaptures,
         ReponseCreationCapture,
+        ReponsePreflight,
         ReponseSante,
         StatutEtapeIA,
     )
     from backend.ollama_client import analyser_phrase
+    from backend.preflight_check import collecter_preflight, resumer_preflight
     from backend.transcription import transcrire_audio
 except ModuleNotFoundError:
     from config import AUDIO_STORAGE_DIR, OLLAMA_URL, SEED_DEMO_DATA
@@ -49,10 +51,12 @@ except ModuleNotFoundError:
         PipelineIA,
         ReponseCaptures,
         ReponseCreationCapture,
+        ReponsePreflight,
         ReponseSante,
         StatutEtapeIA,
     )
     from ollama_client import analyser_phrase
+    from preflight_check import collecter_preflight, resumer_preflight
     from transcription import transcrire_audio
 
 logger = logging.getLogger(__name__)
@@ -96,6 +100,7 @@ def accueil() -> dict:
         "message": "Bienvenue sur le backend Lexiapp.",
         "documentation": "/docs",
         "sante": "/sante",
+        "preflight": "/preflight",
         "captures": "/captures",
     }
 
@@ -123,6 +128,18 @@ def verification_sante() -> ReponseSante:
         status="ok" if ollama_ok else "degraded",
         message="Le serveur est pret." if ollama_ok else "Serveur pret mais Ollama indisponible (analyse desactivee)",
         version=2,
+    )
+
+
+@app.get("/preflight", response_model=ReponsePreflight, tags=["Health"])
+def verification_preflight() -> ReponsePreflight:
+    logger.info("Verification preflight de la phase 2")
+    checks = collecter_preflight()
+    resume = resumer_preflight(checks)
+    return ReponsePreflight(
+        status=resume["status"],
+        message=resume["message"],
+        checks=checks,
     )
 
 
