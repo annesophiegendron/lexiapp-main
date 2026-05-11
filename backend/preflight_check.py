@@ -1,4 +1,4 @@
-import importlib.util
+from importlib import metadata
 import shutil
 import socket
 import subprocess
@@ -41,8 +41,12 @@ def test_port(hote: str, port: int, timeout: float = 2.0) -> bool:
         return False
 
 
-def paquet_installe(nom_module: str) -> bool:
-    return importlib.util.find_spec(nom_module) is not None
+def distribution_installee(nom_distribution: str) -> bool:
+    try:
+        metadata.version(nom_distribution)
+        return True
+    except metadata.PackageNotFoundError:
+        return False
 
 
 def commande_disponible(nom: str) -> bool:
@@ -79,15 +83,15 @@ def main() -> int:
     def ajouter(statut: str, sujet: str, detail: str) -> None:
         resultats.append((statut, sujet, detail))
 
-    ajouter("OK" if paquet_installe("fastapi") else "FAIL", "fastapi", "Framework API disponible")
-    ajouter("OK" if paquet_installe("httpx") else "FAIL", "httpx", "Client HTTP disponible")
+    ajouter("OK" if distribution_installee("fastapi") else "FAIL", "fastapi", "Framework API disponible")
+    ajouter("OK" if distribution_installee("httpx") else "FAIL", "httpx", "Client HTTP disponible")
     ajouter(
-        "OK" if paquet_installe("psycopg") else "FAIL",
+        "OK" if distribution_installee("psycopg") else "FAIL",
         "psycopg",
         "Driver PostgreSQL requis pour la base locale",
     )
     ajouter(
-        "OK" if paquet_installe("whisper") else "FAIL",
+        "OK" if distribution_installee("openai-whisper") else "FAIL",
         "openai-whisper",
         f"Transcription locale requise, modele configure: {WHISPER_MODEL}",
     )
