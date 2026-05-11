@@ -90,6 +90,20 @@ DATABASE_URL=sqlite:///backend/test.db
 python -m unittest test_main.py
 ```
 
+## Verification preflight phase 2
+
+```bash
+python preflight_check.py
+```
+
+Ce script verifie rapidement les prerequis locaux utiles a la phase 2:
+
+- paquets Python critiques (`psycopg`, `openai-whisper`, `httpx`, `fastapi`)
+- disponibilite de `ffmpeg`
+- accessibilite d'Ollama et presence du modele configure
+- accessibilite TCP de PostgreSQL
+- presence du dossier de stockage audio
+
 ## Phase 1 finalisee
 
 - API FastAPI documentee
