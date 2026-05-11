@@ -77,7 +77,7 @@ def test_http(url: str, timeout: float = 3.0) -> bool:
         return False
 
 
-def main() -> int:
+def collecter_preflight() -> list[dict[str, str]]:
     resultats: list[tuple[str, str, str]] = []
 
     def ajouter(statut: str, sujet: str, detail: str) -> None:
@@ -129,17 +129,51 @@ def main() -> int:
             f"{hote_pg}:{port_pg}",
         )
 
+    return [
+        {
+            "statut": statut,
+            "sujet": sujet,
+            "detail": detail,
+        }
+        for statut, sujet, detail in resultats
+    ]
+
+
+def resumer_preflight(resultats: list[dict[str, str]]) -> dict[str, str]:
+    echec = any(resultat["statut"] == "FAIL" for resultat in resultats)
+    warning = any(resultat["statut"] == "WARN" for resultat in resultats)
+
+    if echec:
+        return {
+            "status": "degraded",
+            "message": "Environnement incomplet pour la phase 2.",
+        }
+
+    if warning:
+        return {
+            "status": "warning",
+            "message": "Environnement exploitable avec avertissements.",
+        }
+
+    return {
+        "status": "ok",
+        "message": "Environnement coherent pour continuer la phase 2.",
+    }
+
+
+def main() -> int:
+    resultats = collecter_preflight()
+    resume = resumer_preflight(resultats)
+
     print("Verification Phase 2 - Lexiapp")
     print("=" * 36)
-    for statut, sujet, detail in resultats:
-        print(f"[{statut}] {sujet}: {detail}")
+    for resultat in resultats:
+        print(f"[{resultat['statut']}] {resultat['sujet']}: {resultat['detail']}")
 
-    echec = any(statut == "FAIL" for statut, _, _ in resultats)
-    if echec:
-        print("\nResultat: environnement incomplet pour la phase 2.")
+    print(f"\nResultat: {resume['message']}")
+    if resume["status"] == "degraded":
         return 1
 
-    print("\nResultat: environnement coherent pour continuer la phase 2.")
     return 0
 
 
