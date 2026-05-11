@@ -14,6 +14,18 @@ class ReponseSante(BaseModel):
     version: int
 
 
+class VerificationPreflight(BaseModel):
+    statut: str
+    sujet: str
+    detail: str
+
+
+class ReponsePreflight(BaseModel):
+    status: str
+    message: str
+    checks: List[VerificationPreflight]
+
+
 class StatutEtapeIA(BaseModel):
     statut: str
     modele: Optional[str] = None
