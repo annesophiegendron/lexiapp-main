@@ -5,6 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 from urllib.error import URLError
+from urllib.parse import urlparse
 from urllib.request import urlopen
 
 try:
@@ -18,19 +19,19 @@ CHEMIN_FFMPEG_BUNDLE = DOSSIER_BACKEND / "tools" / "ffmpeg" / "ffmpeg-8.1-essent
 
 
 def extraire_hote_et_port_postgres(database_url: str) -> tuple[str, int] | tuple[None, None]:
-    if not database_url.startswith("postgresql://"):
+    if not database_url.startswith(("postgresql://", "postgres://")):
         return None, None
 
-    reste = database_url.split("://", 1)[1]
-    if "@" not in reste:
+    analyse = urlparse(database_url)
+    if not analyse.hostname:
         return None, None
 
-    hote_port = reste.split("@", 1)[1].split("/", 1)[0]
-    if ":" in hote_port:
-        hote, port = hote_port.rsplit(":", 1)
-        return hote, int(port)
+    try:
+        port = analyse.port or 5432
+    except ValueError:
+        return None, None
 
-    return hote_port, 5432
+    return analyse.hostname, port
 
 
 def test_port(hote: str, port: int, timeout: float = 2.0) -> bool:
