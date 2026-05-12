@@ -16,6 +16,26 @@ const normaliserPipelineIa = pipelineIa => ({
   analyse: lireStatutEtape(pipelineIa?.analyse),
 });
 
+const normaliserSanteBackend = payload => ({
+  status: payload?.status || 'indisponible',
+  message: payload?.message || 'Backend indisponible.',
+  version: typeof payload?.version === 'number' ? payload.version : null,
+});
+
+const normaliserPreflight = payload => {
+  const checks = Array.isArray(payload?.checks) ? payload.checks : [];
+
+  return {
+    status: payload?.status || 'indisponible',
+    message: payload?.message || 'Verification preflight indisponible.',
+    checks: checks.map(check => ({
+      statut: check?.statut || 'INCONNU',
+      sujet: check?.sujet || 'inconnu',
+      detail: check?.detail || '',
+    })),
+  };
+};
+
 const normaliserCapture = capture => ({
   id: capture.id,
   original: capture.phrase_originale,
@@ -41,6 +61,26 @@ export const fetchCaptures = async () => {
   return Array.isArray(payload.captures)
     ? payload.captures.map(normaliserCapture)
     : [];
+};
+
+export const fetchBackendHealth = async () => {
+  const response = await fetch(`${BACKEND_BASE_URL}/sante`);
+  if (!response.ok) {
+    throw new Error(`Impossible de verifier la sante du backend (${response.status}).`);
+  }
+
+  const payload = await response.json();
+  return normaliserSanteBackend(payload);
+};
+
+export const fetchPreflight = async () => {
+  const response = await fetch(`${BACKEND_BASE_URL}/preflight`);
+  if (!response.ok) {
+    throw new Error(`Impossible de verifier le preflight backend (${response.status}).`);
+  }
+
+  const payload = await response.json();
+  return normaliserPreflight(payload);
 };
 
 export const createCapture = async ({
@@ -78,4 +118,10 @@ export const createCapture = async ({
   return normaliserCapture(payload.capture);
 };
 
-export {BACKEND_BASE_URL};
+export {
+  BACKEND_BASE_URL,
+  normaliserCapture,
+  normaliserPipelineIa,
+  normaliserPreflight,
+  normaliserSanteBackend,
+};

@@ -44,13 +44,25 @@ const lireCouleurAnalyse = (isDarkMode, statutAnalyse) => {
   return isDarkMode ? '#d8d8d8' : '#4d5e4d';
 };
 
+const lireCouleurBackend = (isDarkMode, status) => {
+  if (status === 'ok') {
+    return isDarkMode ? '#c7f0c2' : '#1d5f2f';
+  }
+
+  if (status === 'warning' || status === 'degraded') {
+    return isDarkMode ? '#f7c97a' : '#8a5400';
+  }
+
+  return isDarkMode ? '#f2b8b5' : '#a12622';
+};
+
 const MainScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [captureModalVisible, setCaptureModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const navigation = useNavigation();
   const {lexicon} = useLexicon();
-  const {captures, isLoading, refreshCaptures} = useCaptures();
+  const {captures, isLoading, refreshCaptures, backendStatus, refreshBackendStatus} = useCaptures();
   const {isDarkMode} = useTheme();
   const {
     backgroundLight,
@@ -83,6 +95,10 @@ const MainScreen = () => {
   const latestCapture = captures[0];
   const statutAnalyse = latestCapture?.pipelineIa?.analyse?.statut;
   const couleurAnalyse = lireCouleurAnalyse(isDarkMode, statutAnalyse);
+  const couleurBackend = lireCouleurBackend(isDarkMode, backendStatus.health.status);
+  const nombreChecksEnErreur = backendStatus.preflight.checks.filter(
+    check => check.statut === 'FAIL',
+  ).length;
 
   return (
     <ScrollView
@@ -198,11 +214,41 @@ const MainScreen = () => {
           <Text style={[styles.captureMetaText, {color: isDarkMode ? '#fff' : '#172217'}]}>
             {isLoading ? 'Loading backend captures...' : `${captures.length} capture(s) synced`}
           </Text>
-          <TouchableOpacity onPress={refreshCaptures}>
+          <TouchableOpacity
+            onPress={() => {
+              refreshCaptures();
+              refreshBackendStatus();
+            }}>
             <Text style={[styles.captureRefreshText, {color: isDarkMode ? '#d7f5d3' : '#234223'}]}>
               Refresh
             </Text>
           </TouchableOpacity>
+        </View>
+
+        <View style={styles.backendStatusCard}>
+          <View style={styles.pipelineRow}>
+            <View style={[styles.pipelineBadge, {borderColor: couleurBackend}]}>
+              <Text style={[styles.pipelineBadgeText, {color: couleurBackend}]}>
+                Backend: {backendStatus.health.status}
+              </Text>
+            </View>
+            <View style={styles.pipelineBadgeSecondary}>
+              <Text style={styles.pipelineBadgeSecondaryText}>
+                Preflight: {backendStatus.preflight.status}
+              </Text>
+            </View>
+          </View>
+          <Text style={[styles.backendStatusText, {color: isDarkMode ? '#d8e1d8' : '#314231'}]}>
+            {backendStatus.health.message}
+          </Text>
+          <Text style={[styles.backendStatusMeta, {color: isDarkMode ? '#b9c7b7' : '#4d5e4d'}]}>
+            {backendStatus.preflight.message}
+          </Text>
+          <Text style={[styles.backendStatusMeta, {color: isDarkMode ? '#b9c7b7' : '#4d5e4d'}]}>
+            {nombreChecksEnErreur > 0
+              ? `${nombreChecksEnErreur} preflight check(s) en echec`
+              : 'Aucun echec preflight bloquant'}
+          </Text>
         </View>
 
         {latestCapture ? (
@@ -404,6 +450,12 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 14,
   },
+  backendStatusCard: {
+    backgroundColor: 'rgba(255,255,255,0.35)',
+    borderRadius: 16,
+    padding: 14,
+    gap: 6,
+  },
   latestCaptureTitle: {
     fontSize: 13,
     fontWeight: '700',
@@ -416,6 +468,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   latestCaptureMeta: {
+    fontSize: 13,
+  },
+  backendStatusText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  backendStatusMeta: {
     fontSize: 13,
   },
   pipelineRow: {

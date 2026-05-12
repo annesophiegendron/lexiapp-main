@@ -43,6 +43,25 @@ const formaterStatutIa = etapeIa => {
   return `${etapeIa.statut}${etapeIa.modele ? ` (${etapeIa.modele})` : ''}`;
 };
 
+const formaterResumePreflight = backendStatus => {
+  if (!backendStatus?.preflight?.checks?.length) {
+    return backendStatus?.preflight?.message || 'Verification backend indisponible.';
+  }
+
+  const checksEnEchec = backendStatus.preflight.checks.filter(
+    check => check.statut === 'FAIL',
+  );
+
+  if (checksEnEchec.length === 0) {
+    return backendStatus.preflight.message;
+  }
+
+  return checksEnEchec
+    .slice(0, 2)
+    .map(check => `${check.sujet}: ${check.detail}`)
+    .join(' | ');
+};
+
 const CaptureMomentScreen = ({isVisible, onClose}) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordTime, setRecordTime] = useState('00:00');
@@ -52,16 +71,17 @@ const CaptureMomentScreen = ({isVisible, onClose}) => {
   const [language, setLanguage] = useState('fr');
   const [lastCapture, setLastCapture] = useState(null);
   const recorderPathRef = useRef('');
-  const {uploadCapture, isSubmitting, error} = useCaptures();
+  const {uploadCapture, isSubmitting, error, backendStatus, refreshBackendStatus} = useCaptures();
 
   const isUploadDisabled = useMemo(
     () =>
       !audioUri ||
       isRecording ||
       isSubmitting ||
+      !backendStatus.isReady ||
       latitude.trim() === '' ||
       longitude.trim() === '',
-    [audioUri, isRecording, isSubmitting, latitude, longitude],
+    [audioUri, backendStatus.isReady, isRecording, isSubmitting, latitude, longitude],
   );
 
   useEffect(() => {
@@ -146,6 +166,14 @@ const CaptureMomentScreen = ({isVisible, onClose}) => {
     const parsedLatitude = Number(latitude);
     const parsedLongitude = Number(longitude);
 
+    if (!backendStatus.isReady) {
+      Alert.alert(
+        'Backend not ready',
+        formaterResumePreflight(backendStatus),
+      );
+      return;
+    }
+
     if (Number.isNaN(parsedLatitude) || Number.isNaN(parsedLongitude)) {
       Alert.alert('Invalid coordinates', 'Latitude and longitude must be valid numbers.');
       return;
@@ -185,6 +213,22 @@ const CaptureMomentScreen = ({isVisible, onClose}) => {
           <Text style={styles.subtitle}>
             Record a short phrase, then send it to the local backend for transcription and analysis.
           </Text>
+
+          <View style={styles.backendCard}>
+            <View style={styles.backendHeaderRow}>
+              <Text style={styles.backendTitle}>Backend local</Text>
+              <TouchableOpacity onPress={refreshBackendStatus}>
+                <Text style={styles.backendRefreshText}>Refresh status</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.backendLine}>
+              Health: {backendStatus.health.status} {backendStatus.health.version ? `v${backendStatus.health.version}` : ''}
+            </Text>
+            <Text style={styles.backendLine}>
+              Preflight: {backendStatus.preflight.status}
+            </Text>
+            <Text style={styles.backendHint}>{formaterResumePreflight(backendStatus)}</Text>
+          </View>
 
           <View style={styles.timerCard}>
             <Ionicons
@@ -252,6 +296,11 @@ const CaptureMomentScreen = ({isVisible, onClose}) => {
           </View>
 
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {!backendStatus.isReady ? (
+            <Text style={styles.warningText}>
+              Upload disabled until the local backend passes preflight.
+            </Text>
+          ) : null}
 
           {lastCapture ? (
             <View style={styles.resultCard}>
@@ -312,6 +361,39 @@ const styles = StyleSheet.create({
     padding: 18,
     alignItems: 'center',
     gap: 6,
+  },
+  backendCard: {
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    padding: 16,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: '#e0d9cf',
+  },
+  backendHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  backendTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#111',
+  },
+  backendRefreshText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1e3526',
+  },
+  backendLine: {
+    fontSize: 13,
+    color: '#3f3a33',
+  },
+  backendHint: {
+    fontSize: 13,
+    color: '#6b655c',
+    lineHeight: 18,
   },
   timerValue: {
     fontSize: 28,
@@ -377,6 +459,10 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: '#b42318',
+    fontSize: 13,
+  },
+  warningText: {
+    color: '#8a5400',
     fontSize: 13,
   },
   resultCard: {
