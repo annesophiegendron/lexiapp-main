@@ -25,11 +25,13 @@ const lireResumeEtapeIa = etapeIa => {
     return 'etat inconnu';
   }
 
+  const detail = etapeIa.detail ? ` - ${etapeIa.detail}` : '';
+
   if (etapeIa.statut === 'fallback') {
-    return `fallback${etapeIa.modele ? ` via ${etapeIa.modele}` : ''}`;
+    return `fallback${etapeIa.modele ? ` via ${etapeIa.modele}` : ''}${detail}`;
   }
 
-  return `${etapeIa.statut}${etapeIa.modele ? ` via ${etapeIa.modele}` : ''}`;
+  return `${etapeIa.statut}${etapeIa.modele ? ` via ${etapeIa.modele}` : ''}${detail}`;
 };
 
 const lireCouleurAnalyse = (isDarkMode, statutAnalyse) => {

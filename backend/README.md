@@ -147,28 +147,32 @@ Les reponses `POST /captures`, `GET /captures` et `GET /captures/{capture_id}` e
     "pipeline_ia": {
       "transcription": {
         "statut": "ok",
-        "modele": "base"
+        "modele": "base",
+        "detail": null
       },
       "analyse": {
         "statut": "ok",
-        "modele": "llama3"
+        "modele": "llama3",
+        "detail": null
       }
     }
   },
   "pipeline_ia": {
     "transcription": {
       "statut": "ok",
-      "modele": "base"
+      "modele": "base",
+      "detail": null
     },
     "analyse": {
       "statut": "ok",
-      "modele": "llama3"
+      "modele": "llama3",
+      "detail": null
     }
   }
 }
 ```
 
-Si Ollama est indisponible, pipeline_ia.analyse.statut vaut fallback.
+Si Ollama est indisponible, `pipeline_ia.analyse.statut` vaut `fallback` et `pipeline_ia.analyse.detail` contient la cause du fallback.
 
 ## Limites connues
 

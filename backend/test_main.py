@@ -192,6 +192,7 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["captures"][0]["id"], "00000000-0000-0000-0000-000000000001")
         self.assertEqual(payload["captures"][0]["pipeline_ia"]["transcription"]["modele"], "base")
         self.assertEqual(payload["captures"][0]["pipeline_ia"]["analyse"]["statut"], "ok")
+        self.assertIsNone(payload["captures"][0]["pipeline_ia"]["analyse"]["detail"])
 
     def test_get_capture_by_id_route(self):
         response = self.client.get("/captures/00000000-0000-0000-0000-000000000001")
@@ -202,6 +203,7 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["phrase_originale"], "texte transcrit par l'ia")
         self.assertEqual(payload["pipeline_ia"]["transcription"]["statut"], "ok")
         self.assertEqual(payload["pipeline_ia"]["analyse"]["modele"], "llama3")
+        self.assertIsNone(payload["pipeline_ia"]["transcription"]["detail"])
 
     def test_get_capture_by_id_route_returns_404(self):
         response = self.client.get("/captures/00000000-0000-0000-0000-000000000099")
@@ -229,8 +231,10 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["pipeline_ia"]["transcription"]["modele"], "base")
         self.assertEqual(payload["pipeline_ia"]["analyse"]["statut"], "ok")
         self.assertEqual(payload["pipeline_ia"]["analyse"]["modele"], "llama3")
+        self.assertIsNone(payload["pipeline_ia"]["analyse"]["detail"])
         self.assertEqual(payload["capture"]["pipeline_ia"]["transcription"]["statut"], "ok")
         self.assertEqual(payload["capture"]["pipeline_ia"]["analyse"]["modele"], "llama3")
+        self.assertIsNone(payload["capture"]["pipeline_ia"]["transcription"]["detail"])
         nom_fichier = payload["capture"]["audio_url"].split("/")[-1]
         self.assertTrue((self.__class__.stockage_test / nom_fichier).exists())
 
@@ -243,6 +247,7 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(get_payload["captures"][0]["phrase_originale"], "transcription test fr")
         self.assertEqual(get_payload["captures"][0]["pipeline_ia"]["transcription"]["modele"], "base")
         self.assertEqual(get_payload["captures"][0]["pipeline_ia"]["analyse"]["modele"], "llama3")
+        self.assertIsNone(get_payload["captures"][0]["pipeline_ia"]["analyse"]["detail"])
 
         audio_response = self.client.get(payload["capture"]["audio_url"])
         self.assertEqual(audio_response.status_code, 200)
@@ -288,7 +293,9 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["pipeline_ia"]["transcription"]["statut"], "ok")
         self.assertEqual(payload["pipeline_ia"]["analyse"]["statut"], "fallback")
         self.assertEqual(payload["pipeline_ia"]["analyse"]["modele"], "llama3")
+        self.assertEqual(payload["pipeline_ia"]["analyse"]["detail"], "ollama indisponible")
         self.assertEqual(payload["capture"]["pipeline_ia"]["analyse"]["statut"], "fallback")
+        self.assertEqual(payload["capture"]["pipeline_ia"]["analyse"]["detail"], "ollama indisponible")
 
     def test_post_captures_rejects_non_audio(self):
         response = self.client.post(

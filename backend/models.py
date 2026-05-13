@@ -29,6 +29,7 @@ class ReponsePreflight(BaseModel):
 class StatutEtapeIA(BaseModel):
     statut: str
     modele: Optional[str] = None
+    detail: Optional[str] = None
 
 
 class PipelineIA(BaseModel):

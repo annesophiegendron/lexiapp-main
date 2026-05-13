@@ -251,7 +251,11 @@ async def creer_captures(
             "tags": [],
             "formalite": "standard",
         }
-        statut_analyse = StatutEtapeIA(statut="fallback", modele=OLLAMA_MODEL)
+        statut_analyse = StatutEtapeIA(
+            statut="fallback",
+            modele=OLLAMA_MODEL,
+            detail=str(exc),
+        )
 
     capture = creer_capture(
         CommandeCreationCapture(

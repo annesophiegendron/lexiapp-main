@@ -20,8 +20,8 @@ describe('backendApi normalizers', () => {
       langue: 'fr',
       timestamp: '2026-05-12T10:00:00Z',
       pipeline_ia: {
-        transcription: {statut: 'ok', modele: 'base'},
-        analyse: {statut: 'fallback', modele: 'llama3'},
+        transcription: {statut: 'ok', modele: 'base', detail: null},
+        analyse: {statut: 'fallback', modele: 'llama3', detail: 'ollama indisponible'},
       },
     });
 
@@ -29,6 +29,7 @@ describe('backendApi normalizers', () => {
     expect(capture.translation).toBe('hello');
     expect(capture.pipelineIa.transcription.modele).toBe('base');
     expect(capture.pipelineIa.analyse.statut).toBe('fallback');
+    expect(capture.pipelineIa.analyse.detail).toBe('ollama indisponible');
   });
 
   it('normalise un payload preflight incomplet', () => {

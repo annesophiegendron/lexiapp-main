@@ -36,11 +36,13 @@ const formaterStatutIa = etapeIa => {
     return 'etat inconnu';
   }
 
+  const detail = etapeIa.detail ? ` - ${etapeIa.detail}` : '';
+
   if (etapeIa.statut === 'fallback') {
-    return `fallback${etapeIa.modele ? ` (${etapeIa.modele})` : ''}`;
+    return `fallback${etapeIa.modele ? ` (${etapeIa.modele})` : ''}${detail}`;
   }
 
-  return `${etapeIa.statut}${etapeIa.modele ? ` (${etapeIa.modele})` : ''}`;
+  return `${etapeIa.statut}${etapeIa.modele ? ` (${etapeIa.modele})` : ''}${detail}`;
 };
 
 const formaterResumePreflight = backendStatus => {

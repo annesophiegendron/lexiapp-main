@@ -9,6 +9,7 @@ const BACKEND_BASE_URL = Platform.select({
 const lireStatutEtape = etape => ({
   statut: etape?.statut || 'inconnu',
   modele: etape?.modele || '',
+  detail: etape?.detail || '',
 });
 
 const normaliserPipelineIa = pipelineIa => ({

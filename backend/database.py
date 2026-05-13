@@ -25,8 +25,10 @@ CREATE TABLE IF NOT EXISTS captures (
     langue VARCHAR(10),
     transcription_statut TEXT NOT NULL DEFAULT 'ok',
     transcription_modele TEXT,
+    transcription_detail TEXT,
     analyse_statut TEXT NOT NULL DEFAULT 'ok',
     analyse_modele TEXT,
+    analyse_detail TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 )
 """
@@ -45,8 +47,10 @@ CREATE TABLE IF NOT EXISTS captures (
     langue TEXT,
     transcription_statut TEXT NOT NULL DEFAULT 'ok',
     transcription_modele TEXT,
+    transcription_detail TEXT,
     analyse_statut TEXT NOT NULL DEFAULT 'ok',
     analyse_modele TEXT,
+    analyse_detail TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
 """
@@ -100,8 +104,10 @@ def garantir_colonnes_pipeline_ia(connexion, database_url: str) -> None:
     colonnes = [
         ("transcription_statut", "TEXT NOT NULL DEFAULT 'ok'"),
         ("transcription_modele", "TEXT"),
+        ("transcription_detail", "TEXT"),
         ("analyse_statut", "TEXT NOT NULL DEFAULT 'ok'"),
         ("analyse_modele", "TEXT"),
+        ("analyse_detail", "TEXT"),
     ]
 
     if database_url.startswith("sqlite:///"):
@@ -134,8 +140,10 @@ def lister_captures(database_url: Optional[str] = None) -> List[Capture]:
             langue,
             transcription_statut,
             transcription_modele,
+            transcription_detail,
             analyse_statut,
             analyse_modele,
+            analyse_detail,
             created_at
         FROM captures
         ORDER BY created_at DESC, id DESC
@@ -169,9 +177,11 @@ def creer_capture(commande: CommandeCreationCapture, database_url: Optional[str]
             langue,
             transcription_statut,
             transcription_modele,
+            transcription_detail,
             analyse_statut,
-            analyse_modele
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            analyse_modele,
+            analyse_detail
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         url,
     )
@@ -189,8 +199,10 @@ def creer_capture(commande: CommandeCreationCapture, database_url: Optional[str]
             langue,
             transcription_statut,
             transcription_modele,
+            transcription_detail,
             analyse_statut,
             analyse_modele,
+            analyse_detail,
             created_at
         FROM captures
         WHERE id = ?
@@ -210,8 +222,10 @@ def creer_capture(commande: CommandeCreationCapture, database_url: Optional[str]
         commande.langue,
         commande.pipeline_ia.transcription.statut if commande.pipeline_ia else "ok",
         commande.pipeline_ia.transcription.modele if commande.pipeline_ia else None,
+        commande.pipeline_ia.transcription.detail if commande.pipeline_ia else None,
         commande.pipeline_ia.analyse.statut if commande.pipeline_ia else "ok",
         commande.pipeline_ia.analyse.modele if commande.pipeline_ia else None,
+        commande.pipeline_ia.analyse.detail if commande.pipeline_ia else None,
     ]
 
     with connecter_base(url) as connexion:
@@ -240,9 +254,11 @@ def alimenter_donnees_demo(database_url: Optional[str] = None) -> None:
             langue,
             transcription_statut,
             transcription_modele,
+            transcription_detail,
             analyse_statut,
-            analyse_modele
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            analyse_modele,
+            analyse_detail
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         url,
     )
@@ -267,8 +283,10 @@ def alimenter_donnees_demo(database_url: Optional[str] = None) -> None:
                 "fr",
                 "ok",
                 "base",
+                None,
                 "ok",
                 "llama3",
+                None,
             ],
         )
         connexion.commit()
@@ -301,10 +319,12 @@ def ligne_vers_capture(ligne: Any) -> Capture:
             transcription=StatutEtapeIA(
                 statut=ligne["transcription_statut"],
                 modele=ligne["transcription_modele"],
+                detail=ligne["transcription_detail"],
             ),
             analyse=StatutEtapeIA(
                 statut=ligne["analyse_statut"],
                 modele=ligne["analyse_modele"],
+                detail=ligne["analyse_detail"],
             ),
         ),
     )
@@ -327,8 +347,10 @@ def lire_capture_par_id(identifiant: str, database_url: Optional[str] = None) ->
             langue,
             transcription_statut,
             transcription_modele,
+            transcription_detail,
             analyse_statut,
             analyse_modele,
+            analyse_detail,
             created_at
         FROM captures
         WHERE id = ?
