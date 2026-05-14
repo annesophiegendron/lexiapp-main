@@ -173,6 +173,33 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["status"], "degraded")
         self.assertEqual(payload["checks"][0]["sujet"], "postgresql TCP")
 
+    def test_preflight_route_returns_warning_when_only_ollama_is_missing(self):
+        main.collecter_preflight = lambda: [
+            {"statut": "WARN", "sujet": "ollama API", "detail": "Endpoint http://localhost:11434/api/version"},
+            {"statut": "WARN", "sujet": "modele ollama", "detail": "Modele configure: llama3"},
+        ]
+        main.resumer_preflight = lambda checks: {
+            "status": "warning",
+            "message": "Environnement exploitable avec avertissements.",
+        }
+
+        try:
+            response = self.client.get("/preflight")
+        finally:
+            main.collecter_preflight = lambda: [
+                {"statut": "OK", "sujet": "ollama API", "detail": "Endpoint http://localhost:11434/api/version"},
+                {"statut": "OK", "sujet": "modele ollama", "detail": "Modele configure: llama3"},
+            ]
+            main.resumer_preflight = lambda checks: {
+                "status": "ok",
+                "message": "Environnement coherent pour continuer la phase 2.",
+            }
+
+        payload = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload["status"], "warning")
+        self.assertEqual(payload["checks"][0]["sujet"], "ollama API")
+
     def test_root_route(self):
         response = self.client.get("/")
         payload = response.json()

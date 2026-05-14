@@ -105,6 +105,12 @@ Ce script verifie rapidement les prerequis locaux utiles a la phase 2:
 - accessibilite TCP de PostgreSQL
 - presence du dossier de stockage audio
 
+Interpretation:
+
+- `degraded` : prerequis bloquants manquants pour la capture locale
+- `warning` : capture et transcription possibles, mais analyse Ollama indisponible ou partielle
+- `ok` : pipeline local complet disponible
+
 ## Phase 1 finalisee
 
 - API FastAPI documentee
@@ -172,7 +178,7 @@ Les reponses `POST /captures`, `GET /captures` et `GET /captures/{capture_id}` e
 }
 ```
 
-Si Ollama est indisponible, `pipeline_ia.analyse.statut` vaut `fallback` et `pipeline_ia.analyse.detail` contient la cause du fallback.
+Si Ollama est indisponible, `pipeline_ia.analyse.statut` vaut `fallback` et `pipeline_ia.analyse.detail` contient la cause du fallback. Le preflight remonte alors en `warning` plutot qu'en `degraded` pour ne pas bloquer l'upload de capture.
 
 ## Limites connues
 

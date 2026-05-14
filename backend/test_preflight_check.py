@@ -53,6 +53,13 @@ class PreflightCheckTests(unittest.TestCase):
 
         self.assertEqual(resume["status"], "warning")
 
+    def test_resumer_preflight_retourne_warning_si_ollama_est_absent(self):
+        resume = preflight_check.resumer_preflight(
+            [{"statut": "WARN", "sujet": "ollama API", "detail": "Endpoint http://localhost:11434/api/version"}]
+        )
+
+        self.assertEqual(resume["status"], "warning")
+
     def test_resumer_preflight_retourne_ok_si_aucun_warn_ni_echec(self):
         resume = preflight_check.resumer_preflight(
             [{"statut": "OK", "sujet": "fastapi", "detail": "Framework API disponible"}]

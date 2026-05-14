@@ -107,15 +107,17 @@ def collecter_preflight() -> list[dict[str, str]]:
     AUDIO_STORAGE_DIR.mkdir(parents=True, exist_ok=True)
     ajouter("OK", "stockage audio", str(AUDIO_STORAGE_DIR))
 
+    # Ollama reste optionnel pour la capture: son absence degrade l'analyse semantique
+    # mais ne doit pas bloquer la transcription ni l'upload audio.
     ollama_cli = commande_disponible("ollama")
-    ajouter("OK" if ollama_cli else "FAIL", "ollama CLI", "Commande ollama accessible")
+    ajouter("OK" if ollama_cli else "WARN", "ollama CLI", "Commande ollama accessible")
 
     ollama_api = test_http(f"{OLLAMA_URL}/api/version")
-    ajouter("OK" if ollama_api else "FAIL", "ollama API", f"Endpoint {OLLAMA_URL}/api/version")
+    ajouter("OK" if ollama_api else "WARN", "ollama API", f"Endpoint {OLLAMA_URL}/api/version")
 
     modele_present = ollama_modele_present(OLLAMA_MODEL) if ollama_cli else False
     ajouter(
-        "OK" if modele_present else "FAIL",
+        "OK" if modele_present else "WARN",
         "modele ollama",
         f"Modele configure: {OLLAMA_MODEL}",
     )
