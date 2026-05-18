@@ -133,7 +133,7 @@ Interpretation:
 ## Phase 1 finalisee
 
 - API FastAPI documentee
-- Persistence PostgreSQL avec fallback SQLite pour les tests
+- Persistence PostgreSQL avec fallback SQLite pour les tests  (installé la version 16 de postgresql)
 - Routes `GET /captures` et `POST /captures`
 - Acces HTTP aux audios stockes localement
 - Validation geolocalisation et type de fichier
