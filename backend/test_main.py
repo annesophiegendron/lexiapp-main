@@ -2,7 +2,8 @@ import shutil
 import unittest
 from pathlib import Path
 
-from fastapi.testclient import TestClient
+import anyio
+import httpx
 
 try:
     from backend import database, main, storage
@@ -75,11 +76,13 @@ class MainApiTests(unittest.TestCase):
         main.httpx.Client = FauxClientHttpx
 
         database.initialiser_base(cls.database_url)
-        cls.client = TestClient(main.app)
+        transport = httpx.ASGITransport(app=main.app)
+        cls.client = httpx.Client(transport=transport, base_url="http://testserver")
 
     @classmethod
     def tearDownClass(cls):
-        cls.client.close()
+        if hasattr(cls.client, "close"):
+            cls.client.close()
         main.initialiser_base = cls.original_initialiser_base
         main.alimenter_donnees_demo = cls.original_alimenter_donnees_demo
         main.lister_captures = cls.original_lister_captures
@@ -111,7 +114,7 @@ class MainApiTests(unittest.TestCase):
             shutil.rmtree(self.__class__.stockage_test)
 
     def test_health_route(self):
-        response = self.client.get("/sante")
+        response = self.request("GET", "/sante")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["status"], "ok")
@@ -132,7 +135,7 @@ class MainApiTests(unittest.TestCase):
 
         main.httpx.Client = FauxClientHttpxEnEchec
         try:
-            response = self.client.get("/sante")
+            response = self.request("GET", "/sante")
         finally:
             main.httpx.Client = self.__class__.faux_httpx_client
 
@@ -141,7 +144,7 @@ class MainApiTests(unittest.TestCase):
         self.assertIn("Ollama indisponible", response.json()["message"])
 
     def test_preflight_route(self):
-        response = self.client.get("/preflight")
+        response = self.request("GET", "/preflight")
         payload = response.json()
 
         self.assertEqual(response.status_code, 200)
@@ -161,7 +164,7 @@ class MainApiTests(unittest.TestCase):
         }
 
         try:
-            response = self.client.get("/preflight")
+            response = self.request("GET", "/preflight")
         finally:
             main.collecter_preflight = lambda: [
                 {"statut": "OK", "sujet": "ollama API", "detail": "Endpoint http://localhost:11434/api/version"},
@@ -188,7 +191,7 @@ class MainApiTests(unittest.TestCase):
         }
 
         try:
-            response = self.client.get("/preflight")
+            response = self.request("GET", "/preflight")
         finally:
             main.collecter_preflight = lambda: [
                 {"statut": "OK", "sujet": "ollama API", "detail": "Endpoint http://localhost:11434/api/version"},
@@ -205,7 +208,7 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["checks"][0]["sujet"], "ollama API")
 
     def test_root_route(self):
-        response = self.client.get("/")
+        response = self.request("GET", "/")
         payload = response.json()
 
         self.assertEqual(response.status_code, 200)
@@ -215,7 +218,7 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["captures"], "/captures")
 
     def test_get_captures_route(self):
-        response = self.client.get("/captures")
+        response = self.request("GET", "/captures")
         payload = response.json()
 
         self.assertEqual(response.status_code, 200)
@@ -226,7 +229,7 @@ class MainApiTests(unittest.TestCase):
         self.assertIsNone(payload["captures"][0]["pipeline_ia"]["analyse"]["detail"])
 
     def test_get_capture_by_id_route(self):
-        response = self.client.get("/captures/00000000-0000-0000-0000-000000000001")
+        response = self.request("GET", "/captures/00000000-0000-0000-0000-000000000001")
         payload = response.json()
 
         self.assertEqual(response.status_code, 200)
@@ -237,13 +240,14 @@ class MainApiTests(unittest.TestCase):
         self.assertIsNone(payload["pipeline_ia"]["transcription"]["detail"])
 
     def test_get_capture_by_id_route_returns_404(self):
-        response = self.client.get("/captures/00000000-0000-0000-0000-000000000099")
+        response = self.request("GET", "/captures/00000000-0000-0000-0000-000000000099")
 
         self.assertEqual(response.status_code, 404)
         self.assertIn("non trouvee", response.json()["detail"])
 
     def test_post_captures_accepts_audio(self):
-        response = self.client.post(
+        response = self.request(
+            "POST",
             "/captures",
             files={"audio": ("test.wav", b"RIFF....WAVE", "audio/wav")},
             data={"latitude": "48.8566", "longitude": "2.3522", "langue": "fr"},
@@ -269,7 +273,7 @@ class MainApiTests(unittest.TestCase):
         nom_fichier = payload["capture"]["audio_url"].split("/")[-1]
         self.assertTrue((self.__class__.stockage_test / nom_fichier).exists())
 
-        get_response = self.client.get("/captures")
+        get_response = self.request("GET", "/captures")
         get_payload = get_response.json()
 
         self.assertEqual(get_response.status_code, 200)
@@ -280,7 +284,7 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(get_payload["captures"][0]["pipeline_ia"]["analyse"]["modele"], "llama3")
         self.assertIsNone(get_payload["captures"][0]["pipeline_ia"]["analyse"]["detail"])
 
-        audio_response = self.client.get(payload["capture"]["audio_url"])
+        audio_response = self.request("GET", payload["capture"]["audio_url"])
         self.assertEqual(audio_response.status_code, 200)
         self.assertEqual(audio_response.content, b"RIFF....WAVE")
 
@@ -288,7 +292,8 @@ class MainApiTests(unittest.TestCase):
         main.transcrire_audio = lambda chemin_audio, langue=None: (_ for _ in ()).throw(RuntimeError("modele indisponible"))
 
         try:
-            response = self.client.post(
+            response = self.request(
+                "POST",
                 "/captures",
                 files={"audio": ("test.wav", b"RIFF....WAVE", "audio/wav")},
                 data={"latitude": "48.8566", "longitude": "2.3522", "langue": "fr"},
@@ -304,7 +309,8 @@ class MainApiTests(unittest.TestCase):
         main.analyser_phrase = lambda texte, langue=None: (_ for _ in ()).throw(RuntimeError("ollama indisponible"))
 
         try:
-            response = self.client.post(
+            response = self.request(
+                "POST",
                 "/captures",
                 files={"audio": ("test.wav", b"RIFF....WAVE", "audio/wav")},
                 data={"latitude": "48.8566", "longitude": "2.3522", "langue": "fr"},
@@ -329,7 +335,8 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["capture"]["pipeline_ia"]["analyse"]["detail"], "ollama indisponible")
 
     def test_post_captures_rejects_non_audio(self):
-        response = self.client.post(
+        response = self.request(
+            "POST",
             "/captures",
             files={"audio": ("test.txt", b"hello", "text/plain")},
             data={"latitude": "48.8566", "longitude": "2.3522", "langue": "fr"},
@@ -339,7 +346,8 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(response.json()["detail"], "Le fichier envoye doit etre un audio valide.")
 
     def test_post_captures_rejects_missing_latitude(self):
-        response = self.client.post(
+        response = self.request(
+            "POST",
             "/captures",
             files={"audio": ("test.wav", b"RIFF....WAVE", "audio/wav")},
             data={"longitude": "2.3522", "langue": "fr"},
@@ -348,7 +356,8 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 422)
 
     def test_post_captures_rejects_missing_longitude(self):
-        response = self.client.post(
+        response = self.request(
+            "POST",
             "/captures",
             files={"audio": ("test.wav", b"RIFF....WAVE", "audio/wav")},
             data={"latitude": "48.8566", "langue": "fr"},
@@ -361,7 +370,7 @@ class MainApiTests(unittest.TestCase):
             connexion.execute("DELETE FROM captures")
             connexion.commit()
 
-        response = self.client.get("/captures")
+        response = self.request("GET", "/captures")
         payload = response.json()
 
         self.assertEqual(response.status_code, 200)
@@ -371,6 +380,16 @@ class MainApiTests(unittest.TestCase):
     def test_resoudre_chemin_audio_uses_configured_storage_directory(self):
         chemin = main.resoudre_chemin_audio("/stockage/audios/test.wav")
         self.assertEqual(chemin, self.__class__.stockage_test / "test.wav")
+
+    def request(self, method, url, **kwargs):
+        async def _executer():
+            async with httpx.AsyncClient(
+                transport=httpx.ASGITransport(app=main.app),
+                base_url="http://testserver",
+            ) as client:
+                return await client.request(method, url, **kwargs)
+
+        return anyio.run(_executer)
 
 
 if __name__ == "__main__":

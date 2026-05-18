@@ -27,6 +27,13 @@ def charger_modele(nom_modele: Optional[str] = None):
     if _modele_cache is None:
         import whisper
 
+        if not hasattr(whisper, "load_model"):
+            module_path = getattr(whisper, "__file__", "inconnu")
+            raise RuntimeError(
+                "Le module Python 'whisper' charge n'est pas OpenAI Whisper "
+                f"(module detecte: {module_path}). Installe le paquet 'openai-whisper'."
+            )
+
         configurer_ffmpeg()
         _modele_cache = whisper.load_model(nom_modele or WHISPER_MODEL)
 

@@ -70,6 +70,19 @@ def distribution_installee(nom_distribution: str) -> bool:
         return False
 
 
+def whisper_openai_disponible() -> tuple[bool, str]:
+    try:
+        import whisper
+    except Exception as exc:
+        return False, f"import whisper impossible: {exc}"
+
+    if not hasattr(whisper, "load_model"):
+        module_path = getattr(whisper, "__file__", "inconnu")
+        return False, f"module whisper incorrect: {module_path}"
+
+    return True, f"module whisper valide: {getattr(whisper, '__file__', 'inconnu')}"
+
+
 def commande_disponible(nom: str) -> bool:
     return shutil.which(nom) is not None
 
@@ -115,10 +128,11 @@ def collecter_preflight() -> list[dict[str, str]]:
         "psycopg",
         "Driver PostgreSQL requis pour la base locale",
     )
+    whisper_ok, whisper_detail = whisper_openai_disponible()
     ajouter(
-        "OK" if distribution_installee("openai-whisper") else "FAIL",
+        "OK" if whisper_ok else "FAIL",
         "openai-whisper",
-        f"Transcription locale requise, modele configure: {WHISPER_MODEL}",
+        f"Transcription locale requise, modele configure: {WHISPER_MODEL} ({whisper_detail})",
     )
 
     ffmpeg_ok = commande_disponible("ffmpeg") or CHEMIN_FFMPEG_BUNDLE.exists()
