@@ -87,6 +87,7 @@ curl -X POST http://localhost:8000/captures ^
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/lexiapp
 OLLAMA_URL=http://localhost:11434
 OLLAMA_MODEL=llama3
+OLLAMA_TIMEOUT_SECONDS=180
 WHISPER_MODEL=base
 SEED_DEMO_DATA=false
 AUDIO_STORAGE_DIR=backend/stockage/audios

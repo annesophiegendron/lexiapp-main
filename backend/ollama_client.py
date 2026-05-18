@@ -4,9 +4,9 @@ from typing import Any, Dict, Optional
 import httpx
 
 try:
-    from backend.config import OLLAMA_MODEL, OLLAMA_URL
+    from backend.config import OLLAMA_MODEL, OLLAMA_TIMEOUT_SECONDS, OLLAMA_URL
 except ModuleNotFoundError:
-    from config import OLLAMA_MODEL, OLLAMA_URL
+    from config import OLLAMA_MODEL, OLLAMA_TIMEOUT_SECONDS, OLLAMA_URL
 
 PROMPT_SYSTEME = (
     "Tu es un assistant linguistique. "
@@ -25,7 +25,7 @@ def analyser_phrase(texte: str, langue: Optional[str] = None) -> Dict[str, Any]:
         "Retourne seulement le JSON final et sans markdown."
     )
 
-    with httpx.Client(timeout=60.0) as client:
+    with httpx.Client(timeout=OLLAMA_TIMEOUT_SECONDS) as client:
         response = client.post(
             f"{OLLAMA_URL}/api/generate",
             json={
