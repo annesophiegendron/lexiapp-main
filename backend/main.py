@@ -2,7 +2,6 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 import logging
-import uuid
 
 import httpx
 import uvicorn
@@ -33,6 +32,11 @@ try:
     )
     from backend.ollama_client import analyser_phrase
     from backend.preflight_check import collecter_preflight, resumer_preflight
+    from backend.storage import (
+        enregistrer_audio,
+        resoudre_chemin_audio_local,
+        supprimer_audio_si_present,
+    )
     from backend.transcription import transcrire_audio
 except ModuleNotFoundError:
     from config import AUDIO_STORAGE_DIR, OLLAMA_URL, SEED_DEMO_DATA
@@ -57,6 +61,11 @@ except ModuleNotFoundError:
     )
     from ollama_client import analyser_phrase
     from preflight_check import collecter_preflight, resumer_preflight
+    from storage import (
+        enregistrer_audio,
+        resoudre_chemin_audio_local,
+        supprimer_audio_si_present,
+    )
     from transcription import transcrire_audio
 
 logger = logging.getLogger(__name__)
@@ -161,24 +170,16 @@ def lire_capture(capture_id: str) -> Capture:
     return capture
 
 
-async def enregistrer_audio(audio: UploadFile) -> str:
-    CHEMIN_STOCKAGE_AUDIOS.mkdir(parents=True, exist_ok=True)
-    extension = Path(audio.filename).suffix if audio.filename else ""
-    nom_fichier = f"{uuid.uuid4().hex}{extension}"
-    chemin_fichier = CHEMIN_STOCKAGE_AUDIOS / nom_fichier
-    contenu = await audio.read()
-    chemin_fichier.write_bytes(contenu)
-    await audio.seek(0)
-    return f"/stockage/audios/{nom_fichier}"
-
-
 def resoudre_chemin_audio(url_audio: str) -> Path:
-    return CHEMIN_STOCKAGE_AUDIOS / Path(url_audio).name
+    chemin = resoudre_chemin_audio_local(url_audio)
+    if chemin is None:
+        raise HTTPException(status_code=404, detail="Ce fichier audio n'est pas stocke localement")
+    return chemin
 
 
 def supprimer_audio_si_present(url_audio: str) -> None:
-    chemin_audio = resoudre_chemin_audio(url_audio)
-    if chemin_audio.exists():
+    chemin_audio = resoudre_chemin_audio_local(url_audio)
+    if chemin_audio and chemin_audio.exists():
         chemin_audio.unlink()
 
 

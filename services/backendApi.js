@@ -41,7 +41,12 @@ const normaliserCapture = capture => ({
   id: capture.id,
   original: capture.phrase_originale,
   translation: capture.traduction || '',
-  audioUrl: `${BACKEND_BASE_URL}${capture.audio_url}`,
+  audioUrl:
+    typeof capture.audio_url === 'string' &&
+    (capture.audio_url.startsWith('http://') ||
+      capture.audio_url.startsWith('https://'))
+      ? capture.audio_url
+      : `${BACKEND_BASE_URL}${capture.audio_url}`,
   audioPath: capture.audio_url,
   tags: Array.isArray(capture.contexte_tags) ? capture.contexte_tags : [],
   formality: capture.formalite,

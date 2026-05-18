@@ -5,10 +5,11 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 try:
-    from backend import database, main
+    from backend import database, main, storage
 except ModuleNotFoundError:
     import database
     import main
+    import storage
 
 
 class MainApiTests(unittest.TestCase):
@@ -23,6 +24,7 @@ class MainApiTests(unittest.TestCase):
         cls.original_creer_capture = main.creer_capture
         cls.original_lire_capture_par_id = main.lire_capture_par_id
         cls.original_chemin_stockage_audios = main.CHEMIN_STOCKAGE_AUDIOS
+        cls.original_storage_audio_dir = storage.AUDIO_STORAGE_DIR
         cls.original_transcrire_audio = main.transcrire_audio
         cls.original_analyser_phrase = main.analyser_phrase
         cls.original_verifier_sante_base = main.verifier_sante_base
@@ -36,6 +38,7 @@ class MainApiTests(unittest.TestCase):
         main.creer_capture = lambda commande: database.creer_capture(commande, cls.database_url)
         main.lire_capture_par_id = lambda capture_id: database.lire_capture_par_id(capture_id, cls.database_url)
         main.CHEMIN_STOCKAGE_AUDIOS = cls.stockage_test
+        storage.AUDIO_STORAGE_DIR = cls.stockage_test
         main.transcrire_audio = lambda chemin_audio, langue=None: f"transcription test {langue or 'auto'}"
         main.analyser_phrase = lambda texte, langue=None: {
             "traduction": f"traduction de {texte}",
@@ -83,6 +86,7 @@ class MainApiTests(unittest.TestCase):
         main.creer_capture = cls.original_creer_capture
         main.lire_capture_par_id = cls.original_lire_capture_par_id
         main.CHEMIN_STOCKAGE_AUDIOS = cls.original_chemin_stockage_audios
+        storage.AUDIO_STORAGE_DIR = cls.original_storage_audio_dir
         main.transcrire_audio = cls.original_transcrire_audio
         main.analyser_phrase = cls.original_analyser_phrase
         main.verifier_sante_base = cls.original_verifier_sante_base

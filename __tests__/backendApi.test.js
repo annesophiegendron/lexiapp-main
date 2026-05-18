@@ -32,6 +32,25 @@ describe('backendApi normalizers', () => {
     expect(capture.pipelineIa.analyse.detail).toBe('ollama indisponible');
   });
 
+  it('conserve une URL audio absolue pour Supabase Storage', () => {
+    const capture = normaliserCapture({
+      id: 'def',
+      phrase_originale: 'hej',
+      traduction: 'hi',
+      audio_url: 'https://demo.supabase.co/storage/v1/object/public/captures-audio/audios/test.m4a',
+      contexte_tags: [],
+      formalite: 'standard',
+      geolocalisation: {
+        latitude: 59.33,
+        longitude: 18.06,
+      },
+    });
+
+    expect(capture.audioUrl).toBe(
+      'https://demo.supabase.co/storage/v1/object/public/captures-audio/audios/test.m4a',
+    );
+  });
+
   it('normalise un payload preflight incomplet', () => {
     const preflight = normaliserPreflight({
       status: 'warning',

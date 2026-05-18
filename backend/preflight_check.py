@@ -9,9 +9,29 @@ from urllib.parse import urlparse
 from urllib.request import urlopen
 
 try:
-    from backend.config import AUDIO_STORAGE_DIR, DATABASE_URL, OLLAMA_MODEL, OLLAMA_URL, WHISPER_MODEL
+    from backend.config import (
+        AUDIO_STORAGE_DIR,
+        DATABASE_URL,
+        OLLAMA_MODEL,
+        OLLAMA_URL,
+        STORAGE_BACKEND,
+        SUPABASE_BUCKET,
+        SUPABASE_SERVICE_ROLE_KEY,
+        SUPABASE_URL,
+        WHISPER_MODEL,
+    )
 except ModuleNotFoundError:
-    from config import AUDIO_STORAGE_DIR, DATABASE_URL, OLLAMA_MODEL, OLLAMA_URL, WHISPER_MODEL
+    from config import (
+        AUDIO_STORAGE_DIR,
+        DATABASE_URL,
+        OLLAMA_MODEL,
+        OLLAMA_URL,
+        STORAGE_BACKEND,
+        SUPABASE_BUCKET,
+        SUPABASE_SERVICE_ROLE_KEY,
+        SUPABASE_URL,
+        WHISPER_MODEL,
+    )
 
 
 DOSSIER_BACKEND = Path(__file__).resolve().parent
@@ -78,6 +98,10 @@ def test_http(url: str, timeout: float = 3.0) -> bool:
         return False
 
 
+def configuration_supabase_valide() -> bool:
+    return bool(SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY and SUPABASE_BUCKET)
+
+
 def collecter_preflight() -> list[dict[str, str]]:
     resultats: list[tuple[str, str, str]] = []
 
@@ -104,8 +128,23 @@ def collecter_preflight() -> list[dict[str, str]]:
         "Disponible dans le PATH ou dans backend/tools/ffmpeg",
     )
 
-    AUDIO_STORAGE_DIR.mkdir(parents=True, exist_ok=True)
-    ajouter("OK", "stockage audio", str(AUDIO_STORAGE_DIR))
+    if STORAGE_BACKEND == "supabase":
+        ajouter("OK", "stockage backend", "supabase")
+        ajouter(
+            "OK" if configuration_supabase_valide() else "FAIL",
+            "supabase config",
+            f"bucket={SUPABASE_BUCKET or 'absent'}",
+        )
+        if configuration_supabase_valide():
+            ajouter(
+                "OK" if test_http(f"{SUPABASE_URL}/storage/v1/bucket") else "WARN",
+                "supabase storage API",
+                f"{SUPABASE_URL}/storage/v1/bucket",
+            )
+    else:
+        AUDIO_STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+        ajouter("OK", "stockage backend", "local")
+        ajouter("OK", "stockage audio", str(AUDIO_STORAGE_DIR))
 
     # Ollama reste optionnel pour la capture: son absence degrade l'analyse semantique
     # mais ne doit pas bloquer la transcription ni l'upload audio.

@@ -7,6 +7,7 @@ Backend FastAPI pour capturer, transcrire et analyser des phrases apprises en si
 - Python 3.11+
 - PostgreSQL via Docker Compose
 - Ollama avec `llama3` si l'analyse locale doit etre activee
+- Stockage audio `local` ou `supabase`
 - Environ 8 Go de RAM pour Whisper + Ollama
 
 ## Installation
@@ -20,6 +21,16 @@ copy .env.example .env
 ```
 
 Les valeurs par defaut de `.env` conviennent pour un usage local.
+
+Si vous voulez envoyer les audios vers Supabase Storage, configurez aussi:
+
+```dotenv
+STORAGE_BACKEND=supabase
+SUPABASE_URL=https://<project>.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
+SUPABASE_BUCKET=captures-audio
+SUPABASE_PUBLIC_BASE_URL=https://<project>.supabase.co/storage/v1/object/public/captures-audio
+```
 
 ## Lancement
 
@@ -53,6 +64,8 @@ API disponible sur `http://localhost:8000`
 - `POST /captures` : upload audio + geolocalisation + langue
 - `GET /stockage/audios/{nom_fichier}` : acces aux audios stockes localement
 
+Note: la route `GET /stockage/audios/{nom_fichier}` ne sert que le stockage `local`. Avec `supabase`, `audio_url` est deja une URL absolue vers le bucket.
+
 Documentation interactive :
 
 - Swagger UI : `http://localhost:8000/docs`
@@ -77,6 +90,11 @@ OLLAMA_MODEL=llama3
 WHISPER_MODEL=base
 SEED_DEMO_DATA=false
 AUDIO_STORAGE_DIR=backend/stockage/audios
+STORAGE_BACKEND=local
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_BUCKET=captures-audio
+SUPABASE_PUBLIC_BASE_URL=
 ```
 
 Pour des tests locaux sans PostgreSQL :
@@ -103,7 +121,7 @@ Ce script verifie rapidement les prerequis locaux utiles a la phase 2:
 - disponibilite de `ffmpeg`
 - accessibilite d'Ollama et presence du modele configure
 - accessibilite TCP de PostgreSQL
-- presence du dossier de stockage audio
+- presence du dossier de stockage audio local ou configuration Supabase Storage
 
 Interpretation:
 
@@ -119,6 +137,7 @@ Interpretation:
 - Acces HTTP aux audios stockes localement
 - Validation geolocalisation et type de fichier
 - Stockage audio local
+- Support du stockage audio local ou Supabase Storage
 - Tests backend de base
 
 ## Base prete pour la phase 2
