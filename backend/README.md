@@ -141,13 +141,22 @@ Interpretation:
 - Support du stockage audio local ou Supabase Storage
 - Tests backend de base
 
-## Base prete pour la phase 2
+## Phase 2: statut verifie
 
-- Objectif retenu: rendre visible l'etat du pipeline IA pour que le frontend sache si l'analyse locale a vraiment reussi ou si un fallback a ete applique
+Les fondamentaux de la phase 2 sont deja implementes dans ce backend:
+
 - Transcription locale Whisper configurable par `WHISPER_MODEL`
 - Analyse locale Ollama avec degradation propre si indisponible
 - Champ `formalite` et tags persistants dans PostgreSQL
 - Stockage audio reutilisable pour le pipeline IA
+- Route `GET /preflight` pour verifier rapidement l'environnement local
+
+## Base prete pour la phase 3
+
+- Objectif retenu: rendre visible l'etat du pipeline IA pour que le frontend sache si l'analyse locale a vraiment reussi ou si un fallback a ete applique
+- Ajouter la logique SRS sur les captures deja stockees
+- Introduire des filtres de recherche par contexte, lieu et vibe
+- Exposer des statistiques simples via de nouvelles routes backend
 
 ## Reponses des captures
 
