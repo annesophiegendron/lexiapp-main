@@ -62,6 +62,8 @@ API disponible sur `http://localhost:8000`
 - `GET /captures` : liste des captures
 - `GET /captures/{capture_id}` : detail d'une capture
 - `POST /captures` : upload audio + geolocalisation + langue
+- `POST /captures/{capture_id}/review` : notation d'une revision avec calcul SM-2
+- `GET /revisions/due` : liste des captures a reviser
 - `GET /stockage/audios/{nom_fichier}` : acces aux audios stockes localement
 
 Note: la route `GET /stockage/audios/{nom_fichier}` ne sert que le stockage `local`. Avec `supabase`, `audio_url` est deja une URL absolue vers le bucket.
@@ -154,9 +156,25 @@ Les fondamentaux de la phase 2 sont deja implementes dans ce backend:
 ## Base prete pour la phase 3
 
 - Objectif retenu: rendre visible l'etat du pipeline IA pour que le frontend sache si l'analyse locale a vraiment reussi ou si un fallback a ete applique
-- Ajouter la logique SRS sur les captures deja stockees
+- Logique SRS de base branchee sur les captures deja stockees
 - Introduire des filtres de recherche par contexte, lieu et vibe
 - Exposer des statistiques simples via de nouvelles routes backend
+
+## Phase 3 demarree
+
+Le backend expose maintenant un premier flux de repetition espacee:
+
+- chaque capture stocke un bloc `revision_srs`
+- `POST /captures/{capture_id}/review` enregistre une note de revision (`qualite` de 0 a 5)
+- `GET /revisions/due` retourne les captures dont `prochaine_revision` est echue
+
+Exemple de payload de notation:
+
+```json
+{
+  "qualite": 4
+}
+```
 
 ## Reponses des captures
 

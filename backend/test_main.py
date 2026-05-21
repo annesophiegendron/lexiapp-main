@@ -24,6 +24,8 @@ class MainApiTests(unittest.TestCase):
         cls.original_lister_captures = main.lister_captures
         cls.original_creer_capture = main.creer_capture
         cls.original_lire_capture_par_id = main.lire_capture_par_id
+        cls.original_lister_revisions_dues = main.lister_revisions_dues
+        cls.original_noter_revision_capture = main.noter_revision_capture
         cls.original_chemin_stockage_audios = main.CHEMIN_STOCKAGE_AUDIOS
         cls.original_storage_audio_dir = storage.AUDIO_STORAGE_DIR
         cls.original_transcrire_audio = main.transcrire_audio
@@ -38,6 +40,12 @@ class MainApiTests(unittest.TestCase):
         main.lister_captures = lambda: database.lister_captures(cls.database_url)
         main.creer_capture = lambda commande: database.creer_capture(commande, cls.database_url)
         main.lire_capture_par_id = lambda capture_id: database.lire_capture_par_id(capture_id, cls.database_url)
+        main.lister_revisions_dues = lambda: database.lister_revisions_dues(cls.database_url)
+        main.noter_revision_capture = lambda capture_id, qualite: database.noter_revision_capture(
+            capture_id,
+            qualite,
+            cls.database_url,
+        )
         main.CHEMIN_STOCKAGE_AUDIOS = cls.stockage_test
         storage.AUDIO_STORAGE_DIR = cls.stockage_test
         main.transcrire_audio = lambda chemin_audio, langue=None: f"transcription test {langue or 'auto'}"
@@ -88,6 +96,8 @@ class MainApiTests(unittest.TestCase):
         main.lister_captures = cls.original_lister_captures
         main.creer_capture = cls.original_creer_capture
         main.lire_capture_par_id = cls.original_lire_capture_par_id
+        main.lister_revisions_dues = cls.original_lister_revisions_dues
+        main.noter_revision_capture = cls.original_noter_revision_capture
         main.CHEMIN_STOCKAGE_AUDIOS = cls.original_chemin_stockage_audios
         storage.AUDIO_STORAGE_DIR = cls.original_storage_audio_dir
         main.transcrire_audio = cls.original_transcrire_audio
@@ -216,6 +226,7 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["sante"], "/sante")
         self.assertEqual(payload["preflight"], "/preflight")
         self.assertEqual(payload["captures"], "/captures")
+        self.assertEqual(payload["revisions_due"], "/revisions/due")
 
     def test_get_captures_route(self):
         response = self.request("GET", "/captures")
@@ -270,6 +281,8 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["capture"]["pipeline_ia"]["transcription"]["statut"], "ok")
         self.assertEqual(payload["capture"]["pipeline_ia"]["analyse"]["modele"], "llama3")
         self.assertIsNone(payload["capture"]["pipeline_ia"]["transcription"]["detail"])
+        self.assertEqual(payload["capture"]["revision_srs"]["repetitions"], 0)
+        self.assertIsNone(payload["capture"]["revision_srs"]["prochaine_revision"])
         nom_fichier = payload["capture"]["audio_url"].split("/")[-1]
         self.assertTrue((self.__class__.stockage_test / nom_fichier).exists())
 
@@ -380,6 +393,69 @@ class MainApiTests(unittest.TestCase):
     def test_resoudre_chemin_audio_uses_configured_storage_directory(self):
         chemin = main.resoudre_chemin_audio("/stockage/audios/test.wav")
         self.assertEqual(chemin, self.__class__.stockage_test / "test.wav")
+
+    def test_post_review_updates_srs_state(self):
+        response = self.request(
+            "POST",
+            "/captures/00000000-0000-0000-0000-000000000001/review",
+            json={"qualite": 5},
+        )
+        payload = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["revision_srs"]["repetitions"], 1)
+        self.assertEqual(payload["revision_srs"]["intervalle_jours"], 1)
+        self.assertIsNotNone(payload["revision_srs"]["prochaine_revision"])
+        self.assertIsNotNone(payload["revision_srs"]["derniere_revision"])
+        self.assertEqual(payload["capture"]["revision_srs"]["repetitions"], 1)
+
+    def test_post_review_returns_404_for_unknown_capture(self):
+        response = self.request(
+            "POST",
+            "/captures/00000000-0000-0000-0000-000000000099/review",
+            json={"qualite": 3},
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("non trouvee", response.json()["detail"])
+
+    def test_get_due_revisions_returns_only_due_items(self):
+        database.noter_revision_capture(
+            "00000000-0000-0000-0000-000000000001",
+            5,
+            self.__class__.database_url,
+        )
+        with database.connecter_base(self.__class__.database_url) as connexion:
+            connexion.execute(
+                database.adapter_requete(
+                    "UPDATE captures SET prochaine_revision = ?, derniere_revision = ? WHERE id = ?",
+                    self.__class__.database_url,
+                ),
+                [
+                    "2026-05-01T09:00:00+00:00",
+                    "2026-04-30T09:00:00+00:00",
+                    "00000000-0000-0000-0000-000000000001",
+                ],
+            )
+            connexion.commit()
+
+        response = self.request("GET", "/revisions/due")
+        payload = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload["total"], 1)
+        self.assertEqual(payload["captures"][0]["id"], "00000000-0000-0000-0000-000000000001")
+        self.assertEqual(payload["captures"][0]["revision_srs"]["repetitions"], 1)
+
+    def test_post_review_rejects_invalid_quality(self):
+        response = self.request(
+            "POST",
+            "/captures/00000000-0000-0000-0000-000000000001/review",
+            json={"qualite": 8},
+        )
+
+        self.assertEqual(response.status_code, 422)
 
     def request(self, method, url, **kwargs):
         async def _executer():

@@ -1,14 +1,17 @@
 import json
 import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, List, Optional
 
 try:
     from backend.config import DATABASE_URL
-    from backend.models import Capture, CommandeCreationCapture, Geolocalisation, PipelineIA, StatutEtapeIA
+    from backend.models import Capture, CommandeCreationCapture, EtatRevision, Geolocalisation, PipelineIA, StatutEtapeIA
+    from backend.phase3 import EtatSRS, calculer_revision_sm2
 except ModuleNotFoundError:
     from config import DATABASE_URL
-    from models import Capture, CommandeCreationCapture, Geolocalisation, PipelineIA, StatutEtapeIA
+    from models import Capture, CommandeCreationCapture, EtatRevision, Geolocalisation, PipelineIA, StatutEtapeIA
+    from phase3 import EtatSRS, calculer_revision_sm2
 
 
 # Schema PostgreSQL 
@@ -29,6 +32,11 @@ CREATE TABLE IF NOT EXISTS captures (
     analyse_statut TEXT NOT NULL DEFAULT 'ok',
     analyse_modele TEXT,
     analyse_detail TEXT,
+    repetitions INTEGER NOT NULL DEFAULT 0,
+    intervalle_jours INTEGER NOT NULL DEFAULT 0,
+    facteur_aisance DOUBLE PRECISION NOT NULL DEFAULT 2.5,
+    prochaine_revision TIMESTAMPTZ,
+    derniere_revision TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 )
 """
@@ -51,6 +59,11 @@ CREATE TABLE IF NOT EXISTS captures (
     analyse_statut TEXT NOT NULL DEFAULT 'ok',
     analyse_modele TEXT,
     analyse_detail TEXT,
+    repetitions INTEGER NOT NULL DEFAULT 0,
+    intervalle_jours INTEGER NOT NULL DEFAULT 0,
+    facteur_aisance REAL NOT NULL DEFAULT 2.5,
+    prochaine_revision TEXT,
+    derniere_revision TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
 """
@@ -97,6 +110,7 @@ def initialiser_base(database_url: Optional[str] = None) -> None:
     with connecter_base(url) as connexion:
         connexion.execute(schema)
         garantir_colonnes_pipeline_ia(connexion, url)
+        garantir_colonnes_phase3(connexion, url)
         connexion.commit()
 
 
@@ -123,6 +137,38 @@ def garantir_colonnes_pipeline_ia(connexion, database_url: str) -> None:
     for nom, definition in colonnes:
         connexion.execute(f"ALTER TABLE captures ADD COLUMN IF NOT EXISTS {nom} {definition}")
 
+
+def garantir_colonnes_phase3(connexion, database_url: str) -> None:
+    colonnes = [
+        ("repetitions", "INTEGER NOT NULL DEFAULT 0"),
+        ("intervalle_jours", "INTEGER NOT NULL DEFAULT 0"),
+        ("facteur_aisance", "REAL NOT NULL DEFAULT 2.5"),
+        ("prochaine_revision", "TEXT"),
+        ("derniere_revision", "TEXT"),
+    ]
+
+    if database_url.startswith("sqlite:///"):
+        colonnes_existantes = {
+            ligne["name"]
+            for ligne in connexion.execute("PRAGMA table_info(captures)").fetchall()
+        }
+        for nom, definition in colonnes:
+            if nom not in colonnes_existantes:
+                connexion.execute(f"ALTER TABLE captures ADD COLUMN {nom} {definition}")
+        return
+
+    definitions_postgres = {
+        "repetitions": "INTEGER NOT NULL DEFAULT 0",
+        "intervalle_jours": "INTEGER NOT NULL DEFAULT 0",
+        "facteur_aisance": "DOUBLE PRECISION NOT NULL DEFAULT 2.5",
+        "prochaine_revision": "TIMESTAMPTZ",
+        "derniere_revision": "TIMESTAMPTZ",
+    }
+    for nom, _definition in colonnes:
+        connexion.execute(
+            f"ALTER TABLE captures ADD COLUMN IF NOT EXISTS {nom} {definitions_postgres[nom]}"
+        )
+
 def lister_captures(database_url: Optional[str] = None) -> List[Capture]:
     # Lit les captures les plus recentes pour alimenter l'app mobile.
     url = database_url or DATABASE_URL
@@ -144,6 +190,11 @@ def lister_captures(database_url: Optional[str] = None) -> List[Capture]:
             analyse_statut,
             analyse_modele,
             analyse_detail,
+            repetitions,
+            intervalle_jours,
+            facteur_aisance,
+            prochaine_revision,
+            derniere_revision,
             created_at
         FROM captures
         ORDER BY created_at DESC, id DESC
@@ -180,8 +231,13 @@ def creer_capture(commande: CommandeCreationCapture, database_url: Optional[str]
             transcription_detail,
             analyse_statut,
             analyse_modele,
-            analyse_detail
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            analyse_detail,
+            repetitions,
+            intervalle_jours,
+            facteur_aisance,
+            prochaine_revision,
+            derniere_revision
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         url,
     )
@@ -203,6 +259,11 @@ def creer_capture(commande: CommandeCreationCapture, database_url: Optional[str]
             analyse_statut,
             analyse_modele,
             analyse_detail,
+            repetitions,
+            intervalle_jours,
+            facteur_aisance,
+            prochaine_revision,
+            derniere_revision,
             created_at
         FROM captures
         WHERE id = ?
@@ -226,6 +287,11 @@ def creer_capture(commande: CommandeCreationCapture, database_url: Optional[str]
         commande.pipeline_ia.analyse.statut if commande.pipeline_ia else "ok",
         commande.pipeline_ia.analyse.modele if commande.pipeline_ia else None,
         commande.pipeline_ia.analyse.detail if commande.pipeline_ia else None,
+        0,
+        0,
+        2.5,
+        None,
+        None,
     ]
 
     with connecter_base(url) as connexion:
@@ -257,8 +323,13 @@ def alimenter_donnees_demo(database_url: Optional[str] = None) -> None:
             transcription_detail,
             analyse_statut,
             analyse_modele,
-            analyse_detail
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            analyse_detail,
+            repetitions,
+            intervalle_jours,
+            facteur_aisance,
+            prochaine_revision,
+            derniere_revision
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         url,
     )
@@ -287,6 +358,11 @@ def alimenter_donnees_demo(database_url: Optional[str] = None) -> None:
                 "ok",
                 "llama3",
                 None,
+                0,
+                0,
+                2.5,
+                None,
+                None,
             ],
         )
         connexion.commit()
@@ -301,6 +377,9 @@ def ligne_vers_capture(ligne: Any) -> Capture:
     timestamp = ligne["created_at"]
     if timestamp is not None and not isinstance(timestamp, str):
         timestamp = timestamp.isoformat()
+
+    prochaine_revision = convertir_datetime_vers_iso(ligne["prochaine_revision"])
+    derniere_revision = convertir_datetime_vers_iso(ligne["derniere_revision"])
 
     return Capture(
         id=str(ligne["id"]),
@@ -327,6 +406,13 @@ def ligne_vers_capture(ligne: Any) -> Capture:
                 detail=ligne["analyse_detail"],
             ),
         ),
+        revision_srs=EtatRevision(
+            repetitions=ligne["repetitions"],
+            intervalle_jours=ligne["intervalle_jours"],
+            facteur_aisance=ligne["facteur_aisance"],
+            prochaine_revision=prochaine_revision,
+            derniere_revision=derniere_revision,
+        ),
     )
 
 
@@ -351,6 +437,11 @@ def lire_capture_par_id(identifiant: str, database_url: Optional[str] = None) ->
             analyse_statut,
             analyse_modele,
             analyse_detail,
+            repetitions,
+            intervalle_jours,
+            facteur_aisance,
+            prochaine_revision,
+            derniere_revision,
             created_at
         FROM captures
         WHERE id = ?
@@ -365,6 +456,115 @@ def lire_capture_par_id(identifiant: str, database_url: Optional[str] = None) ->
         return None
 
     return ligne_vers_capture(ligne)
+
+
+def noter_revision_capture(
+    identifiant: str,
+    qualite: int,
+    database_url: Optional[str] = None,
+    maintenant: Optional[datetime] = None,
+) -> Optional[Capture]:
+    url = database_url or DATABASE_URL
+    reference = maintenant or datetime.now(timezone.utc)
+    capture = lire_capture_par_id(identifiant, url)
+    if capture is None:
+        return None
+
+    etat_courant = capture.revision_srs or EtatRevision(
+        repetitions=0,
+        intervalle_jours=0,
+        facteur_aisance=2.5,
+    )
+    etat_calcule = calculer_revision_sm2(
+        qualite=qualite,
+        etat=EtatSRS(
+            repetitions=etat_courant.repetitions,
+            intervalle_jours=etat_courant.intervalle_jours,
+            facteur_aisance=etat_courant.facteur_aisance,
+            prochaine_revision=parse_datetime(etat_courant.prochaine_revision),
+        ),
+        maintenant=reference,
+    )
+
+    requete = adapter_requete(
+        """
+        UPDATE captures
+        SET repetitions = ?,
+            intervalle_jours = ?,
+            facteur_aisance = ?,
+            prochaine_revision = ?,
+            derniere_revision = ?
+        WHERE id = ?
+        """,
+        url,
+    )
+
+    with connecter_base(url) as connexion:
+        connexion.execute(
+            requete,
+            [
+                etat_calcule.repetitions,
+                etat_calcule.intervalle_jours,
+                etat_calcule.facteur_aisance,
+                serialiser_datetime(etat_calcule.prochaine_revision, url),
+                serialiser_datetime(reference, url),
+                identifiant,
+            ],
+        )
+        connexion.commit()
+
+    return lire_capture_par_id(identifiant, url)
+
+
+def lister_revisions_dues(
+    database_url: Optional[str] = None,
+    maintenant: Optional[datetime] = None,
+) -> List[Capture]:
+    url = database_url or DATABASE_URL
+    reference = maintenant or datetime.now(timezone.utc)
+
+    requete = adapter_requete(
+        """
+        SELECT
+            id,
+            phrase_originale,
+            traduction,
+            audio_url,
+            contexte_tags,
+            formalite,
+            latitude,
+            longitude,
+            langue,
+            transcription_statut,
+            transcription_modele,
+            transcription_detail,
+            analyse_statut,
+            analyse_modele,
+            analyse_detail,
+            repetitions,
+            intervalle_jours,
+            facteur_aisance,
+            prochaine_revision,
+            derniere_revision,
+            created_at
+        FROM captures
+        WHERE prochaine_revision IS NOT NULL
+        ORDER BY prochaine_revision ASC, id ASC
+        """,
+        url,
+    )
+
+    with connecter_base(url) as connexion:
+        lignes = connexion.execute(requete).fetchall()
+
+    captures = [ligne_vers_capture(ligne) for ligne in lignes]
+    return [
+        capture
+        for capture in captures
+        if capture.revision_srs
+        and capture.revision_srs.prochaine_revision
+        and parse_datetime(capture.revision_srs.prochaine_revision) <= reference
+    ]
 
 
 def verifier_sante_base(database_url: Optional[str] = None) -> bool:
@@ -383,3 +583,25 @@ def lire_premiere_valeur(ligne: Any):
     if isinstance(ligne, dict):
         return next(iter(ligne.values()))
     return ligne[0]
+
+
+def convertir_datetime_vers_iso(valeur: Any) -> Optional[str]:
+    if valeur is None:
+        return None
+    if isinstance(valeur, str):
+        return valeur
+    return valeur.isoformat()
+
+
+def parse_datetime(valeur: Optional[str]) -> Optional[datetime]:
+    if valeur is None:
+        return None
+    return datetime.fromisoformat(valeur)
+
+
+def serialiser_datetime(valeur: Optional[datetime], database_url: str) -> Optional[str | datetime]:
+    if valeur is None:
+        return None
+    if database_url.startswith("sqlite:///"):
+        return valeur.isoformat()
+    return valeur

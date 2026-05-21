@@ -16,17 +16,22 @@ try:
         alimenter_donnees_demo,
         creer_capture,
         initialiser_base,
+        lister_revisions_dues,
         lire_capture_par_id,
         lister_captures,
+        noter_revision_capture,
         verifier_sante_base,
     )
     from backend.models import (
         Capture,
+        CommandeNotationRevision,
         CommandeCreationCapture,
         PipelineIA,
         ReponseCaptures,
         ReponseCreationCapture,
         ReponsePreflight,
+        ReponseRevisionCapture,
+        ReponseRevisionsDue,
         ReponseSante,
         StatutEtapeIA,
     )
@@ -45,17 +50,22 @@ except ModuleNotFoundError:
         alimenter_donnees_demo,
         creer_capture,
         initialiser_base,
+        lister_revisions_dues,
         lire_capture_par_id,
         lister_captures,
+        noter_revision_capture,
         verifier_sante_base,
     )
     from models import (
         Capture,
+        CommandeNotationRevision,
         CommandeCreationCapture,
         PipelineIA,
         ReponseCaptures,
         ReponseCreationCapture,
         ReponsePreflight,
+        ReponseRevisionCapture,
+        ReponseRevisionsDue,
         ReponseSante,
         StatutEtapeIA,
     )
@@ -111,6 +121,7 @@ def accueil() -> dict:
         "sante": "/sante",
         "preflight": "/preflight",
         "captures": "/captures",
+        "revisions_due": "/revisions/due",
     }
 
 
@@ -168,6 +179,13 @@ def lire_capture(capture_id: str) -> Capture:
         logger.warning(f"Capture non trouvee: {capture_id}")
         raise HTTPException(status_code=404, detail=f"Capture {capture_id} non trouvee")
     return capture
+
+
+@app.get("/revisions/due", response_model=ReponseRevisionsDue, tags=["Revision"])
+def lire_revisions_dues() -> ReponseRevisionsDue:
+    logger.info("Recuperation des captures dues pour revision")
+    captures = lister_revisions_dues()
+    return ReponseRevisionsDue(total=len(captures), captures=captures)
 
 
 def resoudre_chemin_audio(url_audio: str) -> Path:
@@ -282,6 +300,22 @@ async def creer_captures(
         message="Le fichier audio recu a ete enregistre.",
         capture=capture,
         pipeline_ia=capture.pipeline_ia,
+    )
+
+
+@app.post("/captures/{capture_id}/review", response_model=ReponseRevisionCapture, tags=["Revision"])
+def noter_revision(capture_id: str, commande: CommandeNotationRevision) -> ReponseRevisionCapture:
+    logger.info(f"Notation revision capture={capture_id} qualite={commande.qualite}")
+    capture = noter_revision_capture(capture_id, commande.qualite)
+    if not capture:
+        logger.warning(f"Capture non trouvee pour revision: {capture_id}")
+        raise HTTPException(status_code=404, detail=f"Capture {capture_id} non trouvee")
+
+    return ReponseRevisionCapture(
+        status="success",
+        message="Revision enregistree.",
+        capture=capture,
+        revision_srs=capture.revision_srs,
     )
 
 
