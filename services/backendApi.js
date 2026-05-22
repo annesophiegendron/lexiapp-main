@@ -57,8 +57,49 @@ const normaliserCapture = capture => ({
   pipelineIa: normaliserPipelineIa(capture.pipeline_ia),
 });
 
-export const fetchCaptures = async () => {
-  const response = await fetch(`${BACKEND_BASE_URL}/captures`);
+const construireQueryCaptures = filters => {
+  const query = new URLSearchParams();
+
+  if (filters?.tag) {
+    query.set('tag', filters.tag);
+  }
+  if (filters?.formalite) {
+    query.set('formalite', filters.formalite);
+  }
+  if (typeof filters?.latitude === 'number') {
+    query.set('latitude', String(filters.latitude));
+  }
+  if (typeof filters?.longitude === 'number') {
+    query.set('longitude', String(filters.longitude));
+  }
+  if (typeof filters?.rayonKm === 'number') {
+    query.set('rayon_km', String(filters.rayonKm));
+  }
+
+  const suffix = query.toString();
+  return suffix ? `?${suffix}` : '';
+};
+
+const normaliserStats = payload => ({
+  totalCaptures: typeof payload?.total_captures === 'number' ? payload.total_captures : 0,
+  totalReviewedPhrases:
+    typeof payload?.total_phrases_revisees === 'number'
+      ? payload.total_phrases_revisees
+      : 0,
+  totalDueRevisions:
+    typeof payload?.total_revisions_dues === 'number' ? payload.total_revisions_dues : 0,
+  topTags: Array.isArray(payload?.tags_dominants)
+    ? payload.tags_dominants.map(item => ({
+        tag: item?.tag || '',
+        total: typeof item?.total === 'number' ? item.total : 0,
+      }))
+    : [],
+});
+
+export const fetchCaptures = async filters => {
+  const response = await fetch(
+    `${BACKEND_BASE_URL}/captures${construireQueryCaptures(filters)}`,
+  );
   if (!response.ok) {
     throw new Error(`Impossible de charger les captures (${response.status}).`);
   }
@@ -124,10 +165,22 @@ export const createCapture = async ({
   return normaliserCapture(payload.capture);
 };
 
+export const fetchRevisionStats = async () => {
+  const response = await fetch(`${BACKEND_BASE_URL}/stats`);
+  if (!response.ok) {
+    throw new Error(`Impossible de charger les statistiques (${response.status}).`);
+  }
+
+  const payload = await response.json();
+  return normaliserStats(payload);
+};
+
 export {
   BACKEND_BASE_URL,
+  construireQueryCaptures,
   normaliserCapture,
   normaliserPipelineIa,
   normaliserPreflight,
   normaliserSanteBackend,
+  normaliserStats,
 };

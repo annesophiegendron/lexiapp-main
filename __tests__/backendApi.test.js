@@ -1,7 +1,9 @@
 import {
+  construireQueryCaptures,
   normaliserCapture,
   normaliserPreflight,
   normaliserSanteBackend,
+  normaliserStats,
 } from '../services/backendApi';
 
 describe('backendApi normalizers', () => {
@@ -68,5 +70,31 @@ describe('backendApi normalizers', () => {
     expect(health.status).toBe('indisponible');
     expect(health.message).toBe('Backend indisponible.');
     expect(health.version).toBeNull();
+  });
+
+  it('construit une query string de filtres phase 3', () => {
+    expect(
+      construireQueryCaptures({
+        tag: 'voyage',
+        formalite: 'standard',
+        latitude: 48.8566,
+        longitude: 2.3522,
+        rayonKm: 8,
+      }),
+    ).toBe('?tag=voyage&formalite=standard&latitude=48.8566&longitude=2.3522&rayon_km=8');
+  });
+
+  it('normalise les statistiques de revision', () => {
+    const stats = normaliserStats({
+      total_captures: 12,
+      total_phrases_revisees: 5,
+      total_revisions_dues: 3,
+      tags_dominants: [{tag: 'voyage', total: 4}],
+    });
+
+    expect(stats.totalCaptures).toBe(12);
+    expect(stats.totalReviewedPhrases).toBe(5);
+    expect(stats.totalDueRevisions).toBe(3);
+    expect(stats.topTags[0].tag).toBe('voyage');
   });
 });

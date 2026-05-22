@@ -1,16 +1,18 @@
 import json
 import uuid
+from collections import Counter
 from datetime import datetime, timezone
+from math import asin, cos, radians, sin, sqrt
 from pathlib import Path
 from typing import Any, List, Optional
 
 try:
     from backend.config import DATABASE_URL
-    from backend.models import Capture, CommandeCreationCapture, EtatRevision, Geolocalisation, PipelineIA, StatutEtapeIA
+    from backend.models import Capture, CommandeCreationCapture, EtatRevision, Geolocalisation, PipelineIA, StatTag, StatutEtapeIA
     from backend.phase3 import EtatSRS, calculer_revision_sm2
 except ModuleNotFoundError:
     from config import DATABASE_URL
-    from models import Capture, CommandeCreationCapture, EtatRevision, Geolocalisation, PipelineIA, StatutEtapeIA
+    from models import Capture, CommandeCreationCapture, EtatRevision, Geolocalisation, PipelineIA, StatTag, StatutEtapeIA
     from phase3 import EtatSRS, calculer_revision_sm2
 
 
@@ -169,7 +171,14 @@ def garantir_colonnes_phase3(connexion, database_url: str) -> None:
             f"ALTER TABLE captures ADD COLUMN IF NOT EXISTS {nom} {definitions_postgres[nom]}"
         )
 
-def lister_captures(database_url: Optional[str] = None) -> List[Capture]:
+def lister_captures(
+    database_url: Optional[str] = None,
+    tag: Optional[str] = None,
+    formalite: Optional[str] = None,
+    latitude: Optional[float] = None,
+    longitude: Optional[float] = None,
+    rayon_km: Optional[float] = None,
+) -> List[Capture]:
     # Lit les captures les plus recentes pour alimenter l'app mobile.
     url = database_url or DATABASE_URL
     requete = adapter_requete(
@@ -205,7 +214,15 @@ def lister_captures(database_url: Optional[str] = None) -> List[Capture]:
     with connecter_base(url) as connexion:
         lignes = connexion.execute(requete).fetchall()
 
-    return [ligne_vers_capture(ligne) for ligne in lignes]
+    captures = [ligne_vers_capture(ligne) for ligne in lignes]
+    return filtrer_captures(
+        captures,
+        tag=tag,
+        formalite=formalite,
+        latitude=latitude,
+        longitude=longitude,
+        rayon_km=rayon_km,
+    )
 
 
 def creer_capture(commande: CommandeCreationCapture, database_url: Optional[str] = None) -> Capture:
@@ -567,6 +584,27 @@ def lister_revisions_dues(
     ]
 
 
+def calculer_stats_captures(database_url: Optional[str] = None) -> dict:
+    captures = lister_captures(database_url=database_url)
+    revisions_dues = lister_revisions_dues(database_url=database_url)
+    compteur_tags = Counter()
+
+    for capture in captures:
+        compteur_tags.update(tag.lower() for tag in capture.contexte_tags if tag)
+
+    return {
+        "total_captures": len(captures),
+        "total_phrases_revisees": sum(
+            1 for capture in captures if capture.revision_srs and capture.revision_srs.derniere_revision
+        ),
+        "total_revisions_dues": len(revisions_dues),
+        "tags_dominants": [
+            StatTag(tag=tag, total=total)
+            for tag, total in compteur_tags.most_common(5)
+        ],
+    }
+
+
 def verifier_sante_base(database_url: Optional[str] = None) -> bool:
     # Verifie que la base de donnees est accessible et fonctionnelle.
     try:
@@ -605,3 +643,56 @@ def serialiser_datetime(valeur: Optional[datetime], database_url: str) -> Option
     if database_url.startswith("sqlite:///"):
         return valeur.isoformat()
     return valeur
+
+
+def filtrer_captures(
+    captures: List[Capture],
+    tag: Optional[str] = None,
+    formalite: Optional[str] = None,
+    latitude: Optional[float] = None,
+    longitude: Optional[float] = None,
+    rayon_km: Optional[float] = None,
+) -> List[Capture]:
+    captures_filtrees = captures
+
+    if tag:
+        tag_normalise = tag.strip().lower()
+        captures_filtrees = [
+            capture
+            for capture in captures_filtrees
+            if any(tag_capture.lower() == tag_normalise for tag_capture in capture.contexte_tags)
+        ]
+
+    if formalite:
+        formalite_normalisee = formalite.strip().lower()
+        captures_filtrees = [
+            capture
+            for capture in captures_filtrees
+            if capture.formalite.lower() == formalite_normalisee
+        ]
+
+    if latitude is not None and longitude is not None:
+        rayon = rayon_km if rayon_km is not None else 10.0
+        captures_filtrees = [
+            capture
+            for capture in captures_filtrees
+            if distance_km(
+                latitude,
+                longitude,
+                capture.geolocalisation.latitude,
+                capture.geolocalisation.longitude,
+            ) <= rayon
+        ]
+
+    return captures_filtrees
+
+
+def distance_km(latitude_1: float, longitude_1: float, latitude_2: float, longitude_2: float) -> float:
+    rayon_terre_km = 6371.0
+    delta_lat = radians(latitude_2 - latitude_1)
+    delta_lon = radians(longitude_2 - longitude_1)
+    lat_1 = radians(latitude_1)
+    lat_2 = radians(latitude_2)
+
+    a = sin(delta_lat / 2) ** 2 + cos(lat_1) * cos(lat_2) * sin(delta_lon / 2) ** 2
+    return 2 * rayon_terre_km * asin(sqrt(a))

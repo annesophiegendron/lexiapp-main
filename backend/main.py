@@ -14,6 +14,7 @@ try:
     from backend.config import OLLAMA_MODEL, WHISPER_MODEL
     from backend.database import (
         alimenter_donnees_demo,
+        calculer_stats_captures,
         creer_capture,
         initialiser_base,
         lister_revisions_dues,
@@ -33,6 +34,7 @@ try:
         ReponseRevisionCapture,
         ReponseRevisionsDue,
         ReponseSante,
+        ReponseStats,
         StatutEtapeIA,
     )
     from backend.ollama_client import analyser_phrase
@@ -48,6 +50,7 @@ except ModuleNotFoundError:
     from config import OLLAMA_MODEL, WHISPER_MODEL
     from database import (
         alimenter_donnees_demo,
+        calculer_stats_captures,
         creer_capture,
         initialiser_base,
         lister_revisions_dues,
@@ -67,6 +70,7 @@ except ModuleNotFoundError:
         ReponseRevisionCapture,
         ReponseRevisionsDue,
         ReponseSante,
+        ReponseStats,
         StatutEtapeIA,
     )
     from ollama_client import analyser_phrase
@@ -122,6 +126,7 @@ def accueil() -> dict:
         "preflight": "/preflight",
         "captures": "/captures",
         "revisions_due": "/revisions/due",
+        "stats": "/stats",
     }
 
 
@@ -164,9 +169,34 @@ def verification_preflight() -> ReponsePreflight:
 
 
 @app.get("/captures", response_model=ReponseCaptures, tags=["Captures"])
-def lire_captures() -> ReponseCaptures:
-    logger.info("Recuperation de la liste des captures")
-    captures = lister_captures()
+def lire_captures(
+    tag: Optional[str] = None,
+    formalite: Optional[str] = None,
+    latitude: Optional[float] = None,
+    longitude: Optional[float] = None,
+    rayon_km: Optional[float] = None,
+) -> ReponseCaptures:
+    logger.info(
+        "Recuperation de la liste des captures "
+        f"tag={tag} formalite={formalite} latitude={latitude} longitude={longitude} rayon_km={rayon_km}"
+    )
+    if (latitude is None) != (longitude is None):
+        raise HTTPException(
+            status_code=400,
+            detail="Les filtres de zone exigent latitude et longitude ensemble.",
+        )
+    if rayon_km is not None and rayon_km <= 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Le rayon_km doit etre strictement positif.",
+        )
+    captures = lister_captures(
+        tag=tag,
+        formalite=formalite,
+        latitude=latitude,
+        longitude=longitude,
+        rayon_km=rayon_km,
+    )
     logger.info(f"Retour de {len(captures)} captures")
     return ReponseCaptures(total=len(captures), captures=captures)
 
@@ -186,6 +216,12 @@ def lire_revisions_dues() -> ReponseRevisionsDue:
     logger.info("Recuperation des captures dues pour revision")
     captures = lister_revisions_dues()
     return ReponseRevisionsDue(total=len(captures), captures=captures)
+
+
+@app.get("/stats", response_model=ReponseStats, tags=["Stats"])
+def lire_stats() -> ReponseStats:
+    logger.info("Recuperation des statistiques phase 3")
+    return ReponseStats(**calculer_stats_captures())
 
 
 def resoudre_chemin_audio(url_audio: str) -> Path:

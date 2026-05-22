@@ -19,17 +19,19 @@ Cela suffit pour commencer la logique metier de revision.
 - l'algorithme est maintenant branche au stockage des captures
 - une premiere route API de notation est exposee: `POST /captures/{id}/review`
 - une premiere route API de consultation est exposee: `GET /revisions/due`
+- `GET /captures` accepte maintenant des filtres simples par `tag`, `formalite` et zone (`latitude`, `longitude`, `rayon_km`)
+- une premiere route de stats est exposee: `GET /stats`
 
 ## Etapes recommandees
 
-1. Ajouter des filtres backend sur les captures:
-   - par tag
-   - par zone ou lieu
-   - par formalite
-2. Ajouter une premiere route de stats:
-   - nombre de captures
-   - nombre de phrases revisees
-   - repartition des tags dominants
+1. Brancher ces filtres et stats dans le frontend:
+   - recherche par tag
+   - recherche par formalite
+   - vue locale par zone
+2. Ajouter ensuite des stats plus produit si besoin:
+   - progression par langue
+   - repartition des formalites
+   - historique de revisions
 
 ## Ordre de travail conseille
 

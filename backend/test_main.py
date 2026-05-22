@@ -22,6 +22,7 @@ class MainApiTests(unittest.TestCase):
         cls.original_initialiser_base = main.initialiser_base
         cls.original_alimenter_donnees_demo = main.alimenter_donnees_demo
         cls.original_lister_captures = main.lister_captures
+        cls.original_calculer_stats_captures = main.calculer_stats_captures
         cls.original_creer_capture = main.creer_capture
         cls.original_lire_capture_par_id = main.lire_capture_par_id
         cls.original_lister_revisions_dues = main.lister_revisions_dues
@@ -37,7 +38,8 @@ class MainApiTests(unittest.TestCase):
 
         main.initialiser_base = lambda: database.initialiser_base(cls.database_url)
         main.alimenter_donnees_demo = lambda: database.alimenter_donnees_demo(cls.database_url)
-        main.lister_captures = lambda: database.lister_captures(cls.database_url)
+        main.lister_captures = lambda **kwargs: database.lister_captures(cls.database_url, **kwargs)
+        main.calculer_stats_captures = lambda: database.calculer_stats_captures(cls.database_url)
         main.creer_capture = lambda commande: database.creer_capture(commande, cls.database_url)
         main.lire_capture_par_id = lambda capture_id: database.lire_capture_par_id(capture_id, cls.database_url)
         main.lister_revisions_dues = lambda: database.lister_revisions_dues(cls.database_url)
@@ -94,6 +96,7 @@ class MainApiTests(unittest.TestCase):
         main.initialiser_base = cls.original_initialiser_base
         main.alimenter_donnees_demo = cls.original_alimenter_donnees_demo
         main.lister_captures = cls.original_lister_captures
+        main.calculer_stats_captures = cls.original_calculer_stats_captures
         main.creer_capture = cls.original_creer_capture
         main.lire_capture_par_id = cls.original_lire_capture_par_id
         main.lister_revisions_dues = cls.original_lister_revisions_dues
@@ -227,6 +230,7 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["preflight"], "/preflight")
         self.assertEqual(payload["captures"], "/captures")
         self.assertEqual(payload["revisions_due"], "/revisions/due")
+        self.assertEqual(payload["stats"], "/stats")
 
     def test_get_captures_route(self):
         response = self.request("GET", "/captures")
@@ -390,6 +394,90 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["total"], 0)
         self.assertEqual(payload["captures"], [])
 
+    def test_get_captures_route_filters_by_tag(self):
+        database.creer_capture(
+            database.CommandeCreationCapture(
+                phrase_originale="bonjour au cafe",
+                traduction="hello at the cafe",
+                audio_url="/stockage/audios/cafe.wav",
+                contexte_tags=["cafe", "politesse"],
+                formalite="familier",
+                latitude=48.857,
+                longitude=2.351,
+                langue="fr",
+                pipeline_ia=database.PipelineIA(
+                    transcription=database.StatutEtapeIA(statut="ok", modele="base"),
+                    analyse=database.StatutEtapeIA(statut="ok", modele="llama3"),
+                ),
+            ),
+            self.__class__.database_url,
+        )
+
+        response = self.request("GET", "/captures?tag=cafe")
+        payload = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload["total"], 1)
+        self.assertEqual(payload["captures"][0]["contexte_tags"], ["cafe", "politesse"])
+
+    def test_get_captures_route_filters_by_formalite(self):
+        database.creer_capture(
+            database.CommandeCreationCapture(
+                phrase_originale="excuse me",
+                traduction="excusez-moi",
+                audio_url="/stockage/audios/poli.wav",
+                contexte_tags=["politesse"],
+                formalite="soutenu",
+                latitude=48.858,
+                longitude=2.35,
+                langue="en",
+                pipeline_ia=database.PipelineIA(
+                    transcription=database.StatutEtapeIA(statut="ok", modele="base"),
+                    analyse=database.StatutEtapeIA(statut="ok", modele="llama3"),
+                ),
+            ),
+            self.__class__.database_url,
+        )
+
+        response = self.request("GET", "/captures?formalite=soutenu")
+        payload = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload["total"], 1)
+        self.assertEqual(payload["captures"][0]["formalite"], "soutenu")
+
+    def test_get_captures_route_filters_by_zone(self):
+        database.creer_capture(
+            database.CommandeCreationCapture(
+                phrase_originale="loin d'ici",
+                traduction="far away",
+                audio_url="/stockage/audios/loin.wav",
+                contexte_tags=["voyage"],
+                formalite="standard",
+                latitude=45.764,
+                longitude=4.8357,
+                langue="fr",
+                pipeline_ia=database.PipelineIA(
+                    transcription=database.StatutEtapeIA(statut="ok", modele="base"),
+                    analyse=database.StatutEtapeIA(statut="ok", modele="llama3"),
+                ),
+            ),
+            self.__class__.database_url,
+        )
+
+        response = self.request("GET", "/captures?latitude=48.8566&longitude=2.3522&rayon_km=5")
+        payload = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload["total"], 1)
+        self.assertEqual(payload["captures"][0]["id"], "00000000-0000-0000-0000-000000000001")
+
+    def test_get_captures_route_rejects_partial_zone_filter(self):
+        response = self.request("GET", "/captures?latitude=48.8566")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("latitude et longitude", response.json()["detail"])
+
     def test_resoudre_chemin_audio_uses_configured_storage_directory(self):
         chemin = main.resoudre_chemin_audio("/stockage/audios/test.wav")
         self.assertEqual(chemin, self.__class__.stockage_test / "test.wav")
@@ -447,6 +535,53 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["total"], 1)
         self.assertEqual(payload["captures"][0]["id"], "00000000-0000-0000-0000-000000000001")
         self.assertEqual(payload["captures"][0]["revision_srs"]["repetitions"], 1)
+
+    def test_get_stats_route_returns_phase3_summary(self):
+        database.creer_capture(
+            database.CommandeCreationCapture(
+                phrase_originale="see you soon",
+                traduction="a bientot",
+                audio_url="/stockage/audios/soon.wav",
+                contexte_tags=["voyage", "salutation"],
+                formalite="standard",
+                latitude=48.8567,
+                longitude=2.3523,
+                langue="en",
+                pipeline_ia=database.PipelineIA(
+                    transcription=database.StatutEtapeIA(statut="ok", modele="base"),
+                    analyse=database.StatutEtapeIA(statut="ok", modele="llama3"),
+                ),
+            ),
+            self.__class__.database_url,
+        )
+        database.noter_revision_capture(
+            "00000000-0000-0000-0000-000000000001",
+            5,
+            self.__class__.database_url,
+        )
+        with database.connecter_base(self.__class__.database_url) as connexion:
+            connexion.execute(
+                database.adapter_requete(
+                    "UPDATE captures SET prochaine_revision = ?, derniere_revision = ? WHERE id = ?",
+                    self.__class__.database_url,
+                ),
+                [
+                    "2026-05-01T09:00:00+00:00",
+                    "2026-04-30T09:00:00+00:00",
+                    "00000000-0000-0000-0000-000000000001",
+                ],
+            )
+            connexion.commit()
+
+        response = self.request("GET", "/stats")
+        payload = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload["total_captures"], 2)
+        self.assertEqual(payload["total_phrases_revisees"], 1)
+        self.assertEqual(payload["total_revisions_dues"], 1)
+        self.assertEqual(payload["tags_dominants"][0]["tag"], "voyage")
+        self.assertEqual(payload["tags_dominants"][0]["total"], 2)
 
     def test_post_review_rejects_invalid_quality(self):
         response = self.request(

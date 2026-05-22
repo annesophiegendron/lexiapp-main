@@ -87,6 +87,18 @@ class ReponseRevisionsDue(BaseModel):
     captures: List[Capture]
 
 
+class StatTag(BaseModel):
+    tag: str
+    total: int
+
+
+class ReponseStats(BaseModel):
+    total_captures: int
+    total_phrases_revisees: int
+    total_revisions_dues: int
+    tags_dominants: List[StatTag]
+
+
 class CommandeCreationCapture(BaseModel):
     phrase_originale: str
     traduction: Optional[str] = None

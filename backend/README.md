@@ -64,6 +64,7 @@ API disponible sur `http://localhost:8000`
 - `POST /captures` : upload audio + geolocalisation + langue
 - `POST /captures/{capture_id}/review` : notation d'une revision avec calcul SM-2
 - `GET /revisions/due` : liste des captures a reviser
+- `GET /stats` : statistiques simples de revision et tags
 - `GET /stockage/audios/{nom_fichier}` : acces aux audios stockes localement
 
 Note: la route `GET /stockage/audios/{nom_fichier}` ne sert que le stockage `local`. Avec `supabase`, `audio_url` est deja une URL absolue vers le bucket.
@@ -175,6 +176,29 @@ Exemple de payload de notation:
   "qualite": 4
 }
 ```
+
+## Filtres backend phase 3
+
+`GET /captures` reste compatible avec l'existant, mais accepte maintenant des filtres simples:
+
+- `tag` pour filtrer sur un tag exact
+- `formalite` pour filtrer sur `familier`, `standard` ou `soutenu`
+- `latitude`, `longitude` et `rayon_km` pour restreindre les captures a une zone
+
+Exemple:
+
+```bash
+curl "http://localhost:8000/captures?tag=voyage&formalite=standard&latitude=48.8566&longitude=2.3522&rayon_km=10"
+```
+
+## Stats phase 3
+
+`GET /stats` retourne un resume simple de l'activite de revision:
+
+- `total_captures`
+- `total_phrases_revisees`
+- `total_revisions_dues`
+- `tags_dominants`
 
 ## Reponses des captures
 
