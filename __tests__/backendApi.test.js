@@ -32,6 +32,8 @@ describe('backendApi normalizers', () => {
     expect(capture.pipelineIa.transcription.modele).toBe('base');
     expect(capture.pipelineIa.analyse.statut).toBe('fallback');
     expect(capture.pipelineIa.analyse.detail).toBe('ollama indisponible');
+    expect(capture.reviewSrs.repetitions).toBe(0);
+    expect(capture.reviewSrs.nextReviewAt).toBeNull();
   });
 
   it('conserve une URL audio absolue pour Supabase Storage', () => {
@@ -89,12 +91,18 @@ describe('backendApi normalizers', () => {
       total_captures: 12,
       total_phrases_revisees: 5,
       total_revisions_dues: 3,
+      total_revisions_a_venir: 7,
       tags_dominants: [{tag: 'voyage', total: 4}],
+      repartition_langues: [{cle: 'fr', total: 6}],
+      repartition_formalites: [{cle: 'standard', total: 8}],
     });
 
     expect(stats.totalCaptures).toBe(12);
     expect(stats.totalReviewedPhrases).toBe(5);
     expect(stats.totalDueRevisions).toBe(3);
+    expect(stats.totalScheduledRevisions).toBe(7);
     expect(stats.topTags[0].tag).toBe('voyage');
+    expect(stats.languageBreakdown[0].key).toBe('fr');
+    expect(stats.formalityBreakdown[0].key).toBe('standard');
   });
 });

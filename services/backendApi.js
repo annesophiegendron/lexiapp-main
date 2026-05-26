@@ -55,6 +55,15 @@ const normaliserCapture = capture => ({
   language: capture.langue || 'auto',
   addedDate: capture.timestamp || new Date().toISOString(),
   pipelineIa: normaliserPipelineIa(capture.pipeline_ia),
+  reviewSrs: {
+    repetitions: capture.revision_srs?.repetitions || 0,
+    intervalDays: capture.revision_srs?.intervalle_jours || 0,
+    easeFactor: typeof capture.revision_srs?.facteur_aisance === 'number'
+      ? capture.revision_srs.facteur_aisance
+      : 2.5,
+    nextReviewAt: capture.revision_srs?.prochaine_revision || null,
+    lastReviewAt: capture.revision_srs?.derniere_revision || null,
+  },
 });
 
 const construireQueryCaptures = filters => {
@@ -88,9 +97,23 @@ const normaliserStats = payload => ({
       : 0,
   totalDueRevisions:
     typeof payload?.total_revisions_dues === 'number' ? payload.total_revisions_dues : 0,
+  totalScheduledRevisions:
+    typeof payload?.total_revisions_a_venir === 'number' ? payload.total_revisions_a_venir : 0,
   topTags: Array.isArray(payload?.tags_dominants)
     ? payload.tags_dominants.map(item => ({
         tag: item?.tag || '',
+        total: typeof item?.total === 'number' ? item.total : 0,
+      }))
+    : [],
+  languageBreakdown: Array.isArray(payload?.repartition_langues)
+    ? payload.repartition_langues.map(item => ({
+        key: item?.cle || '',
+        total: typeof item?.total === 'number' ? item.total : 0,
+      }))
+    : [],
+  formalityBreakdown: Array.isArray(payload?.repartition_formalites)
+    ? payload.repartition_formalites.map(item => ({
+        key: item?.cle || '',
         total: typeof item?.total === 'number' ? item.total : 0,
       }))
     : [],
@@ -173,6 +196,39 @@ export const fetchRevisionStats = async () => {
 
   const payload = await response.json();
   return normaliserStats(payload);
+};
+
+export const fetchDueRevisions = async () => {
+  const response = await fetch(`${BACKEND_BASE_URL}/revisions/due`);
+  if (!response.ok) {
+    throw new Error(`Impossible de charger les revisions dues (${response.status}).`);
+  }
+
+  const payload = await response.json();
+  return Array.isArray(payload.captures)
+    ? payload.captures.map(normaliserCapture)
+    : [];
+};
+
+export const submitCaptureReview = async (captureId, quality) => {
+  const response = await fetch(`${BACKEND_BASE_URL}/captures/${captureId}/review`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({qualite: quality}),
+  });
+
+  const payload = await response.json();
+  if (!response.ok) {
+    const detail =
+      typeof payload?.detail === 'string'
+        ? payload.detail
+        : `Erreur backend (${response.status}).`;
+    throw new Error(detail);
+  }
+
+  return normaliserCapture(payload.capture);
 };
 
 export {

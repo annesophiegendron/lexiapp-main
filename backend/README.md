@@ -198,7 +198,10 @@ curl "http://localhost:8000/captures?tag=voyage&formalite=standard&latitude=48.8
 - `total_captures`
 - `total_phrases_revisees`
 - `total_revisions_dues`
+- `total_revisions_a_venir`
 - `tags_dominants`
+- `repartition_langues`
+- `repartition_formalites`
 
 ## Reponses des captures
 

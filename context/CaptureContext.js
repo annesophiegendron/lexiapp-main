@@ -2,9 +2,12 @@ import React, {createContext, useCallback, useContext, useEffect, useMemo, useSt
 
 import {
   createCapture,
+  fetchDueRevisions,
+  fetchRevisionStats,
   fetchBackendHealth,
   fetchCaptures,
   fetchPreflight,
+  submitCaptureReview,
 } from '../services/backendApi';
 
 const CaptureContext = createContext(undefined);
@@ -13,7 +16,18 @@ export const CaptureProvider = ({children}) => {
   const [captures, setCaptures] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRefreshingRevisions, setIsRefreshingRevisions] = useState(false);
   const [error, setError] = useState('');
+  const [revisionStats, setRevisionStats] = useState({
+    totalCaptures: 0,
+    totalReviewedPhrases: 0,
+    totalDueRevisions: 0,
+    totalScheduledRevisions: 0,
+    topTags: [],
+    languageBreakdown: [],
+    formalityBreakdown: [],
+  });
+  const [dueRevisions, setDueRevisions] = useState([]);
   const [backendStatus, setBackendStatus] = useState({
     health: {
       status: 'indisponible',
@@ -82,10 +96,34 @@ export const CaptureProvider = ({children}) => {
     }
   }, []);
 
+  const refreshRevisionData = useCallback(async () => {
+    setIsRefreshingRevisions(true);
+    setError('');
+
+    try {
+      const [nextStats, nextDueRevisions] = await Promise.all([
+        fetchRevisionStats(),
+        fetchDueRevisions(),
+      ]);
+      setRevisionStats(nextStats);
+      setDueRevisions(nextDueRevisions);
+      return {stats: nextStats, dueRevisions: nextDueRevisions};
+    } catch (refreshError) {
+      setError(refreshError.message);
+      return {
+        stats: null,
+        dueRevisions: [],
+      };
+    } finally {
+      setIsRefreshingRevisions(false);
+    }
+  }, []);
+
   useEffect(() => {
     refreshCaptures();
     refreshBackendStatus();
-  }, [refreshBackendStatus, refreshCaptures]);
+    refreshRevisionData();
+  }, [refreshBackendStatus, refreshCaptures, refreshRevisionData]);
 
   const uploadCapture = useCallback(async captureInput => {
     setIsSubmitting(true);
@@ -95,6 +133,7 @@ export const CaptureProvider = ({children}) => {
       const capture = await createCapture(captureInput);
       setCaptures(previous => [capture, ...previous]);
       await refreshBackendStatus();
+      await refreshRevisionData();
       return capture;
     } catch (uploadError) {
       setError(uploadError.message);
@@ -102,27 +141,59 @@ export const CaptureProvider = ({children}) => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [refreshBackendStatus]);
+  }, [refreshBackendStatus, refreshRevisionData]);
+
+  const reviewCapture = useCallback(async (captureId, quality) => {
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      const updatedCapture = await submitCaptureReview(captureId, quality);
+      setCaptures(previous =>
+        previous.map(capture => (capture.id === captureId ? updatedCapture : capture)),
+      );
+      setDueRevisions(previous =>
+        previous.filter(capture => capture.id !== captureId),
+      );
+      await refreshRevisionData();
+      return updatedCapture;
+    } catch (reviewError) {
+      setError(reviewError.message);
+      throw reviewError;
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [refreshRevisionData]);
 
   const value = useMemo(
     () => ({
       captures,
+      dueRevisions,
       isLoading,
       isSubmitting,
+      isRefreshingRevisions,
       error,
       backendStatus,
+      revisionStats,
       refreshBackendStatus,
       refreshCaptures,
+      refreshRevisionData,
+      reviewCapture,
       uploadCapture,
     }),
     [
       backendStatus,
       captures,
+      dueRevisions,
       error,
       isLoading,
       isSubmitting,
+      isRefreshingRevisions,
+      refreshRevisionData,
       refreshBackendStatus,
       refreshCaptures,
+      reviewCapture,
+      revisionStats,
       uploadCapture,
     ],
   );

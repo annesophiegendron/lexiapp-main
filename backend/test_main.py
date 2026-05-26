@@ -580,8 +580,18 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["total_captures"], 2)
         self.assertEqual(payload["total_phrases_revisees"], 1)
         self.assertEqual(payload["total_revisions_dues"], 1)
+        self.assertEqual(payload["total_revisions_a_venir"], 1)
         self.assertEqual(payload["tags_dominants"][0]["tag"], "voyage")
         self.assertEqual(payload["tags_dominants"][0]["total"], 2)
+        repartition_langues = {
+            item["cle"]: item["total"] for item in payload["repartition_langues"]
+        }
+        repartition_formalites = {
+            item["cle"]: item["total"] for item in payload["repartition_formalites"]
+        }
+        self.assertEqual(repartition_langues["fr"], 1)
+        self.assertEqual(repartition_langues["en"], 1)
+        self.assertEqual(repartition_formalites["standard"], 2)
 
     def test_post_review_rejects_invalid_quality(self):
         response = self.request(

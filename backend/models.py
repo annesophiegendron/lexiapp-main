@@ -92,11 +92,19 @@ class StatTag(BaseModel):
     total: int
 
 
+class StatRepartition(BaseModel):
+    cle: str
+    total: int
+
+
 class ReponseStats(BaseModel):
     total_captures: int
     total_phrases_revisees: int
     total_revisions_dues: int
+    total_revisions_a_venir: int
     tags_dominants: List[StatTag]
+    repartition_langues: List[StatRepartition]
+    repartition_formalites: List[StatRepartition]
 
 
 class CommandeCreationCapture(BaseModel):

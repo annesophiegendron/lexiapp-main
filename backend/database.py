@@ -8,11 +8,11 @@ from typing import Any, List, Optional
 
 try:
     from backend.config import DATABASE_URL
-    from backend.models import Capture, CommandeCreationCapture, EtatRevision, Geolocalisation, PipelineIA, StatTag, StatutEtapeIA
+    from backend.models import Capture, CommandeCreationCapture, EtatRevision, Geolocalisation, PipelineIA, StatRepartition, StatTag, StatutEtapeIA
     from backend.phase3 import EtatSRS, calculer_revision_sm2
 except ModuleNotFoundError:
     from config import DATABASE_URL
-    from models import Capture, CommandeCreationCapture, EtatRevision, Geolocalisation, PipelineIA, StatTag, StatutEtapeIA
+    from models import Capture, CommandeCreationCapture, EtatRevision, Geolocalisation, PipelineIA, StatRepartition, StatTag, StatutEtapeIA
     from phase3 import EtatSRS, calculer_revision_sm2
 
 
@@ -588,9 +588,24 @@ def calculer_stats_captures(database_url: Optional[str] = None) -> dict:
     captures = lister_captures(database_url=database_url)
     revisions_dues = lister_revisions_dues(database_url=database_url)
     compteur_tags = Counter()
+    compteur_langues = Counter()
+    compteur_formalites = Counter()
+    total_revisions_a_venir = 0
 
     for capture in captures:
         compteur_tags.update(tag.lower() for tag in capture.contexte_tags if tag)
+        compteur_langues.update(
+            [capture.langue.strip().lower()]
+            if capture.langue and capture.langue.strip()
+            else ["inconnue"]
+        )
+        compteur_formalites.update(
+            [capture.formalite.strip().lower()]
+            if capture.formalite and capture.formalite.strip()
+            else ["inconnue"]
+        )
+        if capture.revision_srs and capture.revision_srs.prochaine_revision:
+            total_revisions_a_venir += 1
 
     return {
         "total_captures": len(captures),
@@ -598,9 +613,18 @@ def calculer_stats_captures(database_url: Optional[str] = None) -> dict:
             1 for capture in captures if capture.revision_srs and capture.revision_srs.derniere_revision
         ),
         "total_revisions_dues": len(revisions_dues),
+        "total_revisions_a_venir": total_revisions_a_venir,
         "tags_dominants": [
             StatTag(tag=tag, total=total)
             for tag, total in compteur_tags.most_common(5)
+        ],
+        "repartition_langues": [
+            StatRepartition(cle=langue, total=total)
+            for langue, total in compteur_langues.most_common()
+        ],
+        "repartition_formalites": [
+            StatRepartition(cle=formalite, total=total)
+            for formalite, total in compteur_formalites.most_common()
         ],
     }
 
