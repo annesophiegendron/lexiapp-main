@@ -1,4 +1,4 @@
-import React, {createContext, useCallback, useContext, useEffect, useMemo, useState} from 'react';
+import React, {createContext, useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react';
 
 import {
   createCapture,
@@ -14,6 +14,11 @@ const CaptureContext = createContext(undefined);
 
 export const CaptureProvider = ({children}) => {
   const [captures, setCaptures] = useState([]);
+  const [captureFilters, setCaptureFilters] = useState({
+    tag: '',
+    formalite: '',
+  });
+  const captureFiltersRef = useRef(captureFilters);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRefreshingRevisions, setIsRefreshingRevisions] = useState(false);
@@ -80,12 +85,16 @@ export const CaptureProvider = ({children}) => {
     }
   }, []);
 
-  const refreshCaptures = useCallback(async () => {
+  useEffect(() => {
+    captureFiltersRef.current = captureFilters;
+  }, [captureFilters]);
+
+  const refreshCaptures = useCallback(async filtersOverride => {
     setIsLoading(true);
     setError('');
 
     try {
-      const nextCaptures = await fetchCaptures();
+      const nextCaptures = await fetchCaptures(filtersOverride || captureFiltersRef.current);
       setCaptures(nextCaptures);
       return nextCaptures;
     } catch (refreshError) {
@@ -143,6 +152,21 @@ export const CaptureProvider = ({children}) => {
     }
   }, [refreshBackendStatus, refreshRevisionData]);
 
+  const applyCaptureFilters = useCallback(async nextFilters => {
+    const normalizedFilters = {
+      tag: nextFilters?.tag?.trim() || '',
+      formalite: nextFilters?.formalite?.trim() || '',
+    };
+    setCaptureFilters(normalizedFilters);
+    return refreshCaptures(normalizedFilters);
+  }, [refreshCaptures]);
+
+  const resetCaptureFilters = useCallback(async () => {
+    const emptyFilters = {tag: '', formalite: ''};
+    setCaptureFilters(emptyFilters);
+    return refreshCaptures(emptyFilters);
+  }, [refreshCaptures]);
+
   const reviewCapture = useCallback(async (captureId, quality) => {
     setIsSubmitting(true);
     setError('');
@@ -168,6 +192,7 @@ export const CaptureProvider = ({children}) => {
   const value = useMemo(
     () => ({
       captures,
+      captureFilters,
       dueRevisions,
       isLoading,
       isSubmitting,
@@ -178,11 +203,15 @@ export const CaptureProvider = ({children}) => {
       refreshBackendStatus,
       refreshCaptures,
       refreshRevisionData,
+      applyCaptureFilters,
+      resetCaptureFilters,
       reviewCapture,
       uploadCapture,
     }),
     [
+      applyCaptureFilters,
       backendStatus,
+      captureFilters,
       captures,
       dueRevisions,
       error,
@@ -190,6 +219,7 @@ export const CaptureProvider = ({children}) => {
       isSubmitting,
       isRefreshingRevisions,
       refreshRevisionData,
+      resetCaptureFilters,
       refreshBackendStatus,
       refreshCaptures,
       reviewCapture,

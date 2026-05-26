@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -18,6 +19,8 @@ const REVIEW_ACTIONS = [
   {label: 'Good', quality: 4, icon: 'checkmark-circle-outline'},
   {label: 'Easy', quality: 5, icon: 'rocket-outline'},
 ];
+
+const FORMALITY_OPTIONS = ['', 'familier', 'standard', 'soutenu'];
 
 const formatRelativeReview = isoDate => {
   if (!isoDate) {
@@ -40,14 +43,24 @@ const formatRelativeReview = isoDate => {
 const DashboardScreen = () => {
   const {isDarkMode} = useTheme();
   const {
+    applyCaptureFilters,
+    captureFilters,
+    captures,
     dueRevisions,
     error,
+    isLoading,
     isRefreshingRevisions,
     isSubmitting,
     refreshRevisionData,
+    resetCaptureFilters,
     reviewCapture,
     revisionStats,
   } = useCaptures();
+  const [tagInput, setTagInput] = useState('');
+
+  useEffect(() => {
+    setTagInput(captureFilters.tag);
+  }, [captureFilters.tag]);
 
   const surface = isDarkMode ? '#1b1f1d' : '#f4f1e8';
   const card = isDarkMode ? '#232826' : '#fffdf6';
@@ -66,7 +79,7 @@ const DashboardScreen = () => {
             <Text style={[styles.eyebrow, {color: accent}]}>PHASE 3</Text>
             <Text style={[styles.title, {color: text}]}>Revision cockpit</Text>
             <Text style={[styles.subtitle, {color: muted}]}>
-              Follow due reviews, tag density, languages and formality distribution from backend captures.
+              Follow due reviews, filter captures and inspect backend learning signals.
             </Text>
           </View>
           <TouchableOpacity
@@ -118,6 +131,101 @@ const DashboardScreen = () => {
       </View>
 
       <View style={styles.section}>
+        <Text style={[styles.sectionTitle, {color: text}]}>Capture explorer</Text>
+        <View style={[styles.filterCard, {backgroundColor: card, borderColor: border}]}>
+          <Text style={[styles.filterLabel, {color: muted}]}>Tag</Text>
+          <TextInput
+            value={tagInput}
+            onChangeText={setTagInput}
+            placeholder="voyage, cafe, travail..."
+            placeholderTextColor={muted}
+            style={[
+              styles.filterInput,
+              {borderColor: border, color: text, backgroundColor: surface},
+            ]}
+          />
+          <Text style={[styles.filterLabel, {color: muted}]}>Formality</Text>
+          <View style={styles.chipsRow}>
+            {FORMALITY_OPTIONS.map(option => {
+              const selected = captureFilters.formalite === option;
+              return (
+                <TouchableOpacity
+                  key={option || 'all'}
+                  onPress={() =>
+                    applyCaptureFilters({
+                      tag: captureFilters.tag,
+                      formalite: option,
+                    })
+                  }
+                  style={[
+                    styles.chip,
+                    {
+                      borderColor: selected ? accent : border,
+                      backgroundColor: selected ? surface : 'transparent',
+                    },
+                  ]}>
+                  <Text style={[styles.chipText, {color: text}]}>
+                    {option || 'all'}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          <View style={styles.filterActions}>
+            <TouchableOpacity
+              onPress={() =>
+                applyCaptureFilters({
+                  tag: tagInput,
+                  formalite: captureFilters.formalite,
+                })
+              }
+              style={[styles.primaryButton, {backgroundColor: accent}]}>
+              <Text style={styles.primaryButtonText}>Apply filters</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setTagInput('');
+                resetCaptureFilters();
+              }}
+              style={[styles.secondaryButton, {borderColor: border}]}>
+              <Text style={[styles.secondaryButtonText, {color: text}]}>Reset</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={[styles.filterSummary, {color: muted}]}>
+            {isLoading ? 'Loading captures...' : `${captures.length} capture(s) loaded`}
+            {captureFilters.tag ? ` • tag=${captureFilters.tag}` : ''}
+            {captureFilters.formalite ? ` • formalite=${captureFilters.formalite}` : ''}
+          </Text>
+        </View>
+
+        {captures.length === 0 ? (
+          <EmptyState
+            card={card}
+            border={border}
+            text={text}
+            muted={muted}
+            message="No capture matches the current filters."
+          />
+        ) : (
+          captures.slice(0, 4).map(capture => (
+            <View
+              key={`explorer-${capture.id}`}
+              style={[styles.explorerCard, {backgroundColor: card, borderColor: border}]}>
+              <Text style={[styles.reviewOriginal, {color: text}]}>
+                {capture.original}
+              </Text>
+              <Text style={[styles.reviewMeta, {color: muted}]}>
+                {capture.translation || 'No translation'} | {capture.formality} | {capture.language}
+              </Text>
+              <Text style={[styles.reviewMeta, {color: muted}]}>
+                Tags: {capture.tags.length > 0 ? capture.tags.join(', ') : 'none'}
+              </Text>
+            </View>
+          ))
+        )}
+      </View>
+
+      <View style={styles.section}>
         <Text style={[styles.sectionTitle, {color: text}]}>Due revisions</Text>
         {dueRevisions.length === 0 ? (
           <EmptyState
@@ -136,7 +244,7 @@ const DashboardScreen = () => {
                 {capture.original}
               </Text>
               <Text style={[styles.reviewMeta, {color: muted}]}>
-                {capture.translation || 'No translation'} • {capture.formality} • {capture.language}
+                {capture.translation || 'No translation'} | {capture.formality} | {capture.language}
               </Text>
               <Text style={[styles.reviewMeta, {color: muted}]}>
                 Tags: {capture.tags.length > 0 ? capture.tags.join(', ') : 'none'}
@@ -312,6 +420,79 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
+  },
+  filterCard: {
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 16,
+    gap: 10,
+  },
+  filterLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  filterInput: {
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 15,
+  },
+  chipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  chip: {
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  chipText: {
+    fontSize: 13,
+    fontWeight: '700',
+    textTransform: 'capitalize',
+  },
+  filterActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 4,
+  },
+  primaryButton: {
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flex: 1,
+  },
+  primaryButtonText: {
+    color: '#fff8ec',
+    textAlign: 'center',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  secondaryButton: {
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
+  secondaryButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  filterSummary: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  explorerCard: {
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 16,
+    marginTop: 10,
+    gap: 6,
   },
   reviewCard: {
     borderWidth: 1,
