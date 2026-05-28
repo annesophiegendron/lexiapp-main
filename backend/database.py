@@ -1,7 +1,7 @@
 import json
 import uuid
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from math import asin, cos, radians, sin, sqrt
 from pathlib import Path
 from typing import Any, List, Optional
@@ -591,6 +591,8 @@ def calculer_stats_captures(database_url: Optional[str] = None) -> dict:
     compteur_langues = Counter()
     compteur_formalites = Counter()
     total_revisions_a_venir = 0
+    total_revisions_recente = 0
+    reference = datetime.now(timezone.utc)
 
     for capture in captures:
         compteur_tags.update(tag.lower() for tag in capture.contexte_tags if tag)
@@ -606,6 +608,10 @@ def calculer_stats_captures(database_url: Optional[str] = None) -> dict:
         )
         if capture.revision_srs and capture.revision_srs.prochaine_revision:
             total_revisions_a_venir += 1
+        if capture.revision_srs and capture.revision_srs.derniere_revision:
+            derniere_revision = parse_datetime(capture.revision_srs.derniere_revision)
+            if derniere_revision and derniere_revision >= reference - timedelta(days=7):
+                total_revisions_recente += 1
 
     return {
         "total_captures": len(captures),
@@ -614,6 +620,7 @@ def calculer_stats_captures(database_url: Optional[str] = None) -> dict:
         ),
         "total_revisions_dues": len(revisions_dues),
         "total_revisions_a_venir": total_revisions_a_venir,
+        "total_revisions_recente": total_revisions_recente,
         "tags_dominants": [
             StatTag(tag=tag, total=total)
             for tag, total in compteur_tags.most_common(5)
@@ -684,7 +691,7 @@ def filtrer_captures(
         captures_filtrees = [
             capture
             for capture in captures_filtrees
-            if any(tag_capture.lower() == tag_normalise for tag_capture in capture.contexte_tags)
+            if any(tag_normalise in tag_capture.lower() for tag_capture in capture.contexte_tags)
         ]
 
     if formalite:

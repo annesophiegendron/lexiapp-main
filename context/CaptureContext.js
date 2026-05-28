@@ -17,6 +17,9 @@ export const CaptureProvider = ({children}) => {
   const [captureFilters, setCaptureFilters] = useState({
     tag: '',
     formalite: '',
+    latitude: null,
+    longitude: null,
+    rayonKm: null,
   });
   const captureFiltersRef = useRef(captureFilters);
   const [isLoading, setIsLoading] = useState(false);
@@ -156,13 +159,25 @@ export const CaptureProvider = ({children}) => {
     const normalizedFilters = {
       tag: nextFilters?.tag?.trim() || '',
       formalite: nextFilters?.formalite?.trim() || '',
+      latitude:
+        typeof nextFilters?.latitude === 'number' && !Number.isNaN(nextFilters.latitude)
+          ? nextFilters.latitude
+          : null,
+      longitude:
+        typeof nextFilters?.longitude === 'number' && !Number.isNaN(nextFilters.longitude)
+          ? nextFilters.longitude
+          : null,
+      rayonKm:
+        typeof nextFilters?.rayonKm === 'number' && !Number.isNaN(nextFilters.rayonKm)
+          ? nextFilters.rayonKm
+          : null,
     };
     setCaptureFilters(normalizedFilters);
     return refreshCaptures(normalizedFilters);
   }, [refreshCaptures]);
 
   const resetCaptureFilters = useCallback(async () => {
-    const emptyFilters = {tag: '', formalite: ''};
+    const emptyFilters = {tag: '', formalite: '', latitude: null, longitude: null, rayonKm: null};
     setCaptureFilters(emptyFilters);
     return refreshCaptures(emptyFilters);
   }, [refreshCaptures]);

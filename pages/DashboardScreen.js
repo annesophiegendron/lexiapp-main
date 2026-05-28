@@ -57,10 +57,22 @@ const DashboardScreen = () => {
     revisionStats,
   } = useCaptures();
   const [tagInput, setTagInput] = useState('');
+  const [latitudeInput, setLatitudeInput] = useState('');
+  const [longitudeInput, setLongitudeInput] = useState('');
+  const [rayonKmInput, setRayonKmInput] = useState('');
 
   useEffect(() => {
     setTagInput(captureFilters.tag);
-  }, [captureFilters.tag]);
+    setLatitudeInput(
+      captureFilters.latitude !== null ? String(captureFilters.latitude) : '',
+    );
+    setLongitudeInput(
+      captureFilters.longitude !== null ? String(captureFilters.longitude) : '',
+    );
+    setRayonKmInput(
+      captureFilters.rayonKm !== null ? String(captureFilters.rayonKm) : '',
+    );
+  }, [captureFilters]);
 
   const surface = isDarkMode ? '#1b1f1d' : '#f4f1e8';
   const card = isDarkMode ? '#232826' : '#fffdf6';
@@ -127,6 +139,14 @@ const DashboardScreen = () => {
             text={text}
             muted={muted}
           />
+          <MetricCard
+            label="Recent"
+            value={revisionStats.totalRecentRevisions}
+            icon="time-outline"
+            card={surface}
+            text={text}
+            muted={muted}
+          />
         </View>
       </View>
 
@@ -139,6 +159,42 @@ const DashboardScreen = () => {
             onChangeText={setTagInput}
             placeholder="voyage, cafe, travail..."
             placeholderTextColor={muted}
+            style={[
+              styles.filterInput,
+              {borderColor: border, color: text, backgroundColor: surface},
+            ]}
+          />
+          <Text style={[styles.filterLabel, {color: muted}]}>Latitude</Text>
+          <TextInput
+            value={latitudeInput}
+            onChangeText={setLatitudeInput}
+            placeholder="48.8566"
+            placeholderTextColor={muted}
+            keyboardType="numeric"
+            style={[
+              styles.filterInput,
+              {borderColor: border, color: text, backgroundColor: surface},
+            ]}
+          />
+          <Text style={[styles.filterLabel, {color: muted}]}>Longitude</Text>
+          <TextInput
+            value={longitudeInput}
+            onChangeText={setLongitudeInput}
+            placeholder="2.3522"
+            placeholderTextColor={muted}
+            keyboardType="numeric"
+            style={[
+              styles.filterInput,
+              {borderColor: border, color: text, backgroundColor: surface},
+            ]}
+          />
+          <Text style={[styles.filterLabel, {color: muted}]}>Radius (km)</Text>
+          <TextInput
+            value={rayonKmInput}
+            onChangeText={setRayonKmInput}
+            placeholder="10"
+            placeholderTextColor={muted}
+            keyboardType="numeric"
             style={[
               styles.filterInput,
               {borderColor: border, color: text, backgroundColor: surface},
@@ -173,18 +229,27 @@ const DashboardScreen = () => {
           </View>
           <View style={styles.filterActions}>
             <TouchableOpacity
-              onPress={() =>
+              onPress={() => {
+                const latitude = latitudeInput.trim() ? Number(latitudeInput) : null;
+                const longitude = longitudeInput.trim() ? Number(longitudeInput) : null;
+                const rayonKm = rayonKmInput.trim() ? Number(rayonKmInput) : null;
                 applyCaptureFilters({
                   tag: tagInput,
                   formalite: captureFilters.formalite,
-                })
-              }
+                  latitude,
+                  longitude,
+                  rayonKm,
+                });
+              }}
               style={[styles.primaryButton, {backgroundColor: accent}]}>
               <Text style={styles.primaryButtonText}>Apply filters</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
                 setTagInput('');
+                setLatitudeInput('');
+                setLongitudeInput('');
+                setRayonKmInput('');
                 resetCaptureFilters();
               }}
               style={[styles.secondaryButton, {borderColor: border}]}>
@@ -194,8 +259,10 @@ const DashboardScreen = () => {
           <Text style={[styles.filterSummary, {color: muted}]}>
             {isLoading ? 'Loading captures...' : `${captures.length} capture(s) loaded`}
             {captureFilters.tag ? ` • tag=${captureFilters.tag}` : ''}
-            {captureFilters.formalite ? ` • formalite=${captureFilters.formalite}` : ''}
-          </Text>
+            {captureFilters.formalite ? ` • formalite=${captureFilters.formalite}` : ''}            {captureFilters.latitude !== null && captureFilters.longitude !== null
+              ? ` • latitude=${captureFilters.latitude} longitude=${captureFilters.longitude}`
+              : ''}
+            {captureFilters.rayonKm !== null ? ` • rayon=${captureFilters.rayonKm}km` : ''}          </Text>
         </View>
 
         {captures.length === 0 ? (
@@ -219,8 +286,9 @@ const DashboardScreen = () => {
               </Text>
               <Text style={[styles.reviewMeta, {color: muted}]}>
                 Tags: {capture.tags.length > 0 ? capture.tags.join(', ') : 'none'}
-              </Text>
-            </View>
+              </Text>              <Text style={[styles.reviewMeta, {color: muted}]}> 
+                Last review: {formatRelativeReview(capture.reviewSrs.lastReviewAt)}
+              </Text>            </View>
           ))
         )}
       </View>

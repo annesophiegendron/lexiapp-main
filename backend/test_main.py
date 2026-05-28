@@ -1,5 +1,6 @@
 import shutil
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 
 import anyio
@@ -559,6 +560,7 @@ class MainApiTests(unittest.TestCase):
             5,
             self.__class__.database_url,
         )
+        date_derniere_revision = datetime.now(timezone.utc).isoformat()
         with database.connecter_base(self.__class__.database_url) as connexion:
             connexion.execute(
                 database.adapter_requete(
@@ -567,7 +569,7 @@ class MainApiTests(unittest.TestCase):
                 ),
                 [
                     "2026-05-01T09:00:00+00:00",
-                    "2026-04-30T09:00:00+00:00",
+                    date_derniere_revision,
                     "00000000-0000-0000-0000-000000000001",
                 ],
             )
@@ -581,6 +583,7 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["total_phrases_revisees"], 1)
         self.assertEqual(payload["total_revisions_dues"], 1)
         self.assertEqual(payload["total_revisions_a_venir"], 1)
+        self.assertEqual(payload["total_revisions_recente"], 1)
         self.assertEqual(payload["tags_dominants"][0]["tag"], "voyage")
         self.assertEqual(payload["tags_dominants"][0]["total"], 2)
         repartition_langues = {

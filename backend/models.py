@@ -102,6 +102,7 @@ class ReponseStats(BaseModel):
     total_phrases_revisees: int
     total_revisions_dues: int
     total_revisions_a_venir: int
+    total_revisions_recente: int
     tags_dominants: List[StatTag]
     repartition_langues: List[StatRepartition]
     repartition_formalites: List[StatRepartition]

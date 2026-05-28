@@ -99,6 +99,8 @@ const normaliserStats = payload => ({
     typeof payload?.total_revisions_dues === 'number' ? payload.total_revisions_dues : 0,
   totalScheduledRevisions:
     typeof payload?.total_revisions_a_venir === 'number' ? payload.total_revisions_a_venir : 0,
+  totalRecentRevisions:
+    typeof payload?.total_revisions_recente === 'number' ? payload.total_revisions_recente : 0,
   topTags: Array.isArray(payload?.tags_dominants)
     ? payload.tags_dominants.map(item => ({
         tag: item?.tag || '',
