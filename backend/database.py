@@ -691,7 +691,7 @@ def filtrer_captures(
         captures_filtrees = [
             capture
             for capture in captures_filtrees
-            if any(tag_normalise in tag_capture.lower() for tag_capture in capture.contexte_tags)
+            if any(tag_normalise == tag_capture.strip().lower() for tag_capture in capture.contexte_tags)
         ]
 
     if formalite:

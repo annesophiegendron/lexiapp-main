@@ -14,5 +14,10 @@ CREATE TABLE IF NOT EXISTS captures (
     analyse_statut TEXT NOT NULL DEFAULT 'ok',
     analyse_modele TEXT,
     analyse_detail TEXT,
+    repetitions INTEGER NOT NULL DEFAULT 0,
+    intervalle_jours INTEGER NOT NULL DEFAULT 0,
+    facteur_aisance DOUBLE PRECISION NOT NULL DEFAULT 2.5,
+    prochaine_revision TIMESTAMPTZ,
+    derniere_revision TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

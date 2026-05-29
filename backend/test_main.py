@@ -421,6 +421,32 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(payload["total"], 1)
         self.assertEqual(payload["captures"][0]["contexte_tags"], ["cafe", "politesse"])
 
+    def test_get_captures_route_filters_tag_exactly(self):
+        database.creer_capture(
+            database.CommandeCreationCapture(
+                phrase_originale="bonjour au cafe",
+                traduction="hello at the cafe",
+                audio_url="/stockage/audios/cafe.wav",
+                contexte_tags=["cafe", "politesse"],
+                formalite="familier",
+                latitude=48.857,
+                longitude=2.351,
+                langue="fr",
+                pipeline_ia=database.PipelineIA(
+                    transcription=database.StatutEtapeIA(statut="ok", modele="base"),
+                    analyse=database.StatutEtapeIA(statut="ok", modele="llama3"),
+                ),
+            ),
+            self.__class__.database_url,
+        )
+
+        response = self.request("GET", "/captures?tag=caf")
+        payload = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload["total"], 0)
+        self.assertEqual(payload["captures"], [])
+
     def test_get_captures_route_filters_by_formalite(self):
         database.creer_capture(
             database.CommandeCreationCapture(
