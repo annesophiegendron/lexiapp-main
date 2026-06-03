@@ -97,6 +97,13 @@ class StatRepartition(BaseModel):
     total: int
 
 
+class StatTheme(BaseModel):
+    tag: str
+    total: int
+    phrases_maitrisees: int
+    taux_reussite: float
+
+
 class ReponseStats(BaseModel):
     total_captures: int
     total_phrases_revisees: int
@@ -106,6 +113,16 @@ class ReponseStats(BaseModel):
     tags_dominants: List[StatTag]
     repartition_langues: List[StatRepartition]
     repartition_formalites: List[StatRepartition]
+
+
+class ReponseAnalytics(BaseModel):
+    total_captures: int
+    total_phrases_maitrisees: int
+    taux_retenue: float
+    total_revisions_dues: int
+    total_revisions_a_venir: int
+    streak_jours: int
+    matrice_forces_faiblesses: List[StatTheme]
 
 
 class CommandeCreationCapture(BaseModel):

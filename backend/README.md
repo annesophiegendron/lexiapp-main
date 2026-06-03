@@ -40,6 +40,12 @@ Demarrer PostgreSQL :
 docker compose up -d postgres
 ```
 
+Ou lancer toute la pile de production locale depuis la racine du projet :
+
+```bash
+docker compose up --build
+```
+
 Demarrer Ollama dans un second terminal si vous voulez l'analyse semantique :
 
 ```bash
@@ -65,6 +71,7 @@ API disponible sur `http://localhost:8000`
 - `POST /captures/{capture_id}/review` : notation d'une revision avec calcul SM-2
 - `GET /revisions/due` : liste des captures a reviser
 - `GET /stats` : statistiques simples de revision et tags
+- `GET /analytics` : statistiques avancees pour le dashboard et la gamification
 - `GET /stockage/audios/{nom_fichier}` : acces aux audios stockes localement
 
 Note: la route `GET /stockage/audios/{nom_fichier}` ne sert que le stockage `local`. Avec `supabase`, `audio_url` est deja une URL absolue vers le bucket.
@@ -110,7 +117,7 @@ DATABASE_URL=sqlite:///backend/test.db
 ## Tests
 
 ```bash
-python -m unittest test_main.py
+python -m pytest
 ```
 
 ## Verification preflight phase 2
@@ -202,6 +209,20 @@ curl "http://localhost:8000/captures?tag=voyage&formalite=standard&latitude=48.8
 - `tags_dominants`
 - `repartition_langues`
 - `repartition_formalites`
+
+## Analytics avancees
+
+`GET /analytics` expose les signaux utilisees pour la suite de la gamification :
+
+- `total_captures`
+- `total_phrases_maitrisees`
+- `taux_retenue`
+- `total_revisions_dues`
+- `total_revisions_a_venir`
+- `streak_jours`
+- `matrice_forces_faiblesses`
+
+La matrice regroupe les tags les plus actifs et calcule un taux de reussite base sur l'etat SRS courant des captures.
 
 ## Reponses des captures
 

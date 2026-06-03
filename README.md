@@ -1,76 +1,68 @@
-# Lexiapp
+# Lexi-Context
 
-Projet mobile avec un frontend React et un backend FastAPI.
+Application mobile React Native avec backend FastAPI pour capturer, analyser et revoir des phrases apprises en situation reelle.
 
-## Backend
+## Architecture
 
-Le backend se trouve dans `backend/`.
+- **Frontend** : React Native
+- **Backend** : FastAPI
+- **Base de donnees** : PostgreSQL
+- **IA locale** : Whisper pour la transcription et Ollama pour l'analyse
+- **Repetitions espacees** : SM-2 cote backend
 
-### Etat actuel
+## Fonctionnalites backend
 
-- phase 1 backend finalisee sur FastAPI
-- persistence PostgreSQL pour les captures
-- routes disponibles pour la sante, les captures et les fichiers audio locaux
-- base technique en place pour le pipeline local Whisper + Ollama
+- capture audio avec geolocalisation
+- transcription locale
+- analyse IA locale avec fallback propre
+- revision SRS et captures dues
+- statistiques de base via `/stats`
+- analytics avancees via `/analytics`
+- service audio local expose via HTTP
 
-### Fichiers utiles
+## Lancer le projet en local
 
-- `backend/main.py` : API FastAPI
-- `backend/database.py` : acces base de donnees
-- `backend/models.py` : modeles Pydantic du contrat d'API
-- `backend/schema.sql` : schema PostgreSQL de reference
-- `backend/docker-compose.yml` : PostgreSQL local via Docker
-- `backend/requirements.txt` : dependances Python
-- `backend/transcription.py` : integration Whisper locale
-- `backend/ollama_client.py` : integration Ollama locale
-
-### Lancer le backend
-
-Depuis `backend/` :
+Depuis la racine du projet :
 
 ```bash
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
+docker compose up --build
 ```
 
-Puis creer `backend/.env` a partir de `backend/.env.example`, demarrer PostgreSQL local et lancer `ollama run llama3` si la phase 2 est activee.
+Cela lance :
 
-### Demarrer PostgreSQL local
+- PostgreSQL
+- Ollama
+- le backend FastAPI
 
-Depuis `backend/` :
+Le backend sera disponible sur `http://localhost:8000` et la documentation Swagger sur `http://localhost:8000/docs`.
+
+## Tests
+
+Backend :
 
 ```bash
-docker compose up -d postgres
+cd backend
+python -m pytest
 ```
 
-La base ecoute ensuite sur `localhost:5432` avec :
-
-- base : `lexiapp`
-- utilisateur : `postgres`
-- mot de passe : `postgres`
-
-### Commande finale backend
-
-Depuis `backend/` avec l'environnement Python valide du projet :
+Frontend :
 
 ```bash
-venv311\Scripts\python.exe -m uvicorn main:app --reload
+npm test
 ```
 
-Puis ouvrir :
+## Endpoints principaux
 
-- `http://127.0.0.1:8000/docs`
-- `http://127.0.0.1:8000/sante`
+- `GET /sante`
+- `GET /preflight`
+- `GET /captures`
+- `GET /captures/{capture_id}`
+- `POST /captures`
+- `POST /captures/{capture_id}/review`
+- `GET /revisions/due`
+- `GET /stats`
+- `GET /analytics`
 
-### Lancer les tests backend
+## Documentation backend
 
-Depuis `backend/` :
-
-```bash
-venv311\Scripts\python.exe -m unittest test_main.py
-```
-
-## Frontend
-
-Le frontend React Native reste lance depuis la racine du projet avec les commandes habituelles `npm` ou `yarn` si possible.
+La documentation detaillee du backend se trouve dans `backend/README.md`.

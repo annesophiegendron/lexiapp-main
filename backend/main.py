@@ -14,6 +14,7 @@ try:
     from backend.config import OLLAMA_MODEL, WHISPER_MODEL
     from backend.database import (
         alimenter_donnees_demo,
+        calculer_analytics_captures,
         calculer_stats_captures,
         creer_capture,
         initialiser_base,
@@ -29,6 +30,7 @@ try:
         CommandeCreationCapture,
         PipelineIA,
         ReponseCaptures,
+        ReponseAnalytics,
         ReponseCreationCapture,
         ReponsePreflight,
         ReponseRevisionCapture,
@@ -50,6 +52,7 @@ except ModuleNotFoundError:
     from config import OLLAMA_MODEL, WHISPER_MODEL
     from database import (
         alimenter_donnees_demo,
+        calculer_analytics_captures,
         calculer_stats_captures,
         creer_capture,
         initialiser_base,
@@ -65,6 +68,7 @@ except ModuleNotFoundError:
         CommandeCreationCapture,
         PipelineIA,
         ReponseCaptures,
+        ReponseAnalytics,
         ReponseCreationCapture,
         ReponsePreflight,
         ReponseRevisionCapture,
@@ -127,6 +131,7 @@ def accueil() -> dict:
         "captures": "/captures",
         "revisions_due": "/revisions/due",
         "stats": "/stats",
+        "analytics": "/analytics",
     }
 
 
@@ -222,6 +227,12 @@ def lire_revisions_dues() -> ReponseRevisionsDue:
 def lire_stats() -> ReponseStats:
     logger.info("Recuperation des statistiques phase 3")
     return ReponseStats(**calculer_stats_captures())
+
+
+@app.get("/analytics", response_model=ReponseAnalytics, tags=["Analytics"])
+def lire_analytics() -> ReponseAnalytics:
+    logger.info("Recuperation des statistiques avancees")
+    return ReponseAnalytics(**calculer_analytics_captures())
 
 
 def resoudre_chemin_audio(url_audio: str) -> Path:

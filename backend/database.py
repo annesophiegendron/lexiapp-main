@@ -4,7 +4,7 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 from math import asin, cos, radians, sin, sqrt
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Iterable, List, Optional, Sequence
 
 try:
     from backend.config import DATABASE_URL
@@ -14,6 +14,8 @@ except ModuleNotFoundError:
     from config import DATABASE_URL
     from models import Capture, CommandeCreationCapture, EtatRevision, Geolocalisation, PipelineIA, StatRepartition, StatTag, StatutEtapeIA
     from phase3 import EtatSRS, calculer_revision_sm2
+
+MAITRISE_MIN_REPETITIONS = 3
 
 
 # Schema PostgreSQL 
@@ -636,6 +638,85 @@ def calculer_stats_captures(database_url: Optional[str] = None) -> dict:
     }
 
 
+def calculer_analytics_captures(database_url: Optional[str] = None) -> dict:
+    url = database_url or DATABASE_URL
+    total_captures = lire_premiere_valeur(
+        executer_unique(
+            "SELECT COUNT(*) AS total FROM captures",
+            url,
+        )
+    )
+    total_phrases_maitrisees = lire_premiere_valeur(
+        executer_unique(
+            """
+            SELECT COUNT(*) AS total
+            FROM captures
+            WHERE repetitions >= ?
+            """,
+            url,
+            [MAITRISE_MIN_REPETITIONS],
+        )
+    )
+    total_revisions_dues = lire_premiere_valeur(
+        executer_unique(
+            requete_revisions_dues(url),
+            url,
+        )
+    )
+    total_revisions_a_venir = lire_premiere_valeur(
+        executer_unique(
+            requete_revisions_a_venir(url),
+            url,
+        )
+    )
+
+    requete_themes = adapter_requete(
+        requete_themes_maitrise(url),
+        url,
+    )
+    with connecter_base(url) as connexion:
+        lignes_themes = connexion.execute(requete_themes, [MAITRISE_MIN_REPETITIONS]).fetchall()
+        lignes_dates = connexion.execute(requete_dates_activite(url)).fetchall()
+
+    themes = [
+        {
+            "tag": normaliser_cle_texte(ligne["tag"]),
+            "total": int(ligne["total"] or 0),
+            "phrases_maitrisees": int(ligne["phrases_maitrisees"] or 0),
+        }
+        for ligne in lignes_themes
+        if normaliser_cle_texte(ligne["tag"])
+    ]
+
+    taux_retenue = calculer_pourcentage(total_phrases_maitrisees, total_captures)
+    dates_actives = extraire_dates_actives(lignes_dates)
+
+    return {
+        "total_captures": total_captures,
+        "total_phrases_maitrisees": total_phrases_maitrisees,
+        "taux_retenue": taux_retenue,
+        "total_revisions_dues": total_revisions_dues,
+        "total_revisions_a_venir": total_revisions_a_venir,
+        "streak_jours": calculer_streak(dates_actives),
+        "matrice_forces_faiblesses": [
+            {
+                "tag": theme["tag"],
+                "total": theme["total"],
+                "phrases_maitrisees": theme["phrases_maitrisees"],
+                "taux_reussite": calculer_pourcentage(theme["phrases_maitrisees"], theme["total"]),
+            }
+            for theme in sorted(
+                themes,
+                key=lambda item: (
+                    calculer_pourcentage(item["phrases_maitrisees"], item["total"]),
+                    item["total"],
+                ),
+                reverse=True,
+            )
+        ],
+    }
+
+
 def verifier_sante_base(database_url: Optional[str] = None) -> bool:
     # Verifie que la base de donnees est accessible et fonctionnelle.
     try:
@@ -645,6 +726,131 @@ def verifier_sante_base(database_url: Optional[str] = None) -> bool:
         return True
     except Exception:
         return False
+
+
+def executer_unique(requete: str, database_url: str, params: Optional[Sequence[Any]] = None):
+    with connecter_base(database_url) as connexion:
+        ligne = connexion.execute(requete, params or []).fetchone()
+    return ligne
+
+
+def requete_revisions_dues(database_url: str) -> str:
+    base = """
+        SELECT COUNT(*) AS total
+        FROM captures
+        WHERE prochaine_revision IS NOT NULL
+          AND prochaine_revision <= CURRENT_TIMESTAMP
+    """
+    if database_url.startswith("sqlite:///"):
+        return base.replace("CURRENT_TIMESTAMP", "datetime('now')")
+    return base
+
+
+def requete_revisions_a_venir(database_url: str) -> str:
+    base = """
+        SELECT COUNT(*) AS total
+        FROM captures
+        WHERE prochaine_revision IS NOT NULL
+    """
+    return base
+
+
+def requete_themes_maitrise(database_url: str) -> str:
+    if database_url.startswith("sqlite:///"):
+        return """
+            SELECT
+                lower(trim(tag.value)) AS tag,
+                COUNT(*) AS total,
+                SUM(CASE WHEN captures.repetitions >= ? THEN 1 ELSE 0 END) AS phrases_maitrisees
+            FROM captures
+            JOIN json_each(captures.contexte_tags) AS tag
+            WHERE trim(COALESCE(tag.value, '')) <> ''
+            GROUP BY lower(trim(tag.value))
+            ORDER BY total DESC, tag ASC
+        """
+
+    return """
+        SELECT
+            lower(trim(tag.value)) AS tag,
+            COUNT(*) AS total,
+            SUM(CASE WHEN captures.repetitions >= ? THEN 1 ELSE 0 END) AS phrases_maitrisees
+        FROM captures,
+             LATERAL jsonb_array_elements_text(COALESCE(captures.contexte_tags, '[]'::jsonb)) AS tag(value)
+        WHERE trim(COALESCE(tag.value, '')) <> ''
+        GROUP BY lower(trim(tag.value))
+        ORDER BY total DESC, tag ASC
+    """
+
+
+def requete_dates_activite(database_url: str) -> str:
+    if database_url.startswith("sqlite:///"):
+        return """
+            SELECT DISTINCT date_value AS jour
+            FROM (
+                SELECT date(created_at) AS date_value FROM captures WHERE created_at IS NOT NULL
+                UNION
+                SELECT date(derniere_revision) AS date_value FROM captures WHERE derniere_revision IS NOT NULL
+            )
+            WHERE date_value IS NOT NULL
+            ORDER BY date_value DESC
+        """
+
+    return """
+        SELECT DISTINCT jour
+        FROM (
+            SELECT created_at::date::text AS jour FROM captures WHERE created_at IS NOT NULL
+            UNION
+            SELECT derniere_revision::date::text AS jour FROM captures WHERE derniere_revision IS NOT NULL
+        ) AS activite
+        WHERE jour IS NOT NULL
+        ORDER BY jour DESC
+    """
+
+
+def normaliser_cle_texte(valeur: Any) -> str:
+    if valeur is None:
+        return ""
+    return str(valeur).strip().lower()
+
+
+def calculer_pourcentage(partie: int, total: int) -> float:
+    if total <= 0:
+        return 0.0
+    return round((partie / total) * 100, 1)
+
+
+def extraire_dates_actives(lignes: Iterable[Any]) -> List[str]:
+    dates: List[str] = []
+    for ligne in lignes:
+        valeur = ligne["jour"] if isinstance(ligne, dict) else ligne[0]
+        if valeur is None:
+            continue
+        if hasattr(valeur, "isoformat"):
+            dates.append(valeur.isoformat())
+        else:
+            dates.append(str(valeur))
+    return dates
+
+
+def calculer_streak(dates_actives: Sequence[str], reference: Optional[datetime] = None) -> int:
+    if not dates_actives:
+        return 0
+
+    reference = reference or datetime.now(timezone.utc)
+    jours = {
+        datetime.fromisoformat(date_texte).date()
+        for date_texte in dates_actives
+        if date_texte
+    }
+    courant = reference.date()
+    if courant not in jours:
+        return 0
+
+    streak = 0
+    while courant in jours:
+        streak += 1
+        courant -= timedelta(days=1)
+    return streak
 
 
 def lire_premiere_valeur(ligne: Any):
