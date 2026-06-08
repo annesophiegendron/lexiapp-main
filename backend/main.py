@@ -156,7 +156,8 @@ def verification_sante() -> ReponseSante:
 
     return ReponseSante(
         status="ok" if ollama_ok else "degraded",
-        message="Le serveur est pret." if ollama_ok else "Serveur pret mais Ollama indisponible (analyse desactivee)",
+        message="Le serveur est pret." if ollama_ok else "Serveur pret mais Ollama"
+        " indisponible (analyse desactivee)",
         version=2,
     )
 
