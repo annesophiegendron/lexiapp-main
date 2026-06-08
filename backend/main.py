@@ -10,6 +10,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 try:
+    import backend.config as config_module
+    import backend.database as database_module
+    import backend.preflight_check as preflight_module
+
     from backend.config import AUDIO_STORAGE_DIR, OLLAMA_URL, SEED_DEMO_DATA
     from backend.config import OLLAMA_MODEL, WHISPER_MODEL
     from backend.database import (
@@ -48,6 +52,10 @@ try:
     )
     from backend.transcription import transcrire_audio
 except ModuleNotFoundError:
+    import config as config_module
+    import database as database_module
+    import preflight_check as preflight_module
+
     from config import AUDIO_STORAGE_DIR, OLLAMA_URL, SEED_DEMO_DATA
     from config import OLLAMA_MODEL, WHISPER_MODEL
     from database import (
@@ -93,12 +101,28 @@ logging.basicConfig(
 )
 
 CHEMIN_STOCKAGE_AUDIOS = AUDIO_STORAGE_DIR
+DATABASE_URL_SQLITE_FALLBACK = f"sqlite:///{(Path(__file__).resolve().parent / 'lexiapp.db').as_posix()}"
+
+
+def basculer_sur_sqlite_local() -> None:
+    logger.warning(
+        "Fallback local active: PostgreSQL indisponible, bascule sur SQLite (%s)",
+        DATABASE_URL_SQLITE_FALLBACK,
+    )
+    config_module.DATABASE_URL = DATABASE_URL_SQLITE_FALLBACK
+    database_module.DATABASE_URL = DATABASE_URL_SQLITE_FALLBACK
+    preflight_module.DATABASE_URL = DATABASE_URL_SQLITE_FALLBACK
 
 
 @asynccontextmanager
 async def cycle_de_vie(_: FastAPI):
     logger.info("Initialisation du backend Lexiapp...")
-    initialiser_base()
+    try:
+        initialiser_base()
+    except Exception as exc:
+        logger.warning("Initialisation PostgreSQL impossible: %s", exc)
+        basculer_sur_sqlite_local()
+        initialiser_base()
     if SEED_DEMO_DATA:
         alimenter_donnees_demo()
     logger.info("Backend Lexiapp initialise avec succes")

@@ -1,0 +1,11 @@
+INFO:     Started server process [23556]
+INFO:     Waiting for application startup.
+2026-06-08 17:29:39,453 - __main__ - INFO - Initialisation du backend Lexiapp...
+2026-06-08 17:29:41,238 - __main__ - WARNING - Initialisation PostgreSQL impossible: connection failed: connection to server at "127.0.0.1", port 5432 failed: FATAL:  authentification par mot de passe \ufffdchou\ufffde pour l'utilisateur  \ufffd postgres \ufffd
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: '5432', hostaddr: '::1': connection failed: connection to server at "::1", port 5432 failed: FATAL:  authentification par mot de passe \ufffdchou\ufffde pour l'utilisateur  \ufffd postgres \ufffd
+- host: 'localhost', port: '5432', hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5432 failed: FATAL:  authentification par mot de passe \ufffdchou\ufffde pour l'utilisateur  \ufffd postgres \ufffd
+2026-06-08 17:29:41,251 - __main__ - WARNING - Fallback local active: PostgreSQL indisponible, bascule sur SQLite (sqlite:///C:/Users/Admin/Documents/stage/lexiapp-main/backend/lexiapp.db)
+2026-06-08 17:29:41,630 - __main__ - INFO - Backend Lexiapp initialise avec succes
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)

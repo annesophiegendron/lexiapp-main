@@ -1,0 +1,7 @@
+INFO:     Started server process [18580]
+INFO:     Waiting for application startup.
+2026-06-08 17:19:24,131 - __main__ - INFO - Initialisation du backend Lexiapp...
+2026-06-08 17:19:24,208 - __main__ - INFO - Backend Lexiapp initialise avec succes
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-06-08 17:19:28,122 - __main__ - INFO - Verification sante du systeme

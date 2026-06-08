@@ -16,6 +16,7 @@ except ModuleNotFoundError:
     from phase3 import EtatSRS, calculer_revision_sm2
 
 MAITRISE_MIN_REPETITIONS = 3
+PSYCOPG_CONNECT_TIMEOUT_SECONDS = 5
 
 
 # Schema PostgreSQL 
@@ -87,7 +88,11 @@ def connecter_base(database_url: Optional[str] = None):
 
     import psycopg
 
-    return psycopg.connect(url, row_factory=psycopg.rows.dict_row)
+    return psycopg.connect(
+        url,
+        row_factory=psycopg.rows.dict_row,
+        connect_timeout=PSYCOPG_CONNECT_TIMEOUT_SECONDS,
+    )
 
 
 def preparer_tags_pour_stockage(tags: List[str], database_url: str):
