@@ -64,6 +64,17 @@ class ReponseCaptures(BaseModel):
     captures: List[Capture]
 
 
+class ResultatRechercheCapture(BaseModel):
+    capture: Capture
+    score: float
+
+
+class ReponseRechercheCaptures(BaseModel):
+    query: str
+    total: int
+    results: List[ResultatRechercheCapture]
+
+
 class ReponseCreationCapture(BaseModel):
     status: str
     message: str

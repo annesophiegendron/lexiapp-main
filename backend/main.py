@@ -25,6 +25,7 @@ try:
         lister_revisions_dues,
         lire_capture_par_id,
         lister_captures,
+        rechercher_captures,
         noter_revision_capture,
         verifier_sante_base,
     )
@@ -37,6 +38,7 @@ try:
         ReponseAnalytics,
         ReponseCreationCapture,
         ReponsePreflight,
+        ReponseRechercheCaptures,
         ReponseRevisionCapture,
         ReponseRevisionsDue,
         ReponseSante,
@@ -67,6 +69,7 @@ except ModuleNotFoundError:
         lister_revisions_dues,
         lire_capture_par_id,
         lister_captures,
+        rechercher_captures,
         noter_revision_capture,
         verifier_sante_base,
     )
@@ -79,6 +82,7 @@ except ModuleNotFoundError:
         ReponseAnalytics,
         ReponseCreationCapture,
         ReponsePreflight,
+        ReponseRechercheCaptures,
         ReponseRevisionCapture,
         ReponseRevisionsDue,
         ReponseSante,
@@ -153,6 +157,7 @@ def accueil() -> dict:
         "sante": "/sante",
         "preflight": "/preflight",
         "captures": "/captures",
+        "captures_search": "/captures/search",
         "revisions_due": "/revisions/due",
         "stats": "/stats",
         "analytics": "/analytics",
@@ -229,6 +234,18 @@ def lire_captures(
     )
     logger.info(f"Retour de {len(captures)} captures")
     return ReponseCaptures(total=len(captures), captures=captures)
+
+
+@app.get("/captures/search", response_model=ReponseRechercheCaptures, tags=["Captures"])
+def rechercher_captures_route(query: str, limite: int = 10) -> ReponseRechercheCaptures:
+    logger.info("Recherche semantique des captures: query=%s limite=%s", query, limite)
+    if not query or not query.strip():
+        raise HTTPException(status_code=400, detail="La requete de recherche ne peut pas etre vide.")
+    if limite <= 0:
+        raise HTTPException(status_code=400, detail="La limite de recherche doit etre strictement positive.")
+
+    resultats = rechercher_captures(query=query, limite=limite)
+    return ReponseRechercheCaptures(query=query, total=len(resultats), results=resultats)
 
 
 @app.get("/captures/{capture_id}", response_model=Capture, tags=["Captures"])

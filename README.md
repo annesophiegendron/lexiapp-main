@@ -56,6 +56,7 @@ npm test
 - `GET /sante`
 - `GET /preflight`
 - `GET /captures`
+- `GET /captures/search?query=...`
 - `GET /captures/{capture_id}`
 - `POST /captures`
 - `POST /captures/{capture_id}/review`

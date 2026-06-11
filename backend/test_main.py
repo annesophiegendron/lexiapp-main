@@ -23,6 +23,7 @@ class MainApiTests(unittest.TestCase):
         cls.original_initialiser_base = main.initialiser_base
         cls.original_alimenter_donnees_demo = main.alimenter_donnees_demo
         cls.original_lister_captures = main.lister_captures
+        cls.original_rechercher_captures = main.rechercher_captures
         cls.original_calculer_stats_captures = main.calculer_stats_captures
         cls.original_creer_capture = main.creer_capture
         cls.original_lire_capture_par_id = main.lire_capture_par_id
@@ -40,6 +41,11 @@ class MainApiTests(unittest.TestCase):
         main.initialiser_base = lambda: database.initialiser_base(cls.database_url)
         main.alimenter_donnees_demo = lambda: database.alimenter_donnees_demo(cls.database_url)
         main.lister_captures = lambda **kwargs: database.lister_captures(cls.database_url, **kwargs)
+        main.rechercher_captures = lambda query, limite=10: database.rechercher_captures(
+            query,
+            cls.database_url,
+            limite,
+        )
         main.calculer_stats_captures = lambda: database.calculer_stats_captures(cls.database_url)
         main.creer_capture = lambda commande: database.creer_capture(commande, cls.database_url)
         main.lire_capture_par_id = lambda capture_id: database.lire_capture_par_id(capture_id, cls.database_url)
@@ -97,6 +103,7 @@ class MainApiTests(unittest.TestCase):
         main.initialiser_base = cls.original_initialiser_base
         main.alimenter_donnees_demo = cls.original_alimenter_donnees_demo
         main.lister_captures = cls.original_lister_captures
+        main.rechercher_captures = cls.original_rechercher_captures
         main.calculer_stats_captures = cls.original_calculer_stats_captures
         main.creer_capture = cls.original_creer_capture
         main.lire_capture_par_id = cls.original_lire_capture_par_id
@@ -498,6 +505,61 @@ class MainApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(payload["total"], 1)
         self.assertEqual(payload["captures"][0]["id"], "00000000-0000-0000-0000-000000000001")
+
+    def test_search_captures_route_returns_semantic_match(self):
+        with database.connecter_base(self.__class__.database_url) as connexion:
+            connexion.execute("DELETE FROM captures")
+            connexion.commit()
+
+        capture_pertinente = database.creer_capture(
+            database.CommandeCreationCapture(
+                phrase_originale="Je voudrais un cafe et un croissant s'il vous plait",
+                traduction="I would like a coffee and a croissant please",
+                audio_url="/stockage/audios/cafe.wav",
+                contexte_tags=["restaurant", "nourriture"],
+                formalite="standard",
+                latitude=48.8566,
+                longitude=2.3522,
+                langue="fr",
+                pipeline_ia=database.PipelineIA(
+                    transcription=database.StatutEtapeIA(statut="ok", modele="base"),
+                    analyse=database.StatutEtapeIA(statut="ok", modele="llama3"),
+                ),
+            ),
+            self.__class__.database_url,
+        )
+        database.creer_capture(
+            database.CommandeCreationCapture(
+                phrase_originale="Bonjour, comment allez-vous ?",
+                traduction="Hello, how are you?",
+                audio_url="/stockage/audios/salut.wav",
+                contexte_tags=["salutation"],
+                formalite="familier",
+                latitude=48.857,
+                longitude=2.351,
+                langue="fr",
+                pipeline_ia=database.PipelineIA(
+                    transcription=database.StatutEtapeIA(statut="ok", modele="base"),
+                    analyse=database.StatutEtapeIA(statut="ok", modele="llama3"),
+                ),
+            ),
+            self.__class__.database_url,
+        )
+
+        response = self.request("GET", "/captures/search?query=Commander%20%C3%A0%20manger&limite=5")
+        payload = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload["query"], "Commander à manger")
+        self.assertGreaterEqual(payload["total"], 1)
+        self.assertEqual(payload["results"][0]["capture"]["id"], capture_pertinente.id)
+        self.assertGreater(payload["results"][0]["score"], 0)
+
+    def test_search_captures_route_rejects_empty_query(self):
+        response = self.request("GET", "/captures/search?query=")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("ne peut pas etre vide", response.json()["detail"])
 
     def test_get_captures_route_rejects_partial_zone_filter(self):
         response = self.request("GET", "/captures?latitude=48.8566")

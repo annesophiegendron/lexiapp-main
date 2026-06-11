@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS captures (
     analyse_statut TEXT NOT NULL DEFAULT 'ok',
     analyse_modele TEXT,
     analyse_detail TEXT,
+    embedding JSONB NOT NULL DEFAULT '{}'::jsonb,
     repetitions INTEGER NOT NULL DEFAULT 0,
     intervalle_jours INTEGER NOT NULL DEFAULT 0,
     facteur_aisance DOUBLE PRECISION NOT NULL DEFAULT 2.5,

@@ -1,5 +1,7 @@
 import json
+import re
 import uuid
+import unicodedata
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from math import asin, cos, radians, sin, sqrt
@@ -17,6 +19,80 @@ except ModuleNotFoundError:
 
 MAITRISE_MIN_REPETITIONS = 3
 PSYCOPG_CONNECT_TIMEOUT_SECONDS = 5
+EMBEDDING_DIMENSION = 16
+CONCEPTES_SEMANTIQUES = [
+    "nourriture",
+    "boisson",
+    "commande",
+    "politesse",
+    "transport",
+    "logement",
+    "direction",
+    "temps",
+    "argent",
+    "travail",
+    "rencontre",
+    "urgence",
+    "sante",
+    "shopping",
+    "sortie",
+    "administratif",
+]
+
+LEXIQUE_CONCEPTES = {
+    "manger": {"nourriture"},
+    "repas": {"nourriture"},
+    "restaurant": {"nourriture"},
+    "menu": {"nourriture"},
+    "cafe": {"boisson", "nourriture"},
+    "cafes": {"boisson", "nourriture"},
+    "croissant": {"nourriture"},
+    "pain": {"nourriture"},
+    "boire": {"boisson"},
+    "boisson": {"boisson"},
+    "eau": {"boisson"},
+    "commander": {"commande"},
+    "voudrais": {"commande", "politesse"},
+    "souhaite": {"commande", "politesse"},
+    "s'il": {"politesse"},
+    "vous": {"politesse"},
+    "plait": {"politesse"},
+    "merci": {"politesse"},
+    "bonjour": {"rencontre", "politesse"},
+    "salut": {"rencontre", "politesse"},
+    "train": {"transport"},
+    "bus": {"transport"},
+    "avion": {"transport"},
+    "taxi": {"transport"},
+    "metro": {"transport"},
+    "hotel": {"logement"},
+    "chambre": {"logement"},
+    "reservation": {"logement", "administratif"},
+    "reserver": {"logement", "administratif"},
+    "adresse": {"direction", "administratif"},
+    "ou": {"direction"},
+    "gauche": {"direction"},
+    "droite": {"direction"},
+    "heure": {"temps"},
+    "matin": {"temps"},
+    "soir": {"temps"},
+    "argent": {"argent"},
+    "prix": {"argent", "shopping"},
+    "payer": {"argent", "shopping"},
+    "travail": {"travail"},
+    "reunion": {"travail", "rencontre"},
+    "urgent": {"urgence"},
+    "urgence": {"urgence"},
+    "medecin": {"sante"},
+    "hopital": {"sante"},
+    "pharmacie": {"sante"},
+    "acheter": {"shopping"},
+    "magasin": {"shopping"},
+    "sortir": {"sortie"},
+    "sortie": {"sortie"},
+    "formulaire": {"administratif"},
+    "document": {"administratif"},
+}
 
 
 # Schema PostgreSQL 
@@ -37,6 +113,7 @@ CREATE TABLE IF NOT EXISTS captures (
     analyse_statut TEXT NOT NULL DEFAULT 'ok',
     analyse_modele TEXT,
     analyse_detail TEXT,
+    embedding JSONB NOT NULL DEFAULT '{}'::jsonb,
     repetitions INTEGER NOT NULL DEFAULT 0,
     intervalle_jours INTEGER NOT NULL DEFAULT 0,
     facteur_aisance DOUBLE PRECISION NOT NULL DEFAULT 2.5,
@@ -64,6 +141,7 @@ CREATE TABLE IF NOT EXISTS captures (
     analyse_statut TEXT NOT NULL DEFAULT 'ok',
     analyse_modele TEXT,
     analyse_detail TEXT,
+    embedding TEXT NOT NULL DEFAULT '{}',
     repetitions INTEGER NOT NULL DEFAULT 0,
     intervalle_jours INTEGER NOT NULL DEFAULT 0,
     facteur_aisance REAL NOT NULL DEFAULT 2.5,
@@ -105,6 +183,95 @@ def preparer_tags_pour_stockage(tags: List[str], database_url: str):
     return Jsonb(tags)
 
 
+def preparer_embedding_pour_stockage(vecteur: List[float], database_url: str):
+    payload = {"source": "local_semantic", "values": vecteur}
+    if database_url.startswith("sqlite:///"):
+        return json.dumps(payload, ensure_ascii=True)
+
+    from psycopg.types.json import Jsonb
+
+    return Jsonb(payload)
+
+
+def lire_embedding_stocke(valeur: Any) -> Optional[List[float]]:
+    if valeur is None:
+        return None
+    if isinstance(valeur, dict):
+        valeurs = valeur.get("values")
+    elif isinstance(valeur, str):
+        try:
+            valeurs = json.loads(valeur).get("values")
+        except Exception:
+            return None
+    else:
+        valeurs = valeur
+
+    if not isinstance(valeurs, list):
+        return None
+
+    vecteur: List[float] = []
+    for element in valeurs:
+        try:
+            vecteur.append(float(element))
+        except (TypeError, ValueError):
+            return None
+    return vecteur
+
+
+def normaliser_texte_semantique(texte: str) -> List[str]:
+    if not texte:
+        return []
+
+    texte_normalise = unicodedata.normalize("NFKD", texte)
+    texte_normalise = "".join(
+        caractere for caractere in texte_normalise if not unicodedata.combining(caractere)
+    ).lower()
+    mots = re.findall(r"[a-z0-9']+", texte_normalise)
+    return [mot.strip("'") for mot in mots if mot.strip("'")]
+
+
+def generer_embedding_texte(texte: str) -> List[float]:
+    vecteur = [0.0] * EMBEDDING_DIMENSION
+    if not texte:
+        return vecteur
+
+    mots = normaliser_texte_semantique(texte)
+    for mot in mots:
+        concepts = LEXIQUE_CONCEPTES.get(mot)
+        if not concepts:
+            continue
+        for concept in concepts:
+            index = CONCEPTES_SEMANTIQUES.index(concept)
+            vecteur[index] += 1.0
+
+    if any(vecteur):
+        norme = sqrt(sum(valeur * valeur for valeur in vecteur))
+        if norme > 0:
+            return [round(valeur / norme, 6) for valeur in vecteur]
+
+    # Repli lexical minimal pour les textes hors dictionnaire.
+    for mot in mots:
+        index = sum(ord(caractere) for caractere in mot) % EMBEDDING_DIMENSION
+        vecteur[index] += 1.0
+
+    norme = sqrt(sum(valeur * valeur for valeur in vecteur))
+    if norme <= 0:
+        return vecteur
+    return [round(valeur / norme, 6) for valeur in vecteur]
+
+
+def similarite_cosinus(vecteur_a: Sequence[float], vecteur_b: Sequence[float]) -> float:
+    if not vecteur_a or not vecteur_b or len(vecteur_a) != len(vecteur_b):
+        return 0.0
+
+    produit_scalaire = sum(a * b for a, b in zip(vecteur_a, vecteur_b))
+    norme_a = sqrt(sum(a * a for a in vecteur_a))
+    norme_b = sqrt(sum(b * b for b in vecteur_b))
+    if norme_a <= 0 or norme_b <= 0:
+        return 0.0
+    return produit_scalaire / (norme_a * norme_b)
+
+
 def adapter_requete(requete: str, database_url: str) -> str:
     # Uniformise les placeholders SQL entre SQLite (?) et PostgreSQL (%s).
     if database_url.startswith("sqlite:///"):
@@ -120,6 +287,7 @@ def initialiser_base(database_url: Optional[str] = None) -> None:
         connexion.execute(schema)
         garantir_colonnes_pipeline_ia(connexion, url)
         garantir_colonnes_phase3(connexion, url)
+        garantir_colonnes_semantiques(connexion, url)
         connexion.commit()
 
 
@@ -178,6 +346,29 @@ def garantir_colonnes_phase3(connexion, database_url: str) -> None:
             f"ALTER TABLE captures ADD COLUMN IF NOT EXISTS {nom} {definitions_postgres[nom]}"
         )
 
+
+def garantir_colonnes_semantiques(connexion, database_url: str) -> None:
+    colonnes = [
+        ("embedding", "TEXT NOT NULL DEFAULT '{}'"),
+    ]
+
+    if database_url.startswith("sqlite:///"):
+        colonnes_existantes = {
+            ligne["name"]
+            for ligne in connexion.execute("PRAGMA table_info(captures)").fetchall()
+        }
+        for nom, definition in colonnes:
+            if nom not in colonnes_existantes:
+                try:
+                    connexion.execute(f"ALTER TABLE captures ADD COLUMN {nom} {definition}")
+                except Exception as exc:
+                    if "duplicate column name" not in str(exc).lower():
+                        raise
+        return
+
+    for nom, definition in colonnes:
+        connexion.execute(f"ALTER TABLE captures ADD COLUMN IF NOT EXISTS {nom} {definition}")
+
 def lister_captures(
     database_url: Optional[str] = None,
     tag: Optional[str] = None,
@@ -206,6 +397,7 @@ def lister_captures(
             analyse_statut,
             analyse_modele,
             analyse_detail,
+            embedding,
             repetitions,
             intervalle_jours,
             facteur_aisance,
@@ -237,6 +429,14 @@ def creer_capture(commande: CommandeCreationCapture, database_url: Optional[str]
     url = database_url or DATABASE_URL
     identifiant = str(uuid.uuid4())
     tags = preparer_tags_pour_stockage(commande.contexte_tags, url)
+    vecteur_embedding = generer_embedding_texte(
+        " ".join(
+            texte
+            for texte in [commande.phrase_originale, commande.traduction or ""]
+            if texte
+        )
+    )
+    embedding = preparer_embedding_pour_stockage(vecteur_embedding, url)
 
     requete_insertion = adapter_requete(
         """
@@ -256,12 +456,13 @@ def creer_capture(commande: CommandeCreationCapture, database_url: Optional[str]
             analyse_statut,
             analyse_modele,
             analyse_detail,
+            embedding,
             repetitions,
             intervalle_jours,
             facteur_aisance,
             prochaine_revision,
             derniere_revision
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         url,
     )
@@ -283,6 +484,7 @@ def creer_capture(commande: CommandeCreationCapture, database_url: Optional[str]
             analyse_statut,
             analyse_modele,
             analyse_detail,
+            embedding,
             repetitions,
             intervalle_jours,
             facteur_aisance,
@@ -311,6 +513,7 @@ def creer_capture(commande: CommandeCreationCapture, database_url: Optional[str]
         commande.pipeline_ia.analyse.statut if commande.pipeline_ia else "ok",
         commande.pipeline_ia.analyse.modele if commande.pipeline_ia else None,
         commande.pipeline_ia.analyse.detail if commande.pipeline_ia else None,
+        embedding,
         0,
         0,
         2.5,
@@ -348,12 +551,13 @@ def alimenter_donnees_demo(database_url: Optional[str] = None) -> None:
             analyse_statut,
             analyse_modele,
             analyse_detail,
+            embedding,
             repetitions,
             intervalle_jours,
             facteur_aisance,
             prochaine_revision,
             derniere_revision
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         url,
     )
@@ -382,6 +586,10 @@ def alimenter_donnees_demo(database_url: Optional[str] = None) -> None:
                 "ok",
                 "llama3",
                 None,
+                preparer_embedding_pour_stockage(
+                    generer_embedding_texte("texte transcrit par l'ia exemple de traduction"),
+                    url,
+                ),
                 0,
                 0,
                 2.5,
@@ -461,6 +669,7 @@ def lire_capture_par_id(identifiant: str, database_url: Optional[str] = None) ->
             analyse_statut,
             analyse_modele,
             analyse_detail,
+            embedding,
             repetitions,
             intervalle_jours,
             facteur_aisance,
@@ -565,6 +774,7 @@ def lister_revisions_dues(
             analyse_statut,
             analyse_modele,
             analyse_detail,
+            embedding,
             repetitions,
             intervalle_jours,
             facteur_aisance,
@@ -589,6 +799,92 @@ def lister_revisions_dues(
         and capture.revision_srs.prochaine_revision
         and parse_datetime(capture.revision_srs.prochaine_revision) <= reference
     ]
+
+
+def rechercher_captures(
+    query: str,
+    database_url: Optional[str] = None,
+    limite: int = 10,
+) -> List[dict]:
+    url = database_url or DATABASE_URL
+    query_nettoyee = (query or "").strip()
+    if not query_nettoyee or limite <= 0:
+        return []
+
+    requete = adapter_requete(
+        """
+        SELECT
+            id,
+            phrase_originale,
+            traduction,
+            audio_url,
+            contexte_tags,
+            formalite,
+            latitude,
+            longitude,
+            langue,
+            transcription_statut,
+            transcription_modele,
+            transcription_detail,
+            analyse_statut,
+            analyse_modele,
+            analyse_detail,
+            embedding,
+            repetitions,
+            intervalle_jours,
+            facteur_aisance,
+            prochaine_revision,
+            derniere_revision,
+            created_at
+        FROM captures
+        """,
+        url,
+    )
+
+    vecteur_query = generer_embedding_texte(query_nettoyee)
+    mots_query = set(normaliser_texte_semantique(query_nettoyee))
+
+    with connecter_base(url) as connexion:
+        lignes = connexion.execute(requete).fetchall()
+
+    resultats = []
+    for ligne in lignes:
+        capture = ligne_vers_capture(ligne)
+        vecteur_capture = lire_embedding_stocke(ligne["embedding"])
+        if vecteur_capture is None:
+            texte_capture = " ".join(
+                texte
+                for texte in [capture.phrase_originale, capture.traduction or ""]
+                if texte
+            )
+            vecteur_capture = generer_embedding_texte(texte_capture)
+
+        score = similarite_cosinus(vecteur_query, vecteur_capture)
+        mots_capture = set(normaliser_texte_semantique(" ".join([capture.phrase_originale, capture.traduction or ""])))
+        mots_tags = set(normaliser_texte_semantique(" ".join(capture.contexte_tags)))
+
+        if mots_query & mots_capture:
+            score += 0.2
+        if mots_query & mots_tags:
+            score += 0.1
+
+        resultats.append(
+            {
+                "capture": capture,
+                "score": round(score, 4),
+            }
+        )
+
+    resultats_tries = sorted(
+        [resultat for resultat in resultats if resultat["score"] > 0],
+        key=lambda resultat: (
+            resultat["score"],
+            resultat["capture"].timestamp or "",
+            resultat["capture"].id,
+        ),
+        reverse=True,
+    )
+    return resultats_tries[:limite]
 
 
 def calculer_stats_captures(database_url: Optional[str] = None) -> dict:

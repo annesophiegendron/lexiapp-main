@@ -66,6 +66,7 @@ API disponible sur `http://localhost:8000`
 - `GET /sante` : sante backend, base de donnees et Ollama
 - `GET /preflight` : verification detaillee des prerequis phase 2
 - `GET /captures` : liste des captures
+- `GET /captures/search?query=...` : recherche semantique des captures
 - `GET /captures/{capture_id}` : detail d'une capture
 - `POST /captures` : upload audio + geolocalisation + langue
 - `POST /captures/{capture_id}/review` : notation d'une revision avec calcul SM-2
@@ -97,6 +98,7 @@ curl -X POST http://localhost:8000/captures ^
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/lexiapp
 OLLAMA_URL=http://localhost:11434
 OLLAMA_MODEL=llama3
+OLLAMA_EMBEDDING_MODEL=nomic-embed-text
 OLLAMA_TIMEOUT_SECONDS=180
 WHISPER_MODEL=base
 SEED_DEMO_DATA=false
@@ -223,6 +225,18 @@ curl "http://localhost:8000/captures?tag=voyage&formalite=standard&latitude=48.8
 - `matrice_forces_faiblesses`
 
 La matrice regroupe les tags les plus actifs et calcule un taux de reussite base sur l'etat SRS courant des captures.
+
+## Recherche semantique
+
+`GET /captures/search?query=...` classe les captures par similarite semantique et expose un score de correspondance.
+
+Exemple :
+
+```bash
+curl "http://localhost:8000/captures/search?query=Commander%20%C3%A0%20manger"
+```
+
+Le backend stocke aussi un vecteur semantique par capture dans la colonne `embedding` pour preparer une future migration vers pgvector.
 
 ## Reponses des captures
 
