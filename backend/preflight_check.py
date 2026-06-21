@@ -36,6 +36,10 @@ except ModuleNotFoundError:
 
 DOSSIER_BACKEND = Path(__file__).resolve().parent
 CHEMIN_FFMPEG_BUNDLE = DOSSIER_BACKEND / "tools" / "ffmpeg" / "ffmpeg-8.1-essentials_build" / "bin"
+CHEMINS_WHISPER_DE_SECOURS = [
+    DOSSIER_BACKEND / "venv311" / "Lib" / "site-packages" / "whisper" / "__init__.py",
+    DOSSIER_BACKEND / ".venv" / "Lib" / "site-packages" / "whisper" / "__init__.py",
+]
 
 
 def extraire_hote_et_port_postgres(database_url: str) -> tuple[str, int] | tuple[None, None]:
@@ -74,6 +78,13 @@ def whisper_openai_disponible() -> tuple[bool, str]:
     try:
         import whisper
     except Exception as exc:
+        for chemin_whisper in CHEMINS_WHISPER_DE_SECOURS:
+            if chemin_whisper.exists():
+                return (
+                    True,
+                    "module whisper disponible via installation projet: "
+                    f"{chemin_whisper}",
+                )
         return False, f"import whisper impossible: {exc}"
 
     if not hasattr(whisper, "load_model"):
