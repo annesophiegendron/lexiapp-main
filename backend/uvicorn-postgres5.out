@@ -1,0 +1,2 @@
+INFO:     127.0.0.1:49807 - "GET /sante HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49807 - "GET /captures HTTP/1.1" 200 OK

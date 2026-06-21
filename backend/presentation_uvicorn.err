@@ -1,0 +1,51 @@
+INFO:     Started server process [8948]
+INFO:     Waiting for application startup.
+2026-06-21 16:43:21,243 - __main__ - INFO - Initialisation du backend Lexiapp...
+2026-06-21 16:43:21,543 - __main__ - WARNING - Initialisation PostgreSQL impossible: connection failed: connection to server at "127.0.0.1", port 5432 failed: FATAL:  authentification par mot de passe \ufffdchou\ufffde pour l'utilisateur  \ufffd postgres \ufffd
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: '5432', hostaddr: '::1': connection failed: connection to server at "::1", port 5432 failed: FATAL:  authentification par mot de passe \ufffdchou\ufffde pour l'utilisateur  \ufffd postgres \ufffd
+- host: 'localhost', port: '5432', hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5432 failed: FATAL:  authentification par mot de passe \ufffdchou\ufffde pour l'utilisateur  \ufffd postgres \ufffd
+2026-06-21 16:43:21,549 - __main__ - WARNING - Fallback local active: PostgreSQL indisponible, bascule sur SQLite (sqlite:///C:/Users/Admin/Documents/stage/lexiapp-main/backend/lexiapp.db)
+2026-06-21 16:43:21,561 - __main__ - INFO - Backend Lexiapp initialise avec succes
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-06-21 16:43:23,544 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:43:25,519 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:43:26,025 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:43:27,963 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:43:28,985 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:43:31,455 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:43:32,476 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:43:34,921 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:43:35,941 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:43:38,387 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:43:39,410 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:43:41,849 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:43:42,873 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:43:45,316 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:43:46,341 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:43:48,782 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:43:49,799 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:43:52,259 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:43:53,281 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:43:55,709 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:43:56,744 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:43:59,191 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:44:00,211 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:44:02,644 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:44:03,665 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:44:06,085 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:44:07,090 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:44:09,535 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:44:10,547 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:44:13,000 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:44:14,021 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:44:16,488 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:44:17,495 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:44:19,925 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:44:20,946 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:44:23,369 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:44:24,390 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:44:26,835 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"
+2026-06-21 16:44:27,842 - __main__ - INFO - Verification sante du systeme
+2026-06-21 16:44:30,300 - httpx - INFO - HTTP Request: GET http://localhost:11434/api/version "HTTP/1.1 200 OK"

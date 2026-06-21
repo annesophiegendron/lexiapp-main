@@ -31,10 +31,9 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Lexi needs microphone access to record phrases for local transcription.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs access to your location to function properly.</string>
-	<key>NSLocationWhenInUseUsageDescription
-NSLocationWhenInUseUsageDescription</key>
 	<string>This app needs access to your location to function properly.</string>
 	<key>UIAppFonts</key>
 	<array>

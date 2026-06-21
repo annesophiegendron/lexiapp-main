@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "Running CocoaPods install in CI"
+echo "je lance le post clone"
 cd ios
 pod install
 
