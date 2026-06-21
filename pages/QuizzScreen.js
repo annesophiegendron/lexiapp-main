@@ -23,7 +23,7 @@ const QuizzScreen = () => {
 
   const shuffledLexicon = useMemo(() => {
     return lexicon.length >= 4
-      ? lexicon.sort(() => Math.random() - 0.5).slice(0, 10)
+      ? [...lexicon].sort(() => Math.random() - 0.5).slice(0, 10)
       : [];
   }, [lexicon]);
 
@@ -45,13 +45,23 @@ const QuizzScreen = () => {
         const optionsSet = new Set();
         optionsSet.add(correctTranslation);
 
-        while (optionsSet.size < 4) {
+        let attempts = 0;
+        while (optionsSet.size < 4 && attempts < shuffledLexicon.length * 4) {
           const randomTranslation =
             shuffledLexicon[Math.floor(Math.random() * shuffledLexicon.length)]
               .translation;
           if (randomTranslation !== correctTranslation) {
             optionsSet.add(randomTranslation);
           }
+          attempts += 1;
+        }
+
+        const fallbackOptions = shuffledLexicon
+          .map(item => item.translation)
+          .filter((translation, index, all) => translation && all.indexOf(translation) === index);
+
+        while (optionsSet.size < 4 && fallbackOptions.length > 0) {
+          optionsSet.add(fallbackOptions[optionsSet.size % fallbackOptions.length]);
         }
 
         return Array.from(optionsSet).sort(() => Math.random() - 0.5);

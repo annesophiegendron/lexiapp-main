@@ -86,7 +86,9 @@ const MainScreen = () => {
   });
 
   const allerVersMotsCategorie = category => {
-    const filteredWords = lexicon.filter(word => word.category === category);
+    const filteredWords = lexicon.filter(word =>
+      Array.isArray(word.categories) && word.categories.includes(category),
+    );
     navigation.navigate('CategoryWords', {category, words: filteredWords});
   };
 

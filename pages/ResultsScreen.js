@@ -17,8 +17,7 @@ const {height} = Dimensions.get('window');
 const ResultScreen = ({route}) => {
   const navigation = useNavigation();
   const {isDarkMode} = useTheme();
-  const {backgroundLight, backgroundDark} =
-    designSystem.colors;
+  const {backgroundLight, backgroundDark} = designSystem.colors;
 
   const {result} = route.params;
   const {score, totalQuestions} = result;
@@ -28,10 +27,10 @@ const ResultScreen = ({route}) => {
 
   const motivationalText =
     scorePercentage >= 70
-      ? "Nice work! You're making real progress 🧠"
+      ? "Nice work! You're making real progress."
       : scorePercentage >= 50
-      ? "You're getting there! Keep it up 💡"
-      : "Every step counts — you're learning and improving! 💪";
+      ? "You're getting there! Keep it up."
+      : "Every step counts, you're learning and improving.";
 
   const cardTitle = scorePercentage >= 70 ? 'Great Job!' : 'Nice Try!';
 
@@ -57,14 +56,16 @@ const ResultScreen = ({route}) => {
         <View style={styles.actionButtonsWrapper}>
           <TouchableOpacity
             style={styles.backHomeButton}
-            onPress={() => navigation.navigate('Main')}>
+            onPress={() => navigation.navigate('HomeTabs', {screen: 'Main'})}>
             <Ionicons name="home" size={20} color="#000" />
             <Text style={styles.backHomeText}>Back Home</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.playAgainButton}
-            onPress={() => navigation.navigate('QuizzScreen')}>
+            onPress={() =>
+              navigation.navigate('HomeTabs', {screen: 'QuizzScreen'})
+            }>
             <Ionicons name="refresh" size={20} color="#fff" />
             <Text style={styles.playAgainText}>Play Again</Text>
           </TouchableOpacity>

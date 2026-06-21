@@ -258,11 +258,13 @@ const DashboardScreen = () => {
           </View>
           <Text style={[styles.filterSummary, {color: muted}]}>
             {isLoading ? 'Loading captures...' : `${captures.length} capture(s) loaded`}
-            {captureFilters.tag ? ` • tag=${captureFilters.tag}` : ''}
-            {captureFilters.formalite ? ` • formalite=${captureFilters.formalite}` : ''}            {captureFilters.latitude !== null && captureFilters.longitude !== null
-              ? ` • latitude=${captureFilters.latitude} longitude=${captureFilters.longitude}`
+            {captureFilters.tag ? ` | tag=${captureFilters.tag}` : ''}
+            {captureFilters.formalite ? ` | formalite=${captureFilters.formalite}` : ''}
+            {captureFilters.latitude !== null && captureFilters.longitude !== null
+              ? ` | latitude=${captureFilters.latitude} longitude=${captureFilters.longitude}`
               : ''}
-            {captureFilters.rayonKm !== null ? ` • rayon=${captureFilters.rayonKm}km` : ''}          </Text>
+            {captureFilters.rayonKm !== null ? ` | rayon=${captureFilters.rayonKm}km` : ''}
+          </Text>
         </View>
 
         {captures.length === 0 ? (
@@ -286,9 +288,11 @@ const DashboardScreen = () => {
               </Text>
               <Text style={[styles.reviewMeta, {color: muted}]}>
                 Tags: {capture.tags.length > 0 ? capture.tags.join(', ') : 'none'}
-              </Text>              <Text style={[styles.reviewMeta, {color: muted}]}> 
+              </Text>
+              <Text style={[styles.reviewMeta, {color: muted}]}>
                 Last review: {formatRelativeReview(capture.reviewSrs.lastReviewAt)}
-              </Text>            </View>
+              </Text>
+            </View>
           ))
         )}
       </View>

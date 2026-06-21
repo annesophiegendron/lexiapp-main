@@ -23,6 +23,7 @@ import QuizzScreen from './pages/QuizzScreen';
 import ResultsScreen from './pages/ResultsScreen';
 import SettingsScreen from './pages/SettingsScreen';
 import DashboardScreen from './pages/DashboardScreen';
+import WordDetailScreen from './pages/WordDetailScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -196,6 +197,7 @@ const App = () => {
                 <Stack.Screen name="ResultsScreen" component={ResultsScreen} />
                 <Stack.Screen name="MainScreen" component={MainScreen} />
                 <Stack.Screen name="Settings" component={SettingsScreen} />
+                <Stack.Screen name="WordDetail" component={WordDetailScreen} />
               </Stack.Navigator>
             </NavigationContainer>
           </QuizProvider>
