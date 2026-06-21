@@ -1,0 +1,14 @@
+INFO:     Started server process [13368]
+INFO:     Waiting for application startup.
+2026-06-21 16:54:02,001 - __main__ - INFO - Initialisation du backend Lexiapp...
+2026-06-21 16:54:02,300 - __main__ - WARNING - Initialisation PostgreSQL impossible: connection failed: connection to server at "127.0.0.1", port 5432 failed: FATAL:  authentification par mot de passe \ufffdchou\ufffde pour l'utilisateur  \ufffd postgres \ufffd
+Multiple connection attempts failed. All failures were:
+- host: 'localhost', port: '5432', hostaddr: '::1': connection failed: connection to server at "::1", port 5432 failed: FATAL:  authentification par mot de passe \ufffdchou\ufffde pour l'utilisateur  \ufffd postgres \ufffd
+- host: 'localhost', port: '5432', hostaddr: '127.0.0.1': connection failed: connection to server at "127.0.0.1", port 5432 failed: FATAL:  authentification par mot de passe \ufffdchou\ufffde pour l'utilisateur  \ufffd postgres \ufffd
+2026-06-21 16:54:02,301 - __main__ - WARNING - Fallback local active: PostgreSQL indisponible, bascule sur SQLite (sqlite:///C:/Users/Admin/Documents/stage/lexiapp-main/backend/lexiapp.db)
+2026-06-21 16:54:02,309 - __main__ - INFO - Backend Lexiapp initialise avec succes
+INFO:     Application startup complete.
+ERROR:    [Errno 10048] error while attempting to bind on address ('0.0.0.0', 8000): une seule utilisation de chaque adresse de socket (protocole/adresse réseau/port) est habituellement autorisée
+INFO:     Waiting for application shutdown.
+2026-06-21 16:54:02,311 - __main__ - INFO - Arret du backend Lexiapp
+INFO:     Application shutdown complete.
